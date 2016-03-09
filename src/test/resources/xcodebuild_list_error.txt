@@ -1,0 +1,19 @@
+2016-01-19 16:36:07.459 xcodebuild[713:1007] [MT] DVTAssertions: Warning in /SourceCache/IDEFrameworks/IDEFrameworks-6776/IDEFoundation/SourceControl/Model/IDESourceControlManager.m:423
+Details:  Error Domain=com.apple.dt.IDESourceControlErrorDomain Code=-1 "Missing extension: public.vcs.subversion" UserInfo=0x7fb57585e640 {NSLocalizedDescription=Missing extension: public.vcs.subversion}
+Object:   <IDESourceControlManager: 0x7fb5747cbb80>
+Method:   -loadRepositories
+Thread:   <NSThread: 0x7fb571c09d70>{name = (null), num = 1}
+Please file a bug at http://bugreport.apple.com with this warning message and any useful information you can provide.
+Information about project "SCM-Xcode":
+    Targets:
+        SCM-Xcode
+        SCM-XcodeTests
+        SCM-XcodeUITests
+
+    Build Configurations:
+        Debug
+        Release
+
+    If no build configuration is specified and -scheme is not passed then "Release" is used.
+
+    This project contains no schemes.
