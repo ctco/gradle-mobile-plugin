@@ -33,36 +33,41 @@ public class ZipUtilTest {
             testDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
         } while (testDir.exists());
         FileUtils.forceMkdir(testDir);
-        LoggerUtil.error(testDir.getAbsolutePath());
+        LoggerUtil.warn(testDir.getAbsolutePath());
+        File root = createAndGetDir(new File(testDir, "archive"));
+        File dirL = createAndGetDir(new File(root, "wLink"));
+        File dirR = createAndGetDir(new File(root, "wReal"));
+        File fileE = new File(dirR, "file.empty");
+        FileUtils.touch(fileE);
+        File fileR = new File(dirR, "file.real");
+        FileUtils.writeStringToFile(fileR, "This is a real file");
+        File fileX = new File(dirR, ".DS_Store");
+        FileUtils.touch(fileX);
         if (PosixUtil.isPosixFileStore(testDir)) {
-            File root = createAndGetDir(new File(testDir, "archive"));
-            File dirL = createAndGetDir(new File(root, "wLink"));
-            File dirR = createAndGetDir(new File(root, "wReal"));
-            File fileE = new File(dirR, "file.empty");
-            FileUtils.touch(fileE);
-            File fileR = new File(dirR, "file.real");
-            FileUtils.writeStringToFile(fileR, "This is a real file");
-            File fileX = new File(dirR, ".DS_Store");
-            FileUtils.touch(fileX);
             File fileL = new File(dirL, "file.link");
             Files.createSymbolicLink(fileL.toPath(), fileR.toPath());
-            File fileZ = new File(testDir, "woRoot.zip");
-            ZipUtil.compressDirectory(root, false, fileZ);
-            String detectedContent = getZipArchiveEntryNames(fileZ).toString();
-            List<String> expectedList = Arrays.asList("[d]wLink/", "[l]wLink/file.link", "[d]wReal/", "[f]wReal/file.empty", "[f]wReal/file.real");
-            Collections.sort(expectedList);
-            String expectedContent = expectedList.toString();
-            LoggerUtil.error("Detected in archive: "+detectedContent);
-            LoggerUtil.error("Expected in archive: "+expectedContent);
-            assertTrue(detectedContent.equals(expectedContent));
-            //
-            root = createAndGetDir(new File(testDir, "extracted"));
-            ZipUtil.extractAll(fileZ, root);
-            detectedContent = getDirectoryEntryNames(root).toString();
-            LoggerUtil.error("Detected in directory: "+detectedContent);
-            LoggerUtil.error("Expected in directory: "+expectedContent);
-            assertTrue(detectedContent.equals(expectedContent));
         }
+        File fileZ = new File(testDir, "woRoot.zip");
+        ZipUtil.compressDirectory(root, false, fileZ);
+        String detectedContent = getZipArchiveEntryNames(fileZ).toString();
+        List<String> expectedList;
+        if (PosixUtil.isPosixFileStore(testDir)) {
+            expectedList = Arrays.asList("[d]wLink/", "[l]wLink/file.link", "[d]wReal/", "[f]wReal/file.empty", "[f]wReal/file.real");
+        } else {
+            expectedList = Arrays.asList("[d]wLink/", "[d]wReal/", "[f]wReal/file.empty", "[f]wReal/file.real");
+        }
+        Collections.sort(expectedList);
+        String expectedContent = expectedList.toString();
+        LoggerUtil.warn("Detected in archive: "+detectedContent);
+        LoggerUtil.warn("Expected in archive: "+expectedContent);
+        assertTrue(detectedContent.equals(expectedContent));
+        //
+        root = createAndGetDir(new File(testDir, "extracted"));
+        ZipUtil.extractAll(fileZ, root);
+        detectedContent = getDirectoryEntryNames(root).toString();
+        LoggerUtil.warn("Detected in directory: "+detectedContent);
+        LoggerUtil.warn("Expected in directory: "+expectedContent);
+        assertTrue(detectedContent.equals(expectedContent));
     }
 
     @Test
@@ -72,36 +77,41 @@ public class ZipUtilTest {
             testDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
         } while (testDir.exists());
         FileUtils.forceMkdir(testDir);
-        LoggerUtil.error(testDir.getAbsolutePath());
+        LoggerUtil.warn(testDir.getAbsolutePath());
+        File root = createAndGetDir(new File(testDir, "archive"));
+        File dirL = createAndGetDir(new File(root, "wLink"));
+        File dirR = createAndGetDir(new File(root, "wReal"));
+        File fileE = new File(dirR, "file.empty");
+        FileUtils.touch(fileE);
+        File fileR = new File(dirR, "file.real");
+        FileUtils.writeStringToFile(fileR, "This is a real file");
+        File fileX = new File(dirR, ".DS_Store");
+        FileUtils.touch(fileX);
         if (PosixUtil.isPosixFileStore(testDir)) {
-            File root = createAndGetDir(new File(testDir, "archive"));
-            File dirL = createAndGetDir(new File(root, "wLink"));
-            File dirR = createAndGetDir(new File(root, "wReal"));
-            File fileE = new File(dirR, "file.empty");
-            FileUtils.touch(fileE);
-            File fileR = new File(dirR, "file.real");
-            FileUtils.writeStringToFile(fileR, "This is a real file");
-            File fileX = new File(dirR, ".DS_Store");
-            FileUtils.touch(fileX);
             File fileL = new File(dirL, "file.link");
             Files.createSymbolicLink(fileL.toPath(), fileR.toPath());
-            File fileZ = new File(testDir, "wRoot.zip");
-            ZipUtil.compressDirectory(root, true, fileZ);
-            String detectedContent = getZipArchiveEntryNames(fileZ).toString();
-            List<String> expectedList = Arrays.asList("[d]archive/", "[d]archive/wLink/", "[l]archive/wLink/file.link", "[d]archive/wReal/", "[f]archive/wReal/file.empty", "[f]archive/wReal/file.real");
-            Collections.sort(expectedList);
-            String expectedContent = expectedList.toString();
-            LoggerUtil.error("Detected in archive: "+detectedContent);
-            LoggerUtil.error("Expected in archive: "+expectedContent);
-            assertTrue(detectedContent.equals(expectedContent));
-            //
-            root = createAndGetDir(new File(testDir, "extracted"));
-            ZipUtil.extractAll(fileZ, root);
-            detectedContent = getDirectoryEntryNames(root).toString();
-            LoggerUtil.error("Detected in directory: "+detectedContent);
-            LoggerUtil.error("Expected in directory: "+expectedContent);
-            assertTrue(detectedContent.equals(expectedContent));
         }
+        File fileZ = new File(testDir, "wRoot.zip");
+        ZipUtil.compressDirectory(root, true, fileZ);
+        String detectedContent = getZipArchiveEntryNames(fileZ).toString();
+        List<String> expectedList;
+        if (PosixUtil.isPosixFileStore(testDir)) {
+            expectedList = Arrays.asList("[d]archive/", "[d]archive/wLink/", "[l]archive/wLink/file.link", "[d]archive/wReal/", "[f]archive/wReal/file.empty", "[f]archive/wReal/file.real");
+        } else {
+            expectedList = Arrays.asList("[d]archive/", "[d]archive/wLink/", "[d]archive/wReal/", "[f]archive/wReal/file.empty", "[f]archive/wReal/file.real");
+        }
+        Collections.sort(expectedList);
+        String expectedContent = expectedList.toString();
+        LoggerUtil.warn("Detected in archive: "+detectedContent);
+        LoggerUtil.warn("Expected in archive: "+expectedContent);
+        assertTrue(detectedContent.equals(expectedContent));
+        //
+        root = createAndGetDir(new File(testDir, "extracted"));
+        ZipUtil.extractAll(fileZ, root);
+        detectedContent = getDirectoryEntryNames(root).toString();
+        LoggerUtil.warn("Detected in directory: "+detectedContent);
+        LoggerUtil.warn("Expected in directory: "+expectedContent);
+        assertTrue(detectedContent.equals(expectedContent));
     }
 
     private static List<String> getZipArchiveEntryNames(File sourceZip) throws IOException {
@@ -125,7 +135,7 @@ public class ZipUtilTest {
     private static List<String> getDirectoryEntryNames(File sourceDir) throws IOException {
         List<String> content = new ArrayList<>();
         for (File file : FileUtils.listFilesAndDirs(sourceDir, TrueFileFilter.TRUE, TrueFileFilter.TRUE)) {
-            String relativePath = getRelativePath(sourceDir, file);
+            String relativePath = getRelativePath(sourceDir, file).replace("\\", "/");
             if (Files.isSymbolicLink(file.toPath())) {
                 content.add("[l]"+relativePath);
             } else if (file.isDirectory() && !relativePath.isEmpty()) {

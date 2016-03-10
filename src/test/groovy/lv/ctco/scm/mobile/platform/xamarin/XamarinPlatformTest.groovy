@@ -47,11 +47,11 @@ class XamarinPlatformTest {
     @Test
     public void autodetectMultiTarget() {
         Environment expectedEnvironment0 = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
         Environment expectedEnvironment1 = new Environment('TRAIN', 'TestY TRAIN|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN').getAbsoluteFile())
         Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
         gmc.play {
@@ -70,7 +70,7 @@ class XamarinPlatformTest {
     @Test
     public void autodetectSingleEnvironmentTarget() {
         Environment expectedEnvironment = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
 
         initMocks(['DEV'], false)
         gmc.play {
@@ -88,7 +88,7 @@ class XamarinPlatformTest {
     @Test
     public void autodetectNoEnvironmentTargets() {
         Environment expectedEnvironment =
-            new Environment('DEFAULT', 'Ad-Hoc|iPhone', new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/Ad-Hoc'))
+            new Environment('DEFAULT', 'Ad-Hoc|iPhone', new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/Ad-Hoc').getAbsoluteFile())
 
         initMocks([], true)
         gmc.play {
@@ -122,9 +122,9 @@ class XamarinPlatformTest {
     public void autodetectEnvironmentsPartiallyDefinedSameName() {
         Environment expectedEnvironment0 = new Environment('DEV', 'My Config|iPhone', new File('dummy'))
         Environment expectedEnvironment1 = new Environment('TRAIN', 'TestY TRAIN|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN').getAbsoluteFile())
         Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
         gmc.play {
@@ -145,10 +145,10 @@ class XamarinPlatformTest {
     @Test
     public void autodetectEnvironmentsPartiallyDefinedSameConfiguration() {
         Environment expectedEnvironment0 = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
         Environment expectedEnvironment1 = new Environment('MYENV', 'TestY TRAIN|iPhone', new File('dummy'))
         Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT'))
+                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
         gmc.play {

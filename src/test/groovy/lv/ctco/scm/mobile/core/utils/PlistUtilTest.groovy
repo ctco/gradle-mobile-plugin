@@ -59,7 +59,7 @@ class PlistUtilTest {
     @Test
     public void readDateValueFromPlist() {
         File infoPlist = initTemporaryFileFromResource('Info.read.plist')
-        Date expectedDate = new Date(116,5,4,11,6,27)
+        Date expectedDate = new Date(1465027587000L)
         Date foundDate = PlistUtil.getDateValue(infoPlist, "ExpirationDate")
         assert(foundDate.equals(expectedDate))
     }

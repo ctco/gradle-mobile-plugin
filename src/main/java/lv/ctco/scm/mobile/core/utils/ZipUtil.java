@@ -204,7 +204,7 @@ public class ZipUtil {
     }
 
     private static String getRelativePath(File base, File path) {
-        return base.toPath().relativize(path.toPath()).toString();
+        return base.toPath().relativize(path.toPath()).toString().replace("\\", "/");
     }
 
 }

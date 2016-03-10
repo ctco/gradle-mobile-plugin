@@ -8,9 +8,6 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.junit.Test;
 
-import java.io.File;
-import java.io.IOException;
-
 import static org.junit.Assert.*;
 
 public class PosixUtilTest {
@@ -28,12 +25,6 @@ public class PosixUtilTest {
     private static final int O777 = 511;
     private static final int O755 = 493;
     private static final int O644 = 420;
-
-    @Test
-    public void testFileStorePosixSupport() throws IOException {
-        boolean posix = PosixUtil.isPosixFileStore(new File("."));
-        assertTrue(posix);
-    }
 
     @Test
     public void testPosixPermissionConversions() {
