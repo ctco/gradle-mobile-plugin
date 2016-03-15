@@ -5,6 +5,8 @@
  */
 
 apply plugin: 'groovy'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -43,8 +45,8 @@ dependencies {
 	testCompile group: 'org.gmock', name: 'gmock', version: '0.8.3'
 }
 
-archivesBaseName = 'gradle-mobile-plugin'
 group = 'lv.ctco.scm'
+archivesBaseName = 'gradle-mobile-plugin'
 version = '0.9.0.0-SNAPSHOT'
 
 test {
@@ -82,4 +84,67 @@ task projectInfo << {
 	println "##teamcity[buildNumber \'"+version_iteration+"_"+vcs_number+"\']"
 	println "##teamcity[setParameter name=\'build.number\' value=\'"+version_iteration+"_"+vcs_number+"\']"
 	println "##teamcity[setParameter name=\'project.version.iteration\' value=\'"+version_iteration+"\']"
+}
+
+signing {
+    sign configurations.archives
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+    }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'C.T.Co Mobile Plugin for Gradle'
+        packaging 'jar'
+        description 'The C.T.Co Mobile Plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps.'
+        url 'https://github.com/ctco/gradle-mobile-plugin'
+
+        scm {
+          connection 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
+          developerConnection 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
+          url 'https://github.com/ctco/gradle-mobile-plugin'
+        }
+
+        licenses {
+          license {
+            name 'The Apache Software License, Version 2.0'
+            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+          }
+        }
+
+        developers {
+          developer {
+            id 'Quesar'
+            name 'Ivars Bērziņš'
+            email 'Ivars.Berzinsh@ctco.lv'
+          }
+        }
+      }
+    }
+  }
 }
