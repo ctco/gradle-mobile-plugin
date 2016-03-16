@@ -1,7 +1,7 @@
 # C.T.Co Mobile Plugin for Gradle
 
 ## About
-The C.T.Co mobile plugin for Gradle helps you configure and build Xcode and Xamarin (iOS, Android) apps. You can configure a project to build multiple artifacts with profiling for specific environments and build them all with a single or only the ones you specify. You can profile plist file values, regex replace values in any text based file and replace binary files. Plugin also supports uploading artifacts to a Knappsack server.
+The C.T.Co mobile plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps. You can configure a project to build multiple artifacts with profiling for specific environments and build them all with a single or only the ones you specify. You can profile plist file values, regex replace values in any text based file and replace binary files. Plugin also supports uploading artifacts to a Knappsack server.
 
 ## Requirements to build plugin
 - Java 1.7 or greater

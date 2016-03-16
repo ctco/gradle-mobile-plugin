@@ -86,7 +86,12 @@ task projectInfo << {
 	println "##teamcity[setParameter name=\'project.version.iteration\' value=\'"+version_iteration+"\']"
 }
 
+// Configuration for artifact signing and publishing
+
+def hasSigningProperties = project.hasProperty("signing.keyId") && project.hasProperty("signing.password") && project.hasProperty("signing.secretKeyRingFile")
+
 signing {
+    required { hasSigningProperties && gradle.taskGraph.hasTask("uploadArchives") }
     sign configurations.archives
 }
 
@@ -104,6 +109,14 @@ artifacts {
     archives javadocJar, sourcesJar
 }
 
+def ossrhUsername="null"
+if (project.hasProperty("ossrhUsername")) {
+    ossrhUsername=project.get("ossrhUsername")
+}
+def ossrhPassword="null"
+if (project.hasProperty("ossrhPassword")) {
+    ossrhPassword=project.get("ossrhPassword")
+}
 
 uploadArchives {
   repositories {
