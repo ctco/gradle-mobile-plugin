@@ -11,7 +11,6 @@ import lv.ctco.scm.mobile.core.objects.IosProvisioningProfile;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Singleton;
 import java.io.File;

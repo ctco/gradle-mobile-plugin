@@ -8,7 +8,6 @@ package lv.ctco.scm.mobile;
 
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PropertyUtil;
-import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 import lv.ctco.scm.mobile.core.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
 import lv.ctco.scm.mobile.platform.xamarin.XamarinExtension;

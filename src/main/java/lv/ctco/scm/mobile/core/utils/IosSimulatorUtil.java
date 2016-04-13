@@ -9,7 +9,6 @@ package lv.ctco.scm.mobile.core.utils;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Singleton;
 import java.io.File;

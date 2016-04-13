@@ -6,8 +6,6 @@
 
 package lv.ctco.scm.mobile.core.utils
 
-import org.gradle.api.GradleException
-
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -16,7 +14,6 @@ import static org.junit.Assert.fail
 
 class StampUtilTest {
 
-    //private final String[] validStampArray = {"1","2","3","4"}
     private final String validVersionIteration = "1.2.3"
     private final String validVersionToStamp = "1.2.3.0"
     private final String validVersionIteration1 = "1"
@@ -28,15 +25,15 @@ class StampUtilTest {
     private final String validExtStamp = "4"
 
     @Test
-    public void testGetExternalDeploymentOfStamp() throws Exception {
+    public void testGetExternalDeploymentOfStamp() {
         String extStamp = StampUtil.getExternalDeploymentOfStamp(validStampShort)
         assertEquals(validExtStamp, extStamp)
 
         extStamp = StampUtil.getExternalDeploymentOfStamp(validStamp1)
         assertEquals(validExtStamp, extStamp)
 
-        try{
-            StampUtil.getExternalDeploymentOfStamp("Zzz")
+        try {
+            StampUtil.getExternalDeploymentOfStamp("Abc")
         } catch (Throwable expected){
             assertTrue(expected instanceof IOException)
             return
@@ -45,7 +42,7 @@ class StampUtilTest {
     }
 
     @Test
-    public void testGenerateNewVersionData() throws Exception {
+    public void testGenerateNewVersionData() {
         String stamp = StampUtil.generateNewStampVersion(validStampShort)
         assertEquals(newStampShort, stamp)
         stamp = StampUtil.generateNewStampVersion(validStampLong)
@@ -53,7 +50,7 @@ class StampUtilTest {
     }
 
     @Test
-    public void testGetIterationVersionFromStamp() throws Exception {
+    public void testGetIterationVersionFromStamp() {
         String iterationVersion = StampUtil.getIterationVersionFromStamp(validStampShort)
         assertEquals(validVersionIteration, iterationVersion)
         iterationVersion = StampUtil.getIterationVersionFromStamp("...1.0.")
@@ -61,7 +58,7 @@ class StampUtilTest {
     }
 
     @Test
-    public void testIterationToStamp() throws Exception {
+    public void testIterationToStamp() {
         String s = StampUtil.iterationToStamp(validVersionIteration)
         assertEquals(validVersionToStamp, s)
     }

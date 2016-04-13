@@ -124,8 +124,10 @@ public class BuildAndroidTask extends DefaultTask {
         }
         CommandLine commandLine = new CommandLine("jarsigner");
         commandLine.addArgument("-verbose");
+        commandLine.addArgument("-digestalg");
+        commandLine.addArgument("SHA1");
         commandLine.addArgument("-sigalg");
-        commandLine.addArgument("SHA1withRSA");
+        commandLine.addArgument("MD5withRSA");
         commandLine.addArgument("-keystore");
         commandLine.addArgument(signingKeystore, false);
         commandLine.addArgument("-storepass");
