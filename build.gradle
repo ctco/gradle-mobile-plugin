@@ -3,6 +3,9 @@
  *
  * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
  */
+plugins {
+    id 'net.researchgate.release' version '2.3.4'
+}
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -86,6 +89,9 @@ task projectInfo << {
 	println "##teamcity[setParameter name=\'project.version.iteration\' value=\'"+version_iteration+"\']"
 }
 
+task Release << {
+    println "Project revision: "+vcs_number
+}
 // Configuration for artifact signing and publishing
 
 def hasSigningProperties = project.hasProperty("signing.keyId") && project.hasProperty("signing.password") && project.hasProperty("signing.secretKeyRingFile")
@@ -160,4 +166,13 @@ uploadArchives {
       }
     }
   }
+}
+
+release {
+    failOnCommitNeeded = false
+    failOnPublishNeeded = true
+    failOnSnapshotDependencies = true
+    failOnUnversionedFiles = false
+    failOnUpdateNeeded = true
+    revertOnFail = true
 }
