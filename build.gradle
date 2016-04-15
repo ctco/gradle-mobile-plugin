@@ -50,7 +50,6 @@ dependencies {
 
 group = 'lv.ctco.scm'
 archivesBaseName = 'gradle-mobile-plugin'
-//version = '0.8.0.0-SNAPSHOT'
 
 test {
 	useJUnit()
@@ -175,4 +174,9 @@ release {
     failOnUnversionedFiles = false
     failOnUpdateNeeded = true
     revertOnFail = true
+
+    tagTemplate = '${version}'
+    versionPropertyFile = 'gradle.properties'
+    versionProperties = []
+    buildTasks = ['build']
 }
