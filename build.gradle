@@ -178,4 +178,5 @@ release {
     versionProperties = []
     buildTasks = ['build']
 }
+
 afterReleaseBuild.dependsOn uploadArchives
