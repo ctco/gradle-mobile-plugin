@@ -3,13 +3,23 @@
  *
  * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
  */
-plugins {
-    id 'net.researchgate.release' version '2.3.4'
+
+buildscript {
+    //old approach to use dependencies, as gradle-nexus-staging-plugin isn't published to gradle.org plugins.
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "io.codearte.gradle.nexus:gradle-nexus-staging-plugin:0.5.3"
+        classpath "net.researchgate:gradle-release:2.3.5"
+    }
 }
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'signing'
+apply plugin: 'io.codearte.nexus-staging'
+apply plugin: 'net.researchgate.release'
 
 sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
@@ -177,6 +187,10 @@ release {
     versionPropertyFile = 'gradle.properties'
     versionProperties = []
     buildTasks = ['build']
+}
+
+nexusStaging {
+    stagingProfileId = "lv.ctco"
 }
 
 afterReleaseBuild.dependsOn uploadArchives
