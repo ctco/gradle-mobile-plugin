@@ -190,7 +190,7 @@ release {
 }
 
 nexusStaging {
-    stagingProfileId = "lv.ctco"
+    packageGroup = "lv.ctco"
 }
 
 afterReleaseBuild.dependsOn uploadArchives
