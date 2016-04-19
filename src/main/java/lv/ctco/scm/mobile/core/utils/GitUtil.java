@@ -8,6 +8,7 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Singleton;
@@ -22,13 +23,15 @@ public class GitUtil {
     private static final int HASH_SIZE_FULL = 40;
     private static final int HASH_SIZE_SHORT = 7;
 
+    private static final String PROP_VCS_ROOT_DIR = "vcs.root.dir";
+
     private GitUtil() {}
 
     public static String getShortHash(String gitHash) {
         return gitHash.length() == HASH_SIZE_FULL ? StringUtils.substring(gitHash, 0, HASH_SIZE_SHORT) : gitHash;
     }
 
-    public static boolean isUnderGit(File dir) {
+    public static boolean isGitDir(File dir) {
         CommandLine commandLine = new CommandLine("git");
         commandLine.addArguments(new String[] {"rev-parse", "--is-inside-work-tree"}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
@@ -37,7 +40,7 @@ public class GitUtil {
 
     protected static File getGitProjectRoot(File dir) {
         File rootDir = null;
-        if (isUnderGit(dir)) {
+        if (isGitDir(dir)) {
             CommandLine commandLine = new CommandLine("git");
             commandLine.addArguments(new String[] {"rev-parse", "--show-cdup"}, false);
             ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
@@ -49,25 +52,31 @@ public class GitUtil {
         return rootDir;
     }
 
-    public static void generateGitPushMessage(File pushInfoFile) throws IOException {
-        if (isUnderGit(PathUtil.getProjectDir())) {
-            List<String> gitPushInfo = getGitPushInfo(PathUtil.getProjectDir());
-            if (!gitPushInfo.isEmpty()) {
-                LoggerUtil.debug("Git push info:");
-                for (String line : gitPushInfo) {
+    public static void generateCommitInfo(File commitInfoFile) throws IOException {
+        if (isGitDir(PathUtil.getProjectDir())) {
+            List<String> commitInfo;
+            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR).isEmpty()) {
+                File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR)));
+                commitInfo = getCommitInfo(commitDir);
+            } else {
+                commitInfo = getCommitInfo(PathUtil.getProjectDir());
+            }
+            if (!commitInfo.isEmpty()) {
+                LoggerUtil.debug("Git commit info:");
+                for (String line : commitInfo) {
                     LoggerUtil.debug(line);
                 }
-                Files.deleteIfExists(pushInfoFile.toPath());
-                FileUtils.writeStringToFile(pushInfoFile, "<pre>", true);
-                FileUtils.writeLines(pushInfoFile, gitPushInfo, true);
-                FileUtils.writeStringToFile(pushInfoFile, "</pre>", true);
+                Files.deleteIfExists(commitInfoFile.toPath());
+                FileUtils.writeStringToFile(commitInfoFile, "<pre>", true);
+                FileUtils.writeLines(commitInfoFile, commitInfo, true);
+                FileUtils.writeStringToFile(commitInfoFile, "</pre>", true);
             }
         }
     }
 
-    private static List<String> getGitPushInfo(File dir) {
+    private static List<String> getCommitInfo(File dir) {
         List<String> commitInfo = new ArrayList<>();
-        if (isUnderGit(dir)) {
+        if (isGitDir(dir)) {
             CommandLine commandLine = new CommandLine("git");
             String[] args = new String[]{"--no-pager", "log", "-1", "--stat", "--stat-width=70", "--stat-count=100"};
             commandLine.addArguments(args, false);
@@ -79,15 +88,39 @@ public class GitUtil {
         return commitInfo;
     }
 
-    protected static String getGitShortHash(File dir) {
+    protected static String getCheckedoutCommitHashShort(File dir) {
         CommandLine commandLine = new CommandLine("git");
-        commandLine.addArguments(new String[] {"log", "--pretty=format:%h", "-n", "1"}, false);
+        commandLine.addArguments(new String[] {"log", "-n", "1", "--pretty=format:%h"}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
         if (execResult.isSuccess()) {
             return execResult.getOutput().get(0);
         } else {
             return "";
         }
+    }
+
+    protected static long getCheckedoutCommitTimestamp(File dir) {
+        CommandLine commandLine = new CommandLine("git");
+        commandLine.addArguments(new String[] {"log", "-n", "1", "--pretty=format:%ct"}, false);
+        ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
+        if (execResult.isSuccess()) {
+            return Long.parseLong(execResult.getOutput().get(0));
+        } else {
+            return 0L;
+        }
+    }
+
+    protected static File getSubdirWithLatestCommit(File rootDir) {
+        File resultDir = rootDir;
+        long latestCommitTimestamp = GitUtil.getCheckedoutCommitTimestamp(rootDir);
+        for (File rootSubDir : rootDir.listFiles((FileFilter)FileFilterUtils.directoryFileFilter())) {
+            long dirCommitTimestamp = GitUtil.getCheckedoutCommitTimestamp(rootSubDir);
+            if (dirCommitTimestamp > latestCommitTimestamp) {
+                resultDir = rootSubDir;
+                latestCommitTimestamp = dirCommitTimestamp;
+            }
+        }
+        return resultDir;
     }
 
 }

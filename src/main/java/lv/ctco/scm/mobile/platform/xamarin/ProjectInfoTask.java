@@ -31,8 +31,8 @@ public class ProjectInfoTask extends DefaultTask {
     public void doTaskAction() {
         try {
             LoggerUtil.info("Project revision: "+RevisionUtil.getRevision());
-            if (GitUtil.isUnderGit(PathUtil.getProjectDir())) {
-                GitUtil.generateGitPushMessage(new File(PathUtil.getIpaDistDir(), "_push-message.html"));
+            if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
+                GitUtil.generateCommitInfo(new File(PathUtil.getIpaDistDir(), "_commit-info.html"));
             }
             CommonUtil.printTeamcityInfo(releaseVersion);
         } catch (IOException e) {

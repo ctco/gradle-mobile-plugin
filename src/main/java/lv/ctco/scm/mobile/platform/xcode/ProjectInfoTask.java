@@ -90,8 +90,8 @@ public class ProjectInfoTask extends DefaultTask {
             CommonUtil.printTeamcityInfo(version);
             printTcVersionLibrary(versionLibrary);
             LibraryUtil.printLibrariesPublicationsInfo(getProject());
-            if (GitUtil.isUnderGit(PathUtil.getProjectDir())) {
-                GitUtil.generateGitPushMessage(new File(PathUtil.getIpaDistDir(), "_push-message.html"));
+            if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
+                GitUtil.generateCommitInfo(new File(PathUtil.getIpaDistDir(), "_commit-info.html"));
             }
         } catch (IOException e) {
             throw new GradleException(e.getMessage(), e);

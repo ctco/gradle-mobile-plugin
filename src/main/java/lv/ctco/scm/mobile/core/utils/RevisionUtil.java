@@ -19,12 +19,15 @@ public class RevisionUtil {
 
     private static String revision = null;
 
+    private static final String PROP_VCS_REVISION = "revision";
+    private static final String PROP_VCS_ROOT_DIR = "vcs.root.dir";
+
     private RevisionUtil() {}
 
     public static String getRevision() throws IOException {
         if (StringUtils.isBlank(revision)) {
-            if (PropertyUtil.hasProjectProperty("revision") && !StringUtils.isBlank(PropertyUtil.getProjectProperty("revision"))) {
-                setRevision(GitUtil.getShortHash(PropertyUtil.getProjectProperty("revision")));
+            if (PropertyUtil.hasProjectProperty(PROP_VCS_REVISION) && !StringUtils.isBlank(PropertyUtil.getProjectProperty(PROP_VCS_REVISION))) {
+                setRevision(GitUtil.getShortHash(PropertyUtil.getProjectProperty(PROP_VCS_REVISION)));
                 LoggerUtil.info("Revision '"+revision+"' was set from passed property");
             } else {
                 setRevision(getGitShortHashOrSvnRevision(PathUtil.getProjectDir()));
@@ -44,13 +47,19 @@ public class RevisionUtil {
         }
     }
 
-    private static String getGitShortHashOrSvnRevision(File projDir) throws IOException {
+    private static String getGitShortHashOrSvnRevision(File projectDir) throws IOException {
         String result;
-        if (GitUtil.isUnderGit(projDir)) {
-            result = GitUtil.getGitShortHash(GitUtil.getGitProjectRoot(projDir));
-        } else if (SvnUtil.isSvnDir(projDir)) {
-            File svnProjectRootFile = SvnUtil.getSvnAbsoluteRoot(projDir);
+        if (GitUtil.isGitDir(projectDir)) {
+            LoggerUtil.info("Git repo detected.");
+            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR).isEmpty()) {
+                File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR)));
+                result = GitUtil.getCheckedoutCommitHashShort(commitDir);
+            } else {
+                result = GitUtil.getCheckedoutCommitHashShort(GitUtil.getGitProjectRoot(projectDir));
+            }
+        } else if (SvnUtil.isSvnDir(projectDir)) {
             LoggerUtil.info("Svn repo detected.");
+            File svnProjectRootFile = SvnUtil.getSvnAbsoluteRoot(projectDir);
             List<File> externalFolders = SvnUtil.getSvnExternalFolders(svnProjectRootFile);
             if (externalFolders.isEmpty()) {
                 LoggerUtil.debug("svn external links not found");
@@ -58,7 +67,7 @@ public class RevisionUtil {
             } else {
                 LoggerUtil.info("svn external folders found");
                 Map<File, Integer> folderRevisions = SvnUtil.getFolderRevisions(externalFolders);
-                Map.Entry<File,Integer> revisionEntry = SvnUtil.getLargestRevision(folderRevisions);
+                Map.Entry<File, Integer> revisionEntry = SvnUtil.getLargestRevision(folderRevisions);
                 result = revisionEntry.getValue().toString();
                 LoggerUtil.info("Largest svn revision '"+revisionEntry.getValue()+"' was found in '"+revisionEntry.getKey()+"'");
             }

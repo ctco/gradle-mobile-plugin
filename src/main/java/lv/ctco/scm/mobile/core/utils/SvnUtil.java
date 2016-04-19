@@ -73,7 +73,6 @@ public class SvnUtil {
         List<File> extLinks = new ArrayList<>();
         if (isSvnDir(dir)) {
             ExecResult execResult = getSvnExternalsOutput(dir);
-            //List<String> extList = Arrays.asList(commandOutput.trim().split(System.lineSeparator()));
             if (execResult.isSuccess()) {
                 String extFolder = "";
                 for (String line : execResult.getOutput()) {
