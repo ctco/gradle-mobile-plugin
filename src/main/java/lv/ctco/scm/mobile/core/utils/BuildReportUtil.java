@@ -31,7 +31,7 @@ public class BuildReportUtil {
     }
 
     private static void saveReport() throws IOException {
-        File reportFile = new File(PathUtil.getReportSummaryDir(), "build.html");
+        File reportFile = new File(PathUtil.getReportSummaryDir(), "build-info.html");
         Files.deleteIfExists(reportFile.toPath());
         FileUtils.touch(reportFile);
         FileUtils.write(reportFile, "<html><body><table border=\"1\">", DEFAULT_ENCODING, true);
