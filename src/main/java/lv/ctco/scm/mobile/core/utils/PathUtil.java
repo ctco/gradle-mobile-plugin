@@ -27,6 +27,7 @@ public class PathUtil {
 
     private static final String BUILDLOG_SUBPATH = "logs";
 
+    private static final String REPORT_COMMIT_SUBPATH = "reports/commit";
     private static final String REPORT_SUMMARY_SUBPATH = "reports/summary";
     private static final String REPORT_UNIT_SUBPATH = "reports/unit";
 
@@ -75,6 +76,10 @@ public class PathUtil {
 
     public static File getBuildlogDir() throws IOException {
         return createAndReturn(new File(getBuildDir(), BUILDLOG_SUBPATH));
+    }
+
+    public static File getReportCommitDir() throws IOException {
+        return createAndReturn(new File(getBuildDir(), REPORT_COMMIT_SUBPATH));
     }
 
     public static File getReportSummaryDir() throws IOException {

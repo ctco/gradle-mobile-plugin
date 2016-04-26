@@ -32,7 +32,7 @@ public class ProjectInfoTask extends DefaultTask {
         try {
             LoggerUtil.info("Project revision: "+RevisionUtil.getRevision());
             if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
-                GitUtil.generateCommitInfo(new File(PathUtil.getIpaDistDir(), "_commit-info.html"));
+                GitUtil.generateCommitInfo();
             }
             CommonUtil.printTeamcityInfo(releaseVersion);
         } catch (IOException e) {

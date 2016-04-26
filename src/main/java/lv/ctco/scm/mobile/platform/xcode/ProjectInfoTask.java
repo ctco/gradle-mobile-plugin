@@ -91,7 +91,7 @@ public class ProjectInfoTask extends DefaultTask {
             printTcVersionLibrary(versionLibrary);
             LibraryUtil.printLibrariesPublicationsInfo(getProject());
             if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
-                GitUtil.generateCommitInfo(new File(PathUtil.getIpaDistDir(), "_commit-info.html"));
+                GitUtil.generateCommitInfo();
             }
         } catch (IOException e) {
             throw new GradleException(e.getMessage(), e);

@@ -52,7 +52,7 @@ public class GitUtil {
         return rootDir;
     }
 
-    public static void generateCommitInfo(File commitInfoFile) throws IOException {
+    public static void generateCommitInfo() throws IOException {
         if (isGitDir(PathUtil.getProjectDir())) {
             List<String> commitInfo;
             if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR).isEmpty()) {
@@ -66,6 +66,7 @@ public class GitUtil {
                 for (String line : commitInfo) {
                     LoggerUtil.debug(line);
                 }
+                File commitInfoFile = new File(PathUtil.getReportCommitDir(), "commit-info.html");
                 Files.deleteIfExists(commitInfoFile.toPath());
                 FileUtils.writeStringToFile(commitInfoFile, "<pre>", true);
                 FileUtils.writeLines(commitInfoFile, commitInfo, true);
