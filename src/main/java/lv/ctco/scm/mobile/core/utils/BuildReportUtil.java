@@ -34,7 +34,8 @@ public class BuildReportUtil {
         File reportFile = new File(PathUtil.getReportSummaryDir(), "build-info.html");
         Files.deleteIfExists(reportFile.toPath());
         FileUtils.touch(reportFile);
-        FileUtils.write(reportFile, "<html><body><table border=\"1\">", DEFAULT_ENCODING, true);
+        writeStyle(reportFile);
+        FileUtils.write(reportFile, "<html><body><table>", DEFAULT_ENCODING, true);
         writeSysEnvInfo(reportFile);
         for (IosApp iosApp : iosAppList) {
             writeIosAppInfo(iosApp, reportFile);
@@ -69,6 +70,14 @@ public class BuildReportUtil {
         writeReportEntry(reportFile, "Provisioning team name", iosApp.getProvisioningTeamName());
         writeReportEntry(reportFile, "Identity name", iosApp.getIdentityName());
         writeReportEntry(reportFile, "Identity type", iosApp.getIdentityType());
+    }
+
+    private static void writeStyle(File reportFile) throws IOException {
+        FileUtils.write(reportFile, "<style type=\"text/css\">", DEFAULT_ENCODING, true);
+        FileUtils.write(reportFile, "table {border:none; display: table; border-collapse: separate; border-spacing: 2px; border-color: grey; font-family: \"Helvetica Neue\", Arial, sans-serif; font-size: 82%; margin-top: 10px; margin-left: 10px; margin-right: 10px;}", DEFAULT_ENCODING, true);
+        FileUtils.write(reportFile, "table tbody th {border:none; text-align: center; font-weight: bolder; border-left: none; border-right: none; border-top: none; border-bottom: 1px dotted #ccc; padding: 5px;}", DEFAULT_ENCODING, true);
+        FileUtils.write(reportFile, "table td {border-left: none; border-right: none; border-top: none; border-bottom: 1px dotted #ccc; padding: 5px;}", DEFAULT_ENCODING, true);
+        FileUtils.write(reportFile, "</style>", DEFAULT_ENCODING, true);
     }
 
     private static void writeReportHeader(File reportFile, String header) throws IOException {
