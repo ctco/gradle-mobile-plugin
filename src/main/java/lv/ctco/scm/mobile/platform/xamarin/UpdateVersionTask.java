@@ -10,6 +10,7 @@ import lv.ctco.scm.mobile.core.utils.BackupUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
 import lv.ctco.scm.mobile.core.utils.ProfilingUtil;
+import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.gradle.api.DefaultTask;
@@ -27,6 +28,8 @@ public class UpdateVersionTask extends DefaultTask {
     private boolean updateCFBundleShortVersionString;
     private boolean cleanReleaseVersionForPROD;
     private boolean enforcePlistSyntax;
+
+    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
@@ -56,17 +59,21 @@ public class UpdateVersionTask extends DefaultTask {
     public void doTaskAction() {
         try {
             String revision = RevisionUtil.getRevision();
-            LoggerUtil.info("Detected revision as '" + revision + "'");
 
             String plistFileName = projectName+"/Info.plist";
             LoggerUtil.info("Read project release version as '"+releaseVersion+"'");
 
-            String buildVersionToSet = "".equals(releaseVersion) ? revision : releaseVersion+"_"+revision;
-            BackupUtil.backupFile(new File(plistFileName));
+            String buildVersion;
+            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
+                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
+            } else {
+                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"_"+revision;
+            }
+
             if (cleanReleaseVersionForPROD && "PROD".equals(environmentName)) {
                 PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", releaseVersion);
             } else {
-                PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", buildVersionToSet);
+                PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", buildVersion);
             }
             if (updateCFBundleShortVersionString) {
                 PlistUtil.setStringValue(new File(plistFileName), "CFBundleShortVersionString", releaseVersion);
@@ -83,7 +90,7 @@ public class UpdateVersionTask extends DefaultTask {
                 if (cleanReleaseVersionForPROD && "PROD".equals(environmentName)) {
                     ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlistFile, "application_version", releaseVersion);
                 } else {
-                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlistFile, "application_version", buildVersionToSet);
+                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlistFile, "application_version", buildVersion);
                 }
                 if (enforcePlistSyntax) {
                     PlistUtil.validatePlist(rootPlistFile);

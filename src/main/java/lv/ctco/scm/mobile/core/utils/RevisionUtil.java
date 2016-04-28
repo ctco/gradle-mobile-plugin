@@ -21,6 +21,7 @@ public class RevisionUtil {
 
     private static final String PROP_VCS_REVISION = "revision";
     private static final String PROP_VCS_ROOT_DIR = "vcs.root.dir";
+    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     private RevisionUtil() {}
 
@@ -30,7 +31,7 @@ public class RevisionUtil {
                 setRevision(GitUtil.getShortHash(PropertyUtil.getProjectProperty(PROP_VCS_REVISION)));
                 LoggerUtil.info("Revision '"+revision+"' was set from passed property");
             } else {
-                setRevision(getGitShortHashOrSvnRevision(PathUtil.getProjectDir()));
+                setRevision(getGitOrSvnRevision(PathUtil.getProjectDir()));
                 LoggerUtil.info("Revision '"+revision+"' was auto-detected");
             }
         }
@@ -47,13 +48,23 @@ public class RevisionUtil {
         }
     }
 
-    private static String getGitShortHashOrSvnRevision(File projectDir) throws IOException {
+    private static String getGitOrSvnRevision(File projectDir) throws IOException {
         String result;
         if (GitUtil.isGitDir(projectDir)) {
             LoggerUtil.info("Git repo detected.");
             if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR).isEmpty()) {
-                File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR)));
-                result = GitUtil.getCheckedoutCommitHashShort(commitDir);
+                if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
+                    File vcsRootDir = new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR));
+                    result = "";
+                    for (String subDirName : PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).split(",")) {
+                        File subDir = new File(vcsRootDir, subDirName);
+                        long commitNumber = GitUtil.getCheckedoutCommitNumber(subDir);
+                        result = "".equals(result) ? result+commitNumber : result+"."+commitNumber;
+                    }
+                } else {
+                    File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR)));
+                    result = GitUtil.getCheckedoutCommitHashShort(commitDir);
+                }
             } else {
                 result = GitUtil.getCheckedoutCommitHashShort(GitUtil.getGitProjectRoot(projectDir));
             }

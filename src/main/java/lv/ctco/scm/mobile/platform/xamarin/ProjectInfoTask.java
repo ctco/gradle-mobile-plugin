@@ -16,7 +16,6 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.File;
 import java.io.IOException;
 
 public class ProjectInfoTask extends DefaultTask {
@@ -30,7 +29,8 @@ public class ProjectInfoTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
-            LoggerUtil.info("Project revision: "+RevisionUtil.getRevision());
+            LoggerUtil.lifecycle("Project version: "+releaseVersion);
+            LoggerUtil.lifecycle("Project revision: "+RevisionUtil.getRevision());
             if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
                 GitUtil.generateCommitInfo();
             }

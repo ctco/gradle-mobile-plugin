@@ -111,6 +111,18 @@ public class GitUtil {
         }
     }
 
+    protected static long getCheckedoutCommitNumber(File dir) {
+        long timestamp = getCheckedoutCommitTimestamp(dir);
+        CommandLine commandLine = new CommandLine("git");
+        commandLine.addArguments(new String[] {"rev-list", "--all", "--count", "--before="+timestamp}, false);
+        ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
+        if (execResult.isSuccess()) {
+            return Long.parseLong(execResult.getOutput().get(0));
+        } else {
+            return 0L;
+        }
+    }
+
     protected static File getSubdirWithLatestCommit(File rootDir) {
         File resultDir = rootDir;
         long latestCommitTimestamp = GitUtil.getCheckedoutCommitTimestamp(rootDir);

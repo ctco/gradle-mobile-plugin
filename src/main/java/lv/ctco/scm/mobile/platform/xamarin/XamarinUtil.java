@@ -20,13 +20,16 @@ public class XamarinUtil {
     private XamarinUtil() {}
 
     public static String getReleaseVersion(Csproj csproj) {
-        if (csproj == null || StringUtils.isBlank(csproj.getReleaseVersion())) {
-            LoggerUtil.info("Release version not found in Csproj.");
-            LoggerUtil.info("Setting  release version as default '"+DEFAULT_RELEASE_VERSION+"'");
-            return DEFAULT_RELEASE_VERSION;
+        String csprojName = csproj.getFile().getName();
+        String releaseVersion = csproj.getReleaseVersion();
+        if (StringUtils.isBlank(releaseVersion)) {
+            LoggerUtil.info("Release version not found in "+csprojName);
+            releaseVersion = DEFAULT_RELEASE_VERSION;
         } else {
-            return csproj.getReleaseVersion();
+            LoggerUtil.info("Release version was found in "+csprojName);
         }
+        LoggerUtil.info("Setting release version as '"+releaseVersion+"'");
+        return releaseVersion;
     }
 
 }

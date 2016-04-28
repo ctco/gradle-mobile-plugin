@@ -37,17 +37,17 @@ public class UpdateVersionTask extends DefaultTask {
             String productType = buildSettings.get("PRODUCT_TYPE");
             if ("com.apple.product-type.application".equalsIgnoreCase(productType)) {
                 String revision = RevisionUtil.getRevision();
-                LoggerUtil.info("Detected revision as '"+revision+"'");
                 File infoPlist = new File(buildSettings.get("INFOPLIST_FILE"));
-                String shortVersion = PlistUtil.getStringValue(infoPlist, "CFBundleShortVersionString");
-                if (StringUtils.isBlank(shortVersion)) {
-                    shortVersion = DEFAULT_VERSION_STRING;
-                    LoggerUtil.warn("Setting application release version as default Xcode version");
+                String releaseVersion = PlistUtil.getStringValue(infoPlist, "CFBundleShortVersionString");
+                if (StringUtils.isBlank(releaseVersion)) {
+                    LoggerUtil.info("Release version not found in "+infoPlist.getName());
+                    releaseVersion = DEFAULT_VERSION_STRING;
                 } else {
-                    LoggerUtil.info("Read project release version as '"+shortVersion+"'");
+                    LoggerUtil.info("Release version was found in "+infoPlist.getName());
                 }
-                String longVersion = StringUtils.isBlank(shortVersion) ? revision : shortVersion+"_"+revision;
-                PlistUtil.setStringValue(infoPlist, "CFBundleVersion", longVersion);
+                LoggerUtil.info("Setting project release version as '"+releaseVersion+"'");
+                String buildVersion = StringUtils.isBlank(releaseVersion) ? revision : releaseVersion+"_"+revision;
+                PlistUtil.setStringValue(infoPlist, "CFBundleVersion", buildVersion);
             } else {
                 LoggerUtil.info("Product type is not 'application'. Skipping bundle version update as not needed.");
             }

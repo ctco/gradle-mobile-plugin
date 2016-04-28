@@ -55,35 +55,33 @@ public class ProjectInfoTask extends DefaultTask {
                 } else {
                     LoggerUtil.info("Setting application release version from project's info plist");
                 }
-                LoggerUtil.lifecycle("Release Version: "+version);
+                LoggerUtil.lifecycle("Release version: "+version);
                 if (libraryVersion != null) {
                     if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
                         LoggerUtil.lifecycle("Stripping -SNAPSHOT marking");
-                        versionLibrary = libraryVersion.substring(0, libraryVersion.length() - 9);
-                        LoggerUtil.lifecycle("Library Version: " + versionLibrary);
+                        versionLibrary = libraryVersion.substring(0, libraryVersion.length()-9);
+                        LoggerUtil.lifecycle("Library version: " + versionLibrary);
                     } else {
                         versionLibrary = libraryVersion;
-                        LoggerUtil.lifecycle("Library Version: " + versionLibrary);
+                        LoggerUtil.lifecycle("Library version: " + versionLibrary);
                     }
                 }
             } else {
                 if (libraryVersion != null) {
-                    LoggerUtil.lifecycle("Setting library release version as defined in ctcoMobile.xcode.libraryVersion");
+                    LoggerUtil.info("Setting library release version as defined in ctcoMobile.xcode.libraryVersion");
                     if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
                         LoggerUtil.lifecycle("Stripping -SNAPSHOT marking");
-                        version = libraryVersion.substring(0, libraryVersion.length() - 9);
+                        version = libraryVersion.substring(0, libraryVersion.length()-9);
                         versionLibrary = version;
-                        LoggerUtil.lifecycle("Release Version: " + version);
-                        LoggerUtil.lifecycle("Library Version: " + version);
                     } else {
                         version = libraryVersion;
                         versionLibrary = version;
-                        LoggerUtil.lifecycle("Release Version: " + version);
-                        LoggerUtil.lifecycle("Library Version: " + version);
                     }
+                    LoggerUtil.lifecycle("Release version: "+version);
+                    LoggerUtil.lifecycle("Library version: "+version);
                 } else {
                     LoggerUtil.lifecycle("Setting release version as default value "+DEFAULT_XCODE_VERSION+" because it is undefined");
-                    LoggerUtil.lifecycle("Release Version: "+DEFAULT_XCODE_VERSION);
+                    LoggerUtil.lifecycle("Release version: "+DEFAULT_XCODE_VERSION);
                 }
             }
             LoggerUtil.lifecycle("Project revision: "+RevisionUtil.getRevision());
