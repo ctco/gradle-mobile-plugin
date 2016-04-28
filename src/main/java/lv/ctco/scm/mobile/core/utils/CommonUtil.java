@@ -21,6 +21,7 @@ import java.util.regex.Pattern;
 public class CommonUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
+    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     private CommonUtil() {}
 
@@ -31,8 +32,13 @@ public class CommonUtil {
      */
     public static void printTeamcityInfo(String releaseVersion) throws IOException {
         String revision = RevisionUtil.getRevision();
-        TeamcityUtil.setBuildNumber(releaseVersion+"_"+revision);
-        TeamcityUtil.setAgentParameter("build.number", releaseVersion+"_"+revision);
+        if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
+            TeamcityUtil.setBuildNumber(releaseVersion+"."+revision);
+            TeamcityUtil.setAgentParameter("build.number", releaseVersion+"."+revision);
+        } else {
+            TeamcityUtil.setBuildNumber(releaseVersion+"_"+revision);
+            TeamcityUtil.setAgentParameter("build.number", releaseVersion+"_"+revision);
+        }
         TeamcityUtil.setAgentParameter("project.version.iteration", releaseVersion);
         if (PropertyUtil.hasProjectProperty("stamp")) {
             StampUtil.updateStamp(PropertyUtil.getProjectProperty("stamp"), releaseVersion);

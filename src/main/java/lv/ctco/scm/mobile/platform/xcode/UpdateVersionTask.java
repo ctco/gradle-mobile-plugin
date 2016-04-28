@@ -8,6 +8,7 @@ package lv.ctco.scm.mobile.platform.xcode;
 
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
+import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.apache.commons.lang3.StringUtils;
@@ -23,6 +24,7 @@ import java.util.Map;
 public class UpdateVersionTask extends DefaultTask {
 
     private static final String DEFAULT_VERSION_STRING = "0.1";
+    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     private String targetName;
 
@@ -46,7 +48,12 @@ public class UpdateVersionTask extends DefaultTask {
                     LoggerUtil.info("Release version was found in "+infoPlist.getName());
                 }
                 LoggerUtil.info("Setting project release version as '"+releaseVersion+"'");
-                String buildVersion = StringUtils.isBlank(releaseVersion) ? revision : releaseVersion+"_"+revision;
+                String buildVersion;
+                if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
+                    buildVersion = StringUtils.isBlank(releaseVersion) ? revision : releaseVersion+"."+revision;
+                } else {
+                    buildVersion = StringUtils.isBlank(releaseVersion) ? revision : releaseVersion+"_"+revision;
+                }
                 PlistUtil.setStringValue(infoPlist, "CFBundleVersion", buildVersion);
             } else {
                 LoggerUtil.info("Product type is not 'application'. Skipping bundle version update as not needed.");
