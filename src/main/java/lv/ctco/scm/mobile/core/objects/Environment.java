@@ -87,11 +87,11 @@ public class Environment {
 
     @Override
     public String toString() {
-        return "Environment{" +
-                " name:'"+name+"', " +
-                " target:'"+target+"', " +
-                " configuration:'"+configuration+"' " +
-                " sdk:'"+sdk+"' " +
+        return "Environment{ " +
+                "name:'"+name+"', " +
+                "target:'"+target+"', " +
+                "configuration:'"+configuration+"', " +
+                "sdk:'"+sdk+"' " +
                 "}";
     }
 

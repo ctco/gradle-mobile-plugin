@@ -101,7 +101,7 @@ public class BuildAndroidTask extends DefaultTask {
         }
         commandLine.addArgument(projectFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
-        FileUtils.writeLines(new File(this.getName()+"Task.build.log"), execResult.getOutput());
+        FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
         if (!execResult.isSuccess()) {
             throw new IOException(execResult.getException().getMessage());
         }
