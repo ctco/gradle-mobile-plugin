@@ -250,14 +250,14 @@ abstract class PlatformExtension {
             updateShortVersion = this.updateCFBundleShortVersionString ? true : false
         }
         return "$extensionClassName{\n" +
-                "  automaticConfiguration=$automaticConfiguration,\n" +
+                "  automaticConfiguration="+getAutomaticConfiguration()+",\n" +
                 "${solutionFile ? '  solutionFile=\'' + solutionFile + '\',\n' : ''}" +
                 "${projectBaseName ? '  projectBaseName=\'' + projectBaseName + '\',\n' : ''}" +
                 "${projectName ? '  projectName=\'' + projectName + '\',\n' : ''}" +
                 "${assemblyName ? '  assemblyName=\'' + assemblyName + '\',\n' : ''}" +
                 "${plistSyntax != null ? '  enforcePlistSyntax=' + plistSyntax + ',\n' : ''}" +
                 "${skipUpdateVersion != null ? '  skipUpdateVersionForAppstoreConfiguration=' + skipUpdateVersion + ',\n' : ''}" +
-                "${updateShortVersion != null ? '  skipUpdateVersionForAppstoreConfiguration=' + skipUpdateVersion + ',\n' : ''}" +
+                "${updateShortVersion != null ? '  updateCFBundleShortVersionString=' + updateShortVersion + ',\n' : ''}" +
                 "${environments ? '  environments{\n' + envString.toString() + '  }\n' : '  environments{}\n'}" +
                 "${profiles ? '  profiles{\n' + profString.toString() + '  }\n' : '  profiles{}\n'}" +
                 "${uiasetup ? '  ' + uiasetup.toString() + '\n' : ''}" +
