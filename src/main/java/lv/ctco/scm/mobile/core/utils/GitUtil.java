@@ -113,6 +113,15 @@ public class GitUtil {
 
     protected static long getCheckedoutCommitNumber(File dir) {
         long timestamp = getCheckedoutCommitTimestamp(dir);
+        CommandLine fetchCommandLine = new CommandLine("git");
+        fetchCommandLine.addArguments(new String[]{"fetch", "--all"}, false);
+        ExecResult fetchExecResult = ExecUtil.execCommand(fetchCommandLine, dir, null, true, false);
+        if (fetchExecResult.isSuccess()){
+            LoggerUtil.info("git fetch --all finished successfully (Workaround for TeamCity)");
+        }
+        else {
+            LoggerUtil.info("git fetch failed");
+        }
         CommandLine commandLine = new CommandLine("git");
         commandLine.addArguments(new String[] {"rev-list", "--all", "--count", "--before="+timestamp}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
