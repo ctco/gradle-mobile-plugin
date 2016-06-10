@@ -24,6 +24,7 @@ public class CleanTask extends DefaultTask {
     public void doTaskAction() {
         try {
             BackupUtil.restoreAllFiles();
+            FileUtils.deleteDirectory(PathUtil.getBackupDir());
             FileUtils.deleteDirectory(PathUtil.getXcodeDstDir());
             FileUtils.deleteDirectory(PathUtil.getXcodeObjDir());
             FileUtils.deleteDirectory(PathUtil.getXcodeSymDir());

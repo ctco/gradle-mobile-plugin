@@ -35,14 +35,8 @@ import java.util.regex.Pattern;
  */
 public class UIAutomationTask extends DefaultTask {
 
-    private static final String AUTOMATION_TEMPLATE_PATH =
-            "/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate";
-
     /* Name of the executed test. */
     private String testName;
-
-    /** Name of app file to test. Provided or read from solution file. */
-    private String appName;
 
     /** Path to pre-built Xcode application (*.app directory) that has to be tested. */
     private File appPath;
@@ -61,10 +55,6 @@ public class UIAutomationTask extends DefaultTask {
 
     public void setTestName(String testName) {
         this.testName = testName;
-    }
-
-    public void setAppName(String appName) {
-        this.appName = appName;
     }
 
     public void setAppPath(File appPath) {
@@ -87,8 +77,6 @@ public class UIAutomationTask extends DefaultTask {
     public void runTests() {
         try {
             validateParameters();
-            // TODO : Fix Simulator controls
-            //resetSimulator(appName);
 
             String device = null;
             if (targetDevice != null) {
@@ -107,7 +95,7 @@ public class UIAutomationTask extends DefaultTask {
 
             CommandLine commandLine = new CommandLine("instruments");
             commandLine.addArgument("-t");
-            commandLine.addArgument(AUTOMATION_TEMPLATE_PATH, false);
+            commandLine.addArgument("Automation", false);
             if (device != null) {
                 commandLine.addArgument("-w");
                 commandLine.addArgument(device, false);
@@ -121,15 +109,6 @@ public class UIAutomationTask extends DefaultTask {
             commandLine.addArgument(resultsPath.getAbsolutePath(), false);
 
             ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
-
-            /*
-            String line;
-            File traceDir;
-            if (line.startsWith("Instruments Trace Complete")) {
-                traceDir = new File(line.substring(line.indexOf("Output : ")+9, line.length() - 1));
-            }
-            //ZipUtil.compressDirectory(traceDir, true, new File(traceDir.getParent(), testName+"_UITest.trace.zip"));
-            */
 
             for (String line : generateSummary(execResult.getOutput())) {
                 LoggerUtil.info(line);
@@ -165,12 +144,6 @@ public class UIAutomationTask extends DefaultTask {
                 throw new IOException("Failed to create resultsPath at "+resultsPath.getAbsolutePath());
             }
         }
-    }
-
-    private static void resetSimulator(String appName) throws IOException {
-        IosSimulatorUtil.quitDefaultSimulator();
-        IosSimulatorUtil.deleteApp(appName);
-        IosSimulatorUtil.activateDefaultSimulator();
     }
 
     private static boolean containsErrors(List<String> commandOutput) {

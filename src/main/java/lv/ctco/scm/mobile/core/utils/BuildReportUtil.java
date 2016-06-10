@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class BuildReportUtil {
+public final class BuildReportUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
     private static List<IosApp> iosAppList = new ArrayList<>();

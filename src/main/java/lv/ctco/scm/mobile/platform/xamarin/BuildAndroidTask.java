@@ -39,6 +39,8 @@ public class BuildAndroidTask extends DefaultTask {
     private String signingKeystore;
     private String signingCertificateAlias;
 
+    private String configurationBinPath;
+
     public void setEnv(Environment env) {
         this.env = env;
     }
@@ -74,6 +76,7 @@ public class BuildAndroidTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
+            configurationBinPath = projectName+"/bin/"+env.getConfiguration();
             buildArtifact();
             if (!"debug".equalsIgnoreCase(env.getConfiguration()) && signingCertificateAlias != null) {
                 signArtifact();
@@ -134,7 +137,7 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument(storepass);
         commandLine.addArgument("-keypass");
         commandLine.addArgument(keypass);
-        commandLine.addArgument(projectName+"/bin/"+env.getConfiguration()+"/"+assemblyName+".apk");
+        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk");
         commandLine.addArgument(signingCertificateAlias);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
@@ -148,7 +151,7 @@ public class BuildAndroidTask extends DefaultTask {
         CommandLine commandLine = new CommandLine("jarsigner");
         commandLine.addArgument("-verify");
         commandLine.addArgument("-verbose");
-        commandLine.addArgument(projectName+"/bin/"+env.getConfiguration()+"/"+assemblyName+".apk", false);
+        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk", false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
         if (!execResult.isSuccess() || !execResult.getOutput().contains("jar verified.")) {
             throw new IOException("Artifact signature verification failed");
@@ -159,22 +162,17 @@ public class BuildAndroidTask extends DefaultTask {
 
     private void zipalignArtifact() throws IOException {
         LoggerUtil.info("Zipaligning artifact...");
-        File zipalign = PathUtil.getZipalignBinary();
-        if (zipalign == null) {
-            LoggerUtil.errorInTask(this.getName(), "Artifact signature verification failed");
-            throw new GradleException("Zipalign binary was not found!");
-        }
-        CommandLine commandLine = new CommandLine(zipalign.getAbsolutePath());
+        CommandLine commandLine = new CommandLine("zipalign");
         commandLine.addArgument("-f");
         commandLine.addArgument("-v");
         commandLine.addArgument("4");
-        commandLine.addArgument(projectName+"/bin/"+env.getConfiguration()+"/"+assemblyName+".apk", false);
-        commandLine.addArgument(projectName+"/bin/"+env.getConfiguration()+"/"+assemblyName+"-Signed.apk", false);
+        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk", false);
+        commandLine.addArgument(configurationBinPath+"/"+assemblyName+"-Signed.apk", false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
             throw new GradleException("Zipaligning failed");
         }
-        Files.deleteIfExists(new File(projectName+"/bin/"+env.getName()+"/"+assemblyName+".apk").toPath());
+        Files.deleteIfExists(new File(configurationBinPath+"/"+assemblyName+".apk").toPath());
         LoggerUtil.info("Zipaligning successful");
     }
 

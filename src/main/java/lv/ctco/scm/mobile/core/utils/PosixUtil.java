@@ -16,7 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Singleton
-public class PosixUtil {
+public final class PosixUtil {
 
     private static final int O400 = 256;
     private static final int O200 = 128;

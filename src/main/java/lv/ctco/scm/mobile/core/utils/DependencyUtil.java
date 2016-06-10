@@ -21,7 +21,7 @@ import java.util.Collection;
 import java.util.Set;
 
 @Singleton
-public class DependencyUtil {
+public final class DependencyUtil {
 
     private DependencyUtil() {}
 

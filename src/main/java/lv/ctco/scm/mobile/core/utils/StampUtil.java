@@ -12,7 +12,7 @@ import javax.inject.Singleton;
 import java.io.IOException;
 
 @Singleton
-public class StampUtil {
+public final class StampUtil {
 
     private static final Integer EXT_DEPLOYMENT_SUFFIX_POSITION = 1;
     private static final String EXT_DEPLOYMENT_SUFFIX_NEW = ".0";
@@ -30,7 +30,7 @@ public class StampUtil {
         return transformStampToString(digits);
     }
 
-    public static String updateStamp(String oldStamp, String newIterationVersion) {
+    static String updateStamp(String oldStamp, String newIterationVersion) {
         String oldIterationVersion = getIterationVersionFromStamp(oldStamp);
         String stamp;
         if(oldIterationVersion.equals(newIterationVersion)) {
@@ -57,7 +57,7 @@ public class StampUtil {
                 return number;
             }
         }
-        throw new IOException("Bad stamp for external deployment retrieving: "+tmpStamp); // TODO : WTF?
+        throw new IOException("Bad stamp for external deployment retrieving: "+tmpStamp);
     }
 
     protected static String iterationToStamp(String iterationVersion) {
@@ -72,7 +72,7 @@ public class StampUtil {
         return transformStampToString(iterationVersionArray);
     }
 
-    protected static String[] splitStamp(String stamp) {
+    private static String[] splitStamp(String stamp) {
         return stamp.split("\\.");
     }
 
@@ -87,8 +87,8 @@ public class StampUtil {
         StringBuilder newStamp = new StringBuilder();
         for (int i = 0; i < arrStamp.length; ++i) {
             newStamp.append(arrStamp[i]);
-            if(i < arrStamp.length-1) {
-                newStamp.append(".");
+            if (i < arrStamp.length-1) {
+                newStamp.append('.');
             }
         }
         LoggerUtil.debug("Transforming array to string: "+newStamp.toString());

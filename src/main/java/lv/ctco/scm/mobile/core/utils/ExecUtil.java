@@ -16,7 +16,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Singleton
-public class ExecUtil {
+public final class ExecUtil {
 
     private ExecUtil() {}
 

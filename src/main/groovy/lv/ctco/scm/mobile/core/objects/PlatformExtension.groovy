@@ -128,7 +128,7 @@ abstract class PlatformExtension {
         Environment env = new Environment()
         env.setName(params.name)
         env.setConfiguration(params.configuration)
-        if (params.outputPath.getClass().getName().endsWith('.File')) { // TODO : instanceof File works?
+        if (params.outputPath.getClass().getName().endsWith('.File')) {
             env.setOutputPath((File)params.outputPath)
         } else {
             env.setOutputPath(new File(params.outputPath))

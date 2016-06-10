@@ -24,9 +24,9 @@ import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 
 @Singleton
-public class ZipUtil {
+public final class ZipUtil {
 
-    private static final List<String> DEFAULT_EXCLUDES = Arrays.asList(".DS_Store"); //+thumbs.db?
+    private static final List<String> DEFAULT_EXCLUDES = Arrays.asList(".DS_Store");
 
     private ZipUtil() {}
 
@@ -192,8 +192,8 @@ public class ZipUtil {
             Map<String, Object> fileAttr = getFileAttributes(filePath);
             if (fileAttr.get("gid") != null && fileAttr.get("uid") != null) {
                 x7875 = new X7875_NewUnix();
-                x7875.setGID(new Long(fileAttr.get("gid").toString()));
-                x7875.setUID(new Long(fileAttr.get("uid").toString()));
+                x7875.setGID(Long.valueOf(fileAttr.get("gid").toString()));
+                x7875.setUID(Long.valueOf(fileAttr.get("uid").toString()));
             }
         }
         return x7875;

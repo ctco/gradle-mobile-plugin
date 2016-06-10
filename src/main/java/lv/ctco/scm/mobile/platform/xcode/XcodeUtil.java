@@ -59,18 +59,18 @@ public class XcodeUtil {
             commandLine.addArgument("-list");
             ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
             if (execResult.isSuccess()) {
-                return execResult.getOutput();
+                xcodebuildListOutput = execResult.getOutput();
             }
         }
         return xcodebuildListOutput;
     }
 
     private static String getListOfStringsAsString(List<String> list) {
-        String result = "";
+        StringBuilder stringBuilder = new StringBuilder();
         for (String line : list) {
-            result += line + System.lineSeparator();
+            stringBuilder.append(line).append(System.lineSeparator());
         }
-        return result;
+        return stringBuilder.toString();
     }
 
     protected void getGlobalConfiguration() throws IOException {

@@ -37,14 +37,12 @@ public class CleanTask extends DefaultTask {
             throw new GradleException(e.getMessage(), e);
         }
         try {
-            // TODO : Get all actually existing configurations, run clean command for all
             cleanConfiguration("Debug");
             cleanConfiguration("Release");
             cleanConfiguration("Ad-Hoc");
             cleanConfiguration("AppStore");
             cleanConfiguration("UITests");
         } catch (IOException ignore) {
-            // Ignoring expected exceptions
             LoggerUtil.debug(ignore.getMessage());
         }
     }

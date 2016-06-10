@@ -55,15 +55,15 @@ public class ProjectInfoTask extends DefaultTask {
                 } else {
                     LoggerUtil.info("Setting application release version from project's info plist");
                 }
-                LoggerUtil.lifecycle("Release version: "+version);
+                printReleaseVersion(version);
                 if (libraryVersion != null) {
                     if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
                         LoggerUtil.lifecycle("Stripping -SNAPSHOT marking");
                         versionLibrary = libraryVersion.substring(0, libraryVersion.length()-9);
-                        LoggerUtil.lifecycle("Library version: " + versionLibrary);
+                        printLibraryVersion(versionLibrary);
                     } else {
                         versionLibrary = libraryVersion;
-                        LoggerUtil.lifecycle("Library version: " + versionLibrary);
+                        printLibraryVersion(versionLibrary);
                     }
                 }
             } else {
@@ -77,11 +77,11 @@ public class ProjectInfoTask extends DefaultTask {
                         version = libraryVersion;
                         versionLibrary = version;
                     }
-                    LoggerUtil.lifecycle("Release version: "+version);
-                    LoggerUtil.lifecycle("Library version: "+version);
+                    printReleaseVersion(version);
+                    printLibraryVersion(version);
                 } else {
                     LoggerUtil.lifecycle("Setting release version as default value "+DEFAULT_XCODE_VERSION+" because it is undefined");
-                    LoggerUtil.lifecycle("Release version: "+DEFAULT_XCODE_VERSION);
+                    printReleaseVersion(DEFAULT_XCODE_VERSION);
                 }
             }
             LoggerUtil.lifecycle("Project revision: "+RevisionUtil.getRevision());
@@ -94,6 +94,14 @@ public class ProjectInfoTask extends DefaultTask {
         } catch (IOException e) {
             throw new GradleException(e.getMessage(), e);
         }
+    }
+
+    private void printReleaseVersion(String version) {
+        LoggerUtil.lifecycle("Release version: "+version);
+    }
+
+    private void printLibraryVersion(String version) {
+        LoggerUtil.lifecycle("Library version: "+version);
     }
 
     private void printTcVersionLibrary(String versionLibrary) throws IOException {

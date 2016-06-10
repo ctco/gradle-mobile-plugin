@@ -17,13 +17,16 @@ import java.io.File;
 import java.io.IOException;
 
 @Singleton
-public class IosSigningUtil {
+public final class IosSigningUtil {
+
+    private static final String COMMAND_CODESIGN = "codesign";
+    private static final String OPTION_VERBOSE = "--verbose=4";
 
     private IosSigningUtil() {}
 
     public static IosCodesigningIdentity getCodesigningIdentity(File appDir) throws IOException {
-        CommandLine commandLine = new CommandLine("codesign");
-        commandLine.addArguments(new String[]{"--display", "--verbose=4", appDir.getAbsolutePath()}, false);
+        CommandLine commandLine = new CommandLine(COMMAND_CODESIGN);
+        commandLine.addArguments(new String[]{"--display", OPTION_VERBOSE, appDir.getAbsolutePath()}, false);
         IosCodesigningIdentity iosCodesigningIdentity = new IosCodesigningIdentity();
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
         if (execResult.isSuccess()) {
@@ -44,12 +47,6 @@ public class IosSigningUtil {
         return null;
     }
 
-    /*
-    public static List<IosCodesigningIdentity> getAvailableIdentities() {
-        // TODO : Parse -> security find-identity -v -p codesigning
-    }
-    */
-
     public static File getEmbeddedProvisioningFile(File appDir) {
         File provisioningFile = new File(appDir, "embedded.mobileprovision");
         if (provisioningFile.exists()) {
@@ -62,23 +59,22 @@ public class IosSigningUtil {
     public static IosProvisioningProfile getEmbeddedProvisioningProfile(File appDir) throws IOException {
         File provisioningFile = getEmbeddedProvisioningFile(appDir);
         if (provisioningFile != null && provisioningFile.exists()) {
-            return new IosProvisioningProfile(provisioningFile);
+            return IosProvisioningUtil.getProvisioningProfileFromFile(provisioningFile);
         } else {
             return null;
         }
     }
 
     public static void displayAppSignature(File appDir) {
-        CommandLine commandLine = new CommandLine("codesign");
-        commandLine.addArguments(new String[]{"--display", "--verbose=4", appDir.getAbsolutePath()}, false);
+        CommandLine commandLine = new CommandLine(COMMAND_CODESIGN);
+        commandLine.addArguments(new String[]{"--display", OPTION_VERBOSE, appDir.getAbsolutePath()}, false);
         ExecUtil.execCommand(commandLine, null, null, false, true);
     }
 
     private static void codesignApp(File appDir, String identity, File provisioning, File entitlements) throws IOException {
-        // TODO : check for null entitlements
         FileUtils.copyFile(provisioning, new File(appDir, "embedded.mobileprovision"));
-        CommandLine commandLine = new CommandLine("codesign");
-        commandLine.addArguments(new String[]{"-f", "-s", identity, "--verbose=4", "--entitlements", entitlements.getAbsolutePath(), appDir.getAbsolutePath()}, false);
+        CommandLine commandLine = new CommandLine(COMMAND_CODESIGN);
+        commandLine.addArguments(new String[]{"-f", "-s", identity, OPTION_VERBOSE, "--entitlements", entitlements.getAbsolutePath(), appDir.getAbsolutePath()}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
         if (!execResult.isSuccess()) {
             throw new IOException(execResult.getException());
@@ -87,10 +83,9 @@ public class IosSigningUtil {
 
     public static void verifyApp(File appDir) throws IOException {
         // --no-strict is required because of codesign "bug" in OSX 10.9.5 and newer; it bypasses obsolete envelope error.
-        CommandLine commandLine = new CommandLine("codesign");
-        commandLine.addArguments(new String[]{"--verify", "--deep", "--no-strict", "--verbose=4", appDir.getAbsolutePath()}, false);
+        CommandLine commandLine = new CommandLine(COMMAND_CODESIGN);
+        commandLine.addArguments(new String[]{"--verify", "--deep", "--no-strict", OPTION_VERBOSE, appDir.getAbsolutePath()}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
-        // TODO : make function return a boolean
         if (!execResult.isSuccess()) {
             throw new IOException(execResult.getException().getMessage());
         }

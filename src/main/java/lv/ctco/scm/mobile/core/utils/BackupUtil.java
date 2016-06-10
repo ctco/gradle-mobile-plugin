@@ -15,10 +15,10 @@ import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
 
-public class BackupUtil {
+public final class BackupUtil {
 
     private static File backupIndex;
-    private static List<BackupEntry> backupEntries;
+    private static ArrayList<BackupEntry> backupEntries;
 
     private static final BackupUtil instance = new BackupUtil();
 
@@ -32,7 +32,7 @@ public class BackupUtil {
                 backupEntries = new ArrayList<>();
                 saveBackupData();
             }
-            showBackupedFiles();
+            showBackupFiles();
         } catch (IOException e) {
             throw new GradleException("Exception initializing BackupUtil", e);
         }
@@ -42,32 +42,31 @@ public class BackupUtil {
         return instance;
     }
 
-    public static boolean isBackuped(File targetFile) {
+    private static boolean isBackuped(File targetFile) {
         return getBackupEntry(targetFile) != null;
     }
 
     private static void saveBackupData() throws IOException {
         try (
             FileOutputStream fileOut = new FileOutputStream(backupIndex);
-            ObjectOutputStream streamOut = new ObjectOutputStream(fileOut);
+            ObjectOutputStream streamOut = new ObjectOutputStream(fileOut)
         ) {
             streamOut.writeObject(backupEntries);
         }
     }
 
-    // IMPROVEMENT : replace serialization with XML
     private static void loadBackupData() throws IOException {
         try (
             FileInputStream fileIn = new FileInputStream(backupIndex);
-            ObjectInputStream streamIn = new ObjectInputStream(fileIn);
+            ObjectInputStream streamIn = new ObjectInputStream(fileIn)
         ) {
-                backupEntries = (ArrayList<BackupEntry>)streamIn.readObject();
+            backupEntries = (ArrayList<BackupEntry>)streamIn.readObject();
         }  catch (ClassNotFoundException e) {
             throw new IOException(e);
         }
     }
 
-    private static void showBackupedFiles() {
+    private static void showBackupFiles() {
         LoggerUtil.info("Detected "+backupEntries.size()+" backuped files");
         for (BackupEntry backupEntry : backupEntries) {
             LoggerUtil.info(backupEntry.getOriginalFile().getAbsolutePath());

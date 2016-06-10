@@ -18,7 +18,7 @@ import java.text.ParseException;
 import java.util.Map;
 
 @Singleton
-public class ProfilingUtil {
+public final class ProfilingUtil {
 
     private ProfilingUtil() {}
 
@@ -72,7 +72,7 @@ public class ProfilingUtil {
                     && subRootEntry.getValue() instanceof NSArray
                     && "com.dd.plist.NSArray".equals(subRootEntry.getValue().getClass().getCanonicalName())) {
                 NSObject[] psArray = ((NSArray)subRootEntry.getValue()).getArray();
-                NSDictionary psDict = (NSDictionary)psArray[0]; // TODO : check
+                NSDictionary psDict = (NSDictionary)psArray[0];
                 for (Map.Entry<String, NSObject> psEntry : psDict.entrySet()) {
                     if (keyToUpdate.equals(psEntry.getKey())) {
                         psEntry.setValue(new NSString(valueToSet));
@@ -84,17 +84,21 @@ public class ProfilingUtil {
     }
 
     /**
-     *
-     * @deprecated since version 0.14.+
+     * @deprecated Deprecated in favour of GroovyProfilingUtil.
+     * @param target .
+     * @param template .
+     * @param environmentName .
+     * @throws IOException .
      */
     @Deprecated
     public static void profileUsingT4Templates(File target, File template, String environmentName) throws IOException {
+        LoggerUtil.warn("Project is using a deprecated profiling method. Migrate to GroovyProfiling.");
         File textTransformExecutable = PathUtil.getTextTransformExecutable();
         if (textTransformExecutable == null) {
             throw new IOException("Failed to find TextTransform executable!");
         }
         BackupUtil.backupFile(target);
-        CommandLine commandLine = new CommandLine("/usr/bin/mono");
+        CommandLine commandLine = new CommandLine("mono");
         commandLine.addArguments(new String[] {textTransformExecutable.getAbsolutePath(), "-a=environmentName!"+environmentName, "--out="+target.getAbsolutePath(), template.getAbsolutePath()}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, new File("."), null, false, true);
         if (!execResult.isSuccess()) {

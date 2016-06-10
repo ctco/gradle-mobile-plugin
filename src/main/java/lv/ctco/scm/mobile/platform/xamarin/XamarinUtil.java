@@ -13,7 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import javax.inject.Singleton;
 
 @Singleton
-public class XamarinUtil {
+public final class XamarinUtil {
 
     private static final String DEFAULT_RELEASE_VERSION = "0.1";
 

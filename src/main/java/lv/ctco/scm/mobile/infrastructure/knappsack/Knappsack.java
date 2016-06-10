@@ -61,9 +61,9 @@ public class Knappsack {
      * Configures given HTTP client to use a user defined key store.
      * @param keyStoreFile Specific keystore to use.
      * @param password Specific keystore's password.
-     * @throws IOException
+     * @throws IOException .
      */
-    protected void switchToExternalKeyStore(File keyStoreFile, String password) throws IOException {
+    void switchToExternalKeyStore(File keyStoreFile, String password) throws IOException {
         try {
             KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
             keyStore.load(FileUtils.openInputStream(keyStoreFile), password.toCharArray());
@@ -79,9 +79,9 @@ public class Knappsack {
      * Performs web-based authentication on the server.
      * @param username Username to use for authentication.
      * @param password Password to use for authentication.
-     * @throws IOException
+     * @throws IOException .
      */
-    protected void authenticate(String username, String password) throws IOException {
+    void authenticate(String username, String password) throws IOException {
         HttpPost httpPost = new HttpPost(serverUrl+"j_spring_security_check");
         List<NameValuePair> postParameters = new ArrayList<>();
         postParameters.add(new BasicNameValuePair("action", "verify"));
@@ -118,10 +118,10 @@ public class Knappsack {
      * @param versionName Application version.
      * @param recentChanges Changes in uploaded version in HTML format that will be shown to user.
      * @param filePath File path of the artifact.
-     * @throws IOException
+     * @throws IOException .
      */
-    public void uploadArtifact(String parentId, String groupId, String storageConfigurationId, String versionName,
-                               String recentChanges, String filePath) throws IOException {
+    void uploadArtifact(String parentId, String groupId, String storageConfigurationId, String versionName,
+                        String recentChanges, String filePath) throws IOException {
         File file = new File(filePath);
         InputStream stream = new FileInputStream(file);
         uploadArtifact(parentId, groupId, storageConfigurationId, versionName, recentChanges, stream, file.getName());
@@ -136,9 +136,9 @@ public class Knappsack {
      * @param recentChanges Changes in uploaded version in HTML format that will be shown to user.
      * @param inputStream Input stream to read artifact binary date from.
      * @param fileName File name of the artifact.
-     * @throws IOException
+     * @throws IOException .
      */
-    public void uploadArtifact(final String parentId, String groupId, String storageConfigurationId, String versionName,
+    void uploadArtifact(final String parentId, String groupId, String storageConfigurationId, String versionName,
                                String recentChanges, InputStream inputStream, String fileName) throws IOException {
         HttpPost httpPost = new HttpPost(serverUrl+"manager/uploadVersion");
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();

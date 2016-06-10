@@ -18,7 +18,9 @@ import java.text.ParseException;
 import java.util.Date;
 
 @Singleton
-public class PlistUtil {
+public final class PlistUtil {
+
+    private static final String EXCEPTION_MSG_PARSE = "Exception while parsing a plist file";
 
     private PlistUtil() {}
 
@@ -27,7 +29,7 @@ public class PlistUtil {
         try {
             baseDict = (NSDictionary) PropertyListParser.parse(plistFile);
         } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException("Exception while parsing a plist file", e);
+            throw new IOException(EXCEPTION_MSG_PARSE, e);
         }
         if (baseDict.containsKey(keyName)) {
             NSObject entry = baseDict.get(keyName);
@@ -42,7 +44,7 @@ public class PlistUtil {
         try {
             baseDict = (NSDictionary)PropertyListParser.parse(plistFile);
         } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException("Exception while parsing a plist file", e);
+            throw new IOException(EXCEPTION_MSG_PARSE, e);
         }
         if (baseDict.containsKey(keyName)) {
             NSObject entry = baseDict.get(keyName);
@@ -58,7 +60,7 @@ public class PlistUtil {
         try {
             baseDict = (NSDictionary)PropertyListParser.parse(plistFile);
         } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException("Exception while parsing a plist file", e);
+            throw new IOException(EXCEPTION_MSG_PARSE, e);
         }
         if (baseDict.containsKey(keyName)) {
             LoggerUtil.info("Replacing node ["+keyName+"] with value ("+keyValue+")");

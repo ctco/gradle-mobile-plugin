@@ -9,7 +9,7 @@ package lv.ctco.scm.mobile.core.utils;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
-public class LoggerUtil {
+public final class LoggerUtil {
 
     private static final Logger LOGGER = Logging.getLogger("MobilePlugin");
 

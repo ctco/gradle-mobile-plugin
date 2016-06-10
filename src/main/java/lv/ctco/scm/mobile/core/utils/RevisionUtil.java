@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
+import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.inject.Singleton;
@@ -15,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 @Singleton
-public class RevisionUtil {
+public final class RevisionUtil {
 
     private static String revision = null;
 
@@ -42,7 +43,8 @@ public class RevisionUtil {
         revision = value;
     }
 
-    public static void setRevisionIfNull(String value) {
+    @VisibleForTesting
+    private static void setRevisionIfNull(String value) {
         if (revision == null) {
             revision = value;
         }

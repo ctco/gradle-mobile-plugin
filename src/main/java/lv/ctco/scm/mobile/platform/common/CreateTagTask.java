@@ -19,13 +19,15 @@ import java.io.IOException;
 
 public class CreateTagTask extends DefaultTask {
 
+    private static final String PROP_STAMP = "stamp";
+
     @TaskAction
     public void doTaskAction() {
         String stamp;
-        if (PropertyUtil.hasProjectProperty("stamp")) {
-            stamp = PropertyUtil.getProjectProperty("stamp");
+        if (PropertyUtil.hasProjectProperty(PROP_STAMP)) {
+            stamp = PropertyUtil.getProjectProperty(PROP_STAMP);
         } else {
-            String error = "Property stamp has not been provided!";
+            String error = "Property '"+PROP_STAMP+"' has not been provided!";
             LoggerUtil.errorInTask(this.getName(), error);
             throw new GradleException(error);
         }
@@ -37,7 +39,7 @@ public class CreateTagTask extends DefaultTask {
             throw new GradleException(e.getMessage(), e);
         }
         LoggerUtil.info("New stamp version is: "+newStamp);
-        TeamcityUtil.setProjectParameter("stamp", newStamp);
+        TeamcityUtil.setProjectParameter(PROP_STAMP, newStamp);
     }
 
 }

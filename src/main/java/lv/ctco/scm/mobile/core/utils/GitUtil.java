@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class GitUtil {
+public final class GitUtil {
 
     private static final int HASH_SIZE_FULL = 40;
     private static final int HASH_SIZE_SHORT = 7;
@@ -27,7 +27,7 @@ public class GitUtil {
 
     private GitUtil() {}
 
-    public static String getShortHash(String gitHash) {
+    static String getShortHash(String gitHash) {
         return gitHash.length() == HASH_SIZE_FULL ? StringUtils.substring(gitHash, 0, HASH_SIZE_SHORT) : gitHash;
     }
 
@@ -38,7 +38,7 @@ public class GitUtil {
         return execResult.isSuccess();
     }
 
-    protected static File getGitProjectRoot(File dir) {
+    static File getGitProjectRoot(File dir) {
         File rootDir = null;
         if (isGitDir(dir)) {
             CommandLine commandLine = new CommandLine("git");
@@ -89,7 +89,7 @@ public class GitUtil {
         return commitInfo;
     }
 
-    protected static String getCheckedoutCommitHashShort(File dir) {
+    static String getCheckedoutCommitHashShort(File dir) {
         CommandLine commandLine = new CommandLine("git");
         commandLine.addArguments(new String[] {"log", "-n", "1", "--pretty=format:%h"}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
@@ -100,7 +100,7 @@ public class GitUtil {
         }
     }
 
-    protected static long getCheckedoutCommitTimestamp(File dir) {
+    private static long getCheckedoutCommitTimestamp(File dir) {
         CommandLine commandLine = new CommandLine("git");
         commandLine.addArguments(new String[] {"log", "-n", "1", "--pretty=format:%ct"}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
@@ -111,17 +111,20 @@ public class GitUtil {
         }
     }
 
-    protected static long getCheckedoutCommitNumber(File dir) {
-        long timestamp = getCheckedoutCommitTimestamp(dir);
-        CommandLine fetchCommandLine = new CommandLine("git");
-        fetchCommandLine.addArguments(new String[]{"fetch", "--all"}, false);
-        ExecResult fetchExecResult = ExecUtil.execCommand(fetchCommandLine, dir, null, true, false);
+    private static void fetchAllRefs(File dir) {
+        CommandLine commandLine = new CommandLine("git");
+        commandLine.addArguments(new String[]{"fetch", "--all"}, false);
+        ExecResult fetchExecResult = ExecUtil.execCommand(commandLine, dir, null, false, false);
         if (fetchExecResult.isSuccess()){
-            LoggerUtil.info("git fetch --all finished successfully (Workaround for TeamCity)");
+            LoggerUtil.info("Git all reference fetch for "+dir.getName()+" succeeded");
+        } else {
+            LoggerUtil.warn("Git all reference fetch for "+dir.getName()+" failed");
         }
-        else {
-            LoggerUtil.info("git fetch failed");
-        }
+    }
+
+    static long getCheckedoutCommitNumber(File dir) {
+        long timestamp = getCheckedoutCommitTimestamp(dir);
+        fetchAllRefs(dir); //Workaround for TeamCity fetching only refs for branch to build
         CommandLine commandLine = new CommandLine("git");
         commandLine.addArguments(new String[] {"rev-list", "--all", "--count", "--before="+timestamp}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
@@ -132,7 +135,7 @@ public class GitUtil {
         }
     }
 
-    protected static File getSubdirWithLatestCommit(File rootDir) {
+    static File getSubdirWithLatestCommit(File rootDir) {
         File resultDir = rootDir;
         long latestCommitTimestamp = GitUtil.getCheckedoutCommitTimestamp(rootDir);
         for (File rootSubDir : rootDir.listFiles((FileFilter)FileFilterUtils.directoryFileFilter())) {

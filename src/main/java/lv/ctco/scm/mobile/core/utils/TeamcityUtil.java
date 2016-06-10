@@ -9,7 +9,7 @@ package lv.ctco.scm.mobile.core.utils;
 import javax.inject.Singleton;
 
 @Singleton
-public class TeamcityUtil {
+public final class TeamcityUtil {
 
     private TeamcityUtil() {}
 

@@ -25,7 +25,7 @@ public class IosApp {
     private String provisioningUuid;
     private String provisioningProfileName;
     private String provisioningTeamName;
-    private Date provisioningExpiration;
+    private long provisioningExpiration;
 
     private String bundleName;
     private String bundleIdentifier;
@@ -120,11 +120,11 @@ public class IosApp {
     }
 
     public Date getProvisioningExpiration() {
-        return provisioningExpiration;
+        return new Date(provisioningExpiration);
     }
 
     public void setProvisioningExpiration(Date provisioningExpiration) {
-        this.provisioningExpiration = provisioningExpiration;
+        this.provisioningExpiration = provisioningExpiration.getTime();
     }
 
     public String getBundleName() {
@@ -181,7 +181,7 @@ public class IosApp {
             this.provisioningUuid = profile.getUuid();
             this.provisioningProfileName = profile.getProfileName();
             this.provisioningTeamName = profile.getTeamName();
-            this.provisioningExpiration = profile.getExpirationDate();
+            this.provisioningExpiration = profile.getExpirationDate().getTime();
         }
     }
 

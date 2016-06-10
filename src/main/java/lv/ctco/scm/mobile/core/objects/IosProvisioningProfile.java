@@ -6,14 +6,8 @@
 
 package lv.ctco.scm.mobile.core.objects;
 
-import lv.ctco.scm.mobile.core.utils.IosProvisioningUtil;
-import lv.ctco.scm.mobile.core.utils.PathUtil;
-import lv.ctco.scm.mobile.core.utils.PlistUtil;
-
 import org.apache.commons.lang3.time.DateFormatUtils;
 
-import java.io.File;
-import java.io.IOException;
 import java.util.Date;
 
 public class IosProvisioningProfile {
@@ -21,18 +15,8 @@ public class IosProvisioningProfile {
     private String uuid;
     private String profileName;
     private String teamName;
-    private Date expirationDate;
+    private long expirationDate;
     private String location;
-
-    public IosProvisioningProfile(File profileFile) throws IOException {
-        File plist = new File(PathUtil.getTempDir(), profileFile.getName()+".plist");
-        IosProvisioningUtil.convertProvisioningToPlist(profileFile, plist);
-        this.uuid = PlistUtil.getStringValue(plist, "UUID");
-        this.profileName = PlistUtil.getStringValue(plist, "Name");
-        this.teamName = PlistUtil.getStringValue(plist, "TeamName");
-        this.expirationDate = PlistUtil.getDateValue(plist, "ExpirationDate");
-        this.location = profileFile.getAbsolutePath();
-    }
 
     public String getUuid() {
         return uuid;
@@ -59,11 +43,11 @@ public class IosProvisioningProfile {
     }
 
     public Date getExpirationDate() {
-        return expirationDate;
+        return new Date(expirationDate);
     }
 
     public void setExpirationDate(Date expirationDate) {
-        this.expirationDate = expirationDate;
+        this.expirationDate = expirationDate.getTime();
     }
 
     public String getLocation() {
@@ -75,7 +59,7 @@ public class IosProvisioningProfile {
     }
 
     public boolean isExpired() {
-        return expirationDate.before(new Date());
+        return getExpirationDate().before(new Date());
     }
 
     @Override

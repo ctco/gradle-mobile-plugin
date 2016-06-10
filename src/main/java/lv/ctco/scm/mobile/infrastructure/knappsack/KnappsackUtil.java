@@ -15,7 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.io.File;
 import java.io.IOException;
 
-public class KnappsackUtil {
+public final class KnappsackUtil {
 
     private static final String PROP_URL = "knappsack.url";
     private static final String PROP_USER_NAME = "knappsack.user.name";
@@ -53,7 +53,7 @@ public class KnappsackUtil {
         return PropertyUtil.hasProjectProperty(property) ? PropertyUtil.getProjectProperty(property) : null;
     }
 
-    public static void validateKnappsackExtension(KnappsackExtension ext) throws IOException {
+    private static void validateKnappsackExtension(KnappsackExtension ext) throws IOException {
         if (StringUtils.isBlank(ext.getUrl())) {
             failMissingProperty("Knappsack server URL", "knappsack.url", PROP_URL);
         }
@@ -98,7 +98,7 @@ public class KnappsackUtil {
         throw new IOException(name+" configuration (convention: "+conv+", "+"property: "+prop+") is not specified");
     }
 
-    public static void loadWhatsNewFile(KnappsackExtension ext) throws IOException {
+    private static void loadWhatsNewFile(KnappsackExtension ext) throws IOException {
         if (ext.getWhatsNewFile() != null) {
             File whatsNewFile = ext.getWhatsNewFile();
             if (!whatsNewFile.exists()) {
@@ -115,7 +115,7 @@ public class KnappsackUtil {
         }
     }
 
-    protected static void ensureArtifactExists(File artifactFile) throws IOException {
+    private static void ensureArtifactExists(File artifactFile) throws IOException {
         if (!artifactFile.exists()) {
             throw new IOException("Artifact file "+artifactFile.getAbsolutePath()+" does not exist!");
         }
@@ -124,7 +124,7 @@ public class KnappsackUtil {
         }
     }
 
-    protected static void uploadArtifact(KnappsackExtension ext) throws IOException {
+    static void uploadArtifact(KnappsackExtension ext) throws IOException {
         validateKnappsackExtension(ext);
         ensureArtifactExists(ext.getArtifactFile());
         loadWhatsNewFile(ext);

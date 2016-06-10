@@ -28,7 +28,7 @@ public class Profile {
         this.target = target;
         this.sources = sources;
         this.scopes = scopes != null ? scopes : new String[]{DEFAULT_SCOPE};
-        this.additionalTargets = additionalTargets;
+        this.additionalTargets = additionalTargets != null ? additionalTargets : null;
     }
 
     public String getEnvironment() {
@@ -56,12 +56,12 @@ public class Profile {
     }
 
     public String[] getScopes() {
-        return scopes;
+        return scopes.clone();
     }
 
     public void setScopes(String[] scopes) {
         if (scopes != null) {
-            this.scopes = scopes; // IMPROVEMENT : default if nulled?
+            this.scopes = scopes.clone(); // IMPROVEMENT : default if nulled?
         }
     }
 
@@ -72,11 +72,13 @@ public class Profile {
     }
 
     public String[] getAdditionalTargets() {
-        return additionalTargets;
+        return additionalTargets.clone();
     }
 
     public void setAdditionalTargets(String[] additionalTargets) {
-        this.additionalTargets = additionalTargets;
+        if (additionalTargets != null) {
+            this.additionalTargets = additionalTargets.clone();
+        }
     }
 
     public boolean hasScope(String scope) {
@@ -84,15 +86,15 @@ public class Profile {
     }
 
     private static String getArrayAsString(String[] array) {
-        String result = null;
+        StringBuilder stringBuilder = new StringBuilder();
         for (String path : array) {
-            if (result == null) {
-                result = "'"+path+"'";
+            if (stringBuilder.length() == 0) {
+                stringBuilder.append('\'').append(path).append('\'');
             } else {
-                result = result+", '"+path+"'";
+                stringBuilder.append(", '").append(path).append('\'');
             }
         }
-        return result;
+        return stringBuilder.toString();
     }
 
     @Override

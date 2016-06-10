@@ -11,14 +11,14 @@ import org.apache.commons.exec.LogOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ExecOutputStream extends LogOutputStream {
+class ExecOutputStream extends LogOutputStream {
 
     private List<String> output = new ArrayList<>();
 
     private boolean routeToOutput;
     private boolean routeToStdout;
 
-    public ExecOutputStream(boolean routeToOutput, boolean routeToStdout) {
+    ExecOutputStream(boolean routeToOutput, boolean routeToStdout) {
         this.routeToOutput = routeToOutput;
         this.routeToStdout = routeToStdout;
     }

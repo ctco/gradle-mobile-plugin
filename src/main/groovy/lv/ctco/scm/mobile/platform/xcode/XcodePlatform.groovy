@@ -165,7 +165,6 @@ class XcodePlatform {
                     group = 'Mobile UI Test'
                     description = "Runs $uiTestName test"
                     testName = "UITest" + uiTestNum + uiTestName
-                    appName = _ext.uiasetup.appName
                     appPath = new File(_ext.uiasetup.appPath)
                     resultsPath = new File(_ext.uiasetup.resultsPath)
                     targetDevice = _ext.uiasetup.targetDevice

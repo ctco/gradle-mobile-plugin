@@ -19,13 +19,12 @@ import java.util.Iterator;
 import java.util.List;
 
 @Singleton
-public class IosSimulatorUtil {
+public final class IosSimulatorUtil {
 
     private IosSimulatorUtil() {}
 
     public static String getKnownDevice(String targetDevice) throws IOException {
         CommandLine commandLine = new CommandLine("instruments");
-        // TODO : Redo to '-s devices'
         commandLine.addArgument("-w");
         commandLine.addArgument("list");
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
@@ -56,7 +55,6 @@ public class IosSimulatorUtil {
             if (!execResult.isSuccess()) {
                 throw new IOException(execResult.getException());
             }
-            //Thread.sleep(3000);
         }
     }
 
@@ -73,7 +71,6 @@ public class IosSimulatorUtil {
             if (!execResult.isSuccess()) {
                 throw new IOException(execResult.getException());
             }
-            //Thread.sleep(3000);
         }
     }
 

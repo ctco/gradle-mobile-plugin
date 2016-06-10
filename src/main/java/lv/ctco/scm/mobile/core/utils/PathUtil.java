@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class PathUtil {
+public final class PathUtil {
 
     private static File userDir = FileUtils.getUserDirectory();
     private static File projectDir = new File(".");
@@ -138,10 +138,10 @@ public class PathUtil {
     }
 
     /**
-     * @deprecated since version 0.14.+
+     * @deprecated
      */
     @Deprecated
-    public static File getTextTransformExecutable() {
+    static File getTextTransformExecutable() {
         List<File> usualLocations = new ArrayList<>();
         usualLocations.add(new File("/Applications/Xamarin Studio.app/Contents/MacOS/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe"));
         usualLocations.add(new File("/Applications/Xamarin Studio.app/Contents/Resources/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe"));
@@ -157,40 +157,6 @@ public class PathUtil {
 
     public static File getAndroidKeystore() {
         return new File(getUserDir(), ".gradle/init.d/android.keystore");
-    }
-
-    public static File getZipalignBinary() {
-        File androidBuildToolsDir = new File(getUserDir(), "Library/Developer/Xamarin/android-sdk-macosx/build-tools");
-        List<String> tools = new ArrayList<>();
-        File[] files = androidBuildToolsDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.isDirectory()) {
-                    tools.add(file.getName());
-                }
-            }
-        }
-        File androidSdkZipalign;
-        int foundTools = tools.size();
-        if (foundTools == 0) {
-            return null;
-        } else if (foundTools == 1) {
-            androidSdkZipalign = new File(androidBuildToolsDir, tools.get(0)+"/zipalign");
-        } else {
-            String maxVersion = tools.get(0);
-            for (int v = 1; v < tools.size(); v++) {
-                // TODO : FIX
-                if (CommonUtil.versionCompare(tools.get(v), maxVersion) >= 0) {
-                    maxVersion = tools.get(v);
-                }
-            }
-            androidSdkZipalign = new File(androidBuildToolsDir, maxVersion+"/zipalign");
-        }
-        if (androidSdkZipalign.exists()) {
-            return androidSdkZipalign;
-        } else {
-            return null;
-        }
     }
 
     public static File getDefaultNugetCacheDir() {

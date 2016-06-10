@@ -17,20 +17,20 @@ import java.io.IOException;
 import java.util.HashMap;
 
 @Singleton
-public class IosProvisioningUtil {
+final class IosProvisioningUtil {
 
     private static HashMap<String, IosProvisioningProfile> provisioningProfiles = new HashMap<>();
 
     private IosProvisioningUtil() {}
 
-    public static void getAvailableProvisioningProfiles() throws IOException {
+    static void getAvailableProvisioningProfiles() throws IOException {
         File profileDir = PathUtil.getDefaultProvisioningProfileDir();
         provisioningProfiles.clear();
         int available = 0;
         int expired = 0;
         LoggerUtil.info("Reading available provisioning profiles...");
         for (File file : FileUtils.listFiles(profileDir, new String[] {"mobileprovision"}, false)) {
-            IosProvisioningProfile profile = new IosProvisioningProfile(file);
+            IosProvisioningProfile profile = IosProvisioningUtil.getProvisioningProfileFromFile(file);
             if (profile.isExpired()) {
                 LoggerUtil.debug("  expired '"+profile.toString()+"'");
                 expired++;
@@ -43,15 +43,29 @@ public class IosProvisioningUtil {
         LoggerUtil.info("Found "+available+" provisioning profiles ("+expired+" of them are expired).");
     }
 
-    public static File getProvisioningProfileFileByUuid(String uuid) {
+    static IosProvisioningProfile getProvisioningProfileFromFile(File profileFile) throws IOException {
+        File plist = new File(PathUtil.getTempDir(), profileFile.getName()+".plist");
+        convertProvisioningToPlist(profileFile, plist);
+        //
+        IosProvisioningProfile profile = new IosProvisioningProfile();
+        profile.setUuid(PlistUtil.getStringValue(plist, "UUID"));
+        profile.setProfileName(PlistUtil.getStringValue(plist, "Name"));
+        profile.setTeamName(PlistUtil.getStringValue(plist, "TeamName"));
+        profile.setExpirationDate(PlistUtil.getDateValue(plist, "ExpirationDate"));
+        profile.setLocation(profileFile.getAbsolutePath());
+        return profile;
+    }
+
+    private static File getProvisioningProfileFileByUuid(String uuid) {
         return new File(PathUtil.getDefaultProvisioningProfileDir(), uuid+".mobileprovision");
     }
 
-    public static IosProvisioningProfile getProvisioningProfileByUuid(String uuid) throws IOException {
-        return new IosProvisioningProfile(getProvisioningProfileFileByUuid(uuid));
+    static IosProvisioningProfile getProvisioningProfileByUuid(String uuid) throws IOException {
+        File profileFile = getProvisioningProfileFileByUuid(uuid);
+        return getProvisioningProfileFromFile(profileFile);
     }
 
-    public static IosProvisioningProfile getProvisioningProfileByProfileName(String profileName) {
+    static IosProvisioningProfile getProvisioningProfileByProfileName(String profileName) {
         for (IosProvisioningProfile profile : provisioningProfiles.values()) {
             if (profileName.equalsIgnoreCase(profile.getProfileName())) {
                 if (profile.isExpired()) {
@@ -64,7 +78,7 @@ public class IosProvisioningUtil {
         return null;
     }
 
-    public static void convertProvisioningToPlist(File profile, File plist) throws IOException {
+    private static void convertProvisioningToPlist(File profile, File plist) throws IOException {
         CommandLine commandLine = new CommandLine("security");
         commandLine.addArguments(new String[] {"cms", "-D", "-i", profile.getAbsolutePath(), "-o", plist.getAbsolutePath()}, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);

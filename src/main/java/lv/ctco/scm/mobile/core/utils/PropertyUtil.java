@@ -13,7 +13,7 @@ import org.gradle.api.Project;
 import javax.inject.Singleton;
 
 @Singleton
-public class PropertyUtil {
+public final class PropertyUtil {
 
     private static Project project;
 

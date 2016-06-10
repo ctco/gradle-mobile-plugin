@@ -13,7 +13,7 @@ import java.io.File;
 import java.io.IOException;
 
 @Singleton
-public class ReprofilingUtil {
+public final class ReprofilingUtil {
 
     private ReprofilingUtil() {}
 
@@ -45,7 +45,7 @@ public class ReprofilingUtil {
 
     private static String getCleanVersion(String providedVersion) {
         if (providedVersion.contains("_")) {
-            return providedVersion.substring(0, providedVersion.indexOf("_"));
+            return providedVersion.substring(0, providedVersion.indexOf('_'));
         } else {
             return providedVersion;
         }

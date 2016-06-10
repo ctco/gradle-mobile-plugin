@@ -13,14 +13,14 @@ import java.io.File;
 import java.util.*;
 
 @Singleton
-public class SvnUtil {
+final class SvnUtil {
 
     private static final String SVN_PROTOCOL_URL = "svn:";
     private static final String SVN_RELATIVE_URL = "^/";
 
     private SvnUtil() {}
 
-    protected static boolean isSvnDir(File dir) {
+    static boolean isSvnDir(File dir) {
         boolean result = false;
         ExecResult execResult = getSvnInfoOutput(dir);
         if (execResult.isSuccess() && execResult.getOutput().get(0).startsWith("Path:")) {
@@ -29,7 +29,7 @@ public class SvnUtil {
         return result;
     }
 
-    protected static File getSvnAbsoluteRoot(File dir) {
+    static File getSvnAbsoluteRoot(File dir) {
         File result = dir;
         File tmpRootFile = dir;
         String tmpRoot;
@@ -41,7 +41,7 @@ public class SvnUtil {
         return result;
     }
 
-    protected static Map<File, Integer> getFolderRevisions(List<File> extLinks) {
+    static Map<File, Integer> getFolderRevisions(List<File> extLinks) {
         Map<File, Integer> linksRevision = new HashMap<>();
         for (File link : extLinks) {
             linksRevision.put(link, getSvnVersionFromFile(link));
@@ -49,7 +49,7 @@ public class SvnUtil {
         return linksRevision;
     }
 
-    protected static Map.Entry<File, Integer> getLargestRevision(Map<File, Integer> revisions) {
+    static Map.Entry<File, Integer> getLargestRevision(Map<File, Integer> revisions) {
         Map.Entry<File, Integer> revision = null;
         for (Map.Entry<File, Integer> entry : revisions.entrySet()) {
             Integer tmpRevision = entry.getValue();
@@ -60,16 +60,16 @@ public class SvnUtil {
         return revision;
     }
 
-    protected static Integer getSvnVersionFromFile(File dir) {
+    static Integer getSvnVersionFromFile(File dir) {
         String result = "0";
         if (isSvnDir(dir)) {
             ExecResult execResult = getSvnInfoOutput(dir);
             result = parseSvnInfoForRevision(execResult.getOutput());
         }
-        return new Integer(result);
+        return Integer.valueOf(result);
     }
 
-    protected static List<File> getSvnExternalFolders(File dir) {
+    static List<File> getSvnExternalFolders(File dir) {
         List<File> extLinks = new ArrayList<>();
         if (isSvnDir(dir)) {
             ExecResult execResult = getSvnExternalsOutput(dir);

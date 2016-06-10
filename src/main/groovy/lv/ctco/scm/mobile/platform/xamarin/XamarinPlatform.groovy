@@ -266,7 +266,6 @@ class XamarinPlatform {
                     group = 'Mobile UI Test'
                     description = "Runs $uiTestName test"
                     testName = "UITest" + uiTestNum + uiTestName
-                    appName = extXios.uiasetup.appName
                     appPath = new File(extXios.uiasetup.appPath)
                     resultsPath = new File(extXios.uiasetup.resultsPath)
                     targetDevice = extXios.uiasetup.targetDevice
@@ -293,13 +292,12 @@ class XamarinPlatform {
      * @param extXios XamarinExtension to read configuration from
      * @param solution Solution file information
      * @param projectSection MS Build project to gather artifacts from
-     * @param msBuildConfiguration MS Build project configuration
+     * @param csproj MS Build project configuration
      */
     void performAutomaticConfiguration(XamarinExtension extXios, Solution solution,
-                                       SlnProjectSection projectSection, Csproj msBuildConfiguration) {
-        String projectDirectory = msBuildConfiguration.getDirectory().getAbsolutePath()
-
-        extXios.assemblyName = msBuildConfiguration.getAssemblyName()
+                                       SlnProjectSection projectSection, Csproj csproj) {
+        String projectDirectory = csproj.getDirectory().getAbsolutePath()
+        extXios.assemblyName = csproj.getAssemblyName()
 
         LoggerUtil.info("Trying to determine project environments")
         MultiTargetDetectorUtil detector = new MultiTargetDetectorUtil("|iPhone")
@@ -309,18 +307,21 @@ class XamarinPlatform {
                         new LinkedList<String>(solutionConfigurations))
         environments.each { key, value ->
             addEnvironment(key, value, projectSection, solution,
-                    msBuildConfiguration, projectDirectory, extXios)
+                    csproj, projectDirectory, extXios)
         }
 
         // Use Solution name or Ad-Hoc when there are no environment configurations
         if (extXios.environments.size() == 0) {
             if (solutionConfigurations.contains("$extXios.projectBaseName|iPhone".toString())) {
                 addEnvironment('DEFAULT', "$extXios.projectBaseName|iPhone", projectSection, solution,
-                        msBuildConfiguration, projectDirectory, extXios)
+                        csproj, projectDirectory, extXios)
 
             } else if (solutionConfigurations.contains('Ad-Hoc|iPhone')) {
                 addEnvironment('DEFAULT', 'Ad-Hoc|iPhone', projectSection, solution,
-                        msBuildConfiguration, projectDirectory, extXios)
+                        csproj, projectDirectory, extXios)
+            } else if (solutionConfigurations.contains('Release|iPhone')) {
+                addEnvironment('DEFAULT', 'Release|iPhone', projectSection, solution,
+                        csproj, projectDirectory, extXios)
             } else {
                 throw new GradleException("No environments detected, no build is going to be performed!")
             }

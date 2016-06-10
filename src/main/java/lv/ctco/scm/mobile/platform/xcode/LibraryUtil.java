@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Singleton
-public class LibraryUtil {
+public final class LibraryUtil {
 
     private static final String PUBLISHING_EXT_NAME = "publishing";
     private static final String PUBLISHING_PREFIX = "library";
@@ -44,7 +44,7 @@ public class LibraryUtil {
         return libraries;
     }
 
-    public static void printLibrariesPublicationsInfo(Project project) {
+    static void printLibrariesPublicationsInfo(Project project) {
         List<DefaultMavenPublication> libraries = getLibrariesPublications(project);
         if (!libraries.isEmpty()) {
             LoggerUtil.info("Detected "+libraries.size()+" defined library publication(s):");
@@ -54,7 +54,7 @@ public class LibraryUtil {
         }
     }
 
-    public static List<DefaultMavenArtifactRepository> getLibrariesRepositories(Project project) {
+    static List<DefaultMavenArtifactRepository> getLibrariesRepositories(Project project) {
         List<DefaultMavenArtifactRepository> repositories = new ArrayList<>();
         PublishingExtension publishingExtension = (PublishingExtension)project.getExtensions().findByName(PUBLISHING_EXT_NAME);
         if (publishingExtension != null) {
@@ -83,7 +83,6 @@ public class LibraryUtil {
             RepositoryHandler repositoryHandler = publishingExtension.getRepositories();
             DefaultMavenArtifactRepository repository = (DefaultMavenArtifactRepository)repositoryHandler.getByName(repoName);
             if (repository == null) {
-                // TODO : Check for provided project params
                 throw new GradleException("Required Maven repository '"+repoName+"' configuration not found!");
             } else {
                 repositoryHandler.clear();

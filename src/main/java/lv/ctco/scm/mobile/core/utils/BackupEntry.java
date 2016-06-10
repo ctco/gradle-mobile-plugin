@@ -13,57 +13,46 @@ import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.util.UUID;
 
-public class BackupEntry implements Serializable {
+class BackupEntry implements Serializable {
 
     private File backupedFile;
     private boolean originalExisted;
     private File originalFile;
     private long originalTime;
 
-    public BackupEntry(File file) throws IOException {
+    BackupEntry(File file) throws IOException {
         this.originalFile = file.getAbsoluteFile();
         if (file.exists()) {
-            this.originalExisted = true;
             this.originalTime = Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS).toMillis();
         } else {
-            this.originalExisted = false;
             this.originalTime = 0L;
         }
-        do {
-            this.backupedFile = new File(PathUtil.getBackupDir(), "/"+UUID.randomUUID());
-        } while (this.backupedFile.exists());
+        this.originalExisted = file.exists();
+        this.backupedFile = generateNewBackupPath();
     }
 
-    public File getBackupedFile() {
+    File getBackupedFile() {
         return backupedFile;
     }
 
-    public void setBackupedFile(File backupedFile) {
-        this.backupedFile = backupedFile;
-    }
-
-    public boolean hadOriginalExisted() {
+    boolean hadOriginalExisted() {
         return originalExisted;
     }
 
-    public void setOriginalExisted(boolean originalExisted) {
-        this.originalExisted = originalExisted;
-    }
-
-    public File getOriginalFile() {
+    File getOriginalFile() {
         return originalFile;
     }
 
-    public void setOriginalFile(File originalFile) {
-        this.originalFile = originalFile;
-    }
-
-    public long getOriginalTime() {
+    long getOriginalTime() {
         return originalTime;
     }
 
-    public void setOriginalTime(long originalTime) {
-        this.originalTime = originalTime;
+    private File generateNewBackupPath() throws IOException {
+        File newBackupPath;
+        do {
+            newBackupPath = new File(PathUtil.getBackupDir(), UUID.randomUUID().toString());
+        } while (newBackupPath.exists());
+        return newBackupPath;
     }
 
 }
