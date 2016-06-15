@@ -160,17 +160,20 @@ public class BuildAndroidTask extends DefaultTask {
 
     private void zipalignArtifact() throws IOException {
         LoggerUtil.info("Zipaligning artifact...");
+        File sourceApk = getUnsignedArtifact();
+        File targetApk = new File(sourceApk.getParentFile(), sourceApk.getName().substring(0,sourceApk.getName().length()-4)+"-signed.apk");
         CommandLine commandLine = new CommandLine("zipalign");
         commandLine.addArgument("-f");
         commandLine.addArgument("-v");
         commandLine.addArgument("4");
-        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath(), false);
-        commandLine.addArgument(getSignedArtifact().getAbsolutePath(), false);
+        commandLine.addArgument(sourceApk.getAbsolutePath(), false);
+        commandLine.addArgument(targetApk.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
             throw new GradleException("Zipaligning failed");
         }
-        Files.deleteIfExists(getUnsignedArtifact().toPath());
+        Files.deleteIfExists(sourceApk.toPath());
+        FileUtils.copyFile(targetApk, sourceApk);
         LoggerUtil.info("Zipaligning successful");
     }
 
