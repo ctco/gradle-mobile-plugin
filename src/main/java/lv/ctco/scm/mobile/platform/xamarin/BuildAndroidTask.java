@@ -33,6 +33,7 @@ public class BuildAndroidTask extends DefaultTask {
 
     private File projectFile;
     private String projectName;
+    private String assemblyName;
 
     private String javaXmx;
     private String javaOpts;
@@ -52,6 +53,10 @@ public class BuildAndroidTask extends DefaultTask {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
+    }
+
+    public void setAssemblyName(String assemblyName) {
+        this.assemblyName = assemblyName;
     }
 
     public void setJavaXmx(String javaXmx) {
@@ -201,7 +206,12 @@ public class BuildAndroidTask extends DefaultTask {
         Files.deleteIfExists(getUnsignedArtifact().toPath());
         File apkDistDir = PathUtil.getApkDistDir();
         File sourceApk = getSignedArtifact();
-        File targetApk = new File(apkDistDir, sourceApk.getName().substring(0,sourceApk.getName().length()-11)+" "+env.getUpperCaseName()+".apk");
+        File targetApk;
+        if (assemblyName == null) {
+            targetApk = new File(apkDistDir, sourceApk.getName().substring(0,sourceApk.getName().length()-11)+" "+env.getUpperCaseName()+".apk");
+        } else {
+            targetApk = new File(apkDistDir, assemblyName+" "+env.getUpperCaseName()+".apk");
+        }
         FileUtils.copyFile(sourceApk, targetApk);
         FileUtils.forceDelete(sourceApk);
     }
