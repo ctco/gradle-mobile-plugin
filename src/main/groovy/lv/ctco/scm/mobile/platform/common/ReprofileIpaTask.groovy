@@ -31,7 +31,7 @@ class ReprofileIpaTask extends DefaultTask {
             profiles = project.ctcoMobile.xamarin.getProfilesAsArray()
             cleanReleaseVersion = project.ctcoMobile.xamarin.cleanReleaseVersionForPROD
         } else {
-            throw new GradleException('Unsupported platform!')
+            throw new GradleException("Unsupported project platform! Plugin supports 'xcode' and 'xamarin'.")
         }
         String targetEnvName = PropertyUtil.getProjectProperty("reprofiling.environment")
         File targetIpaFile = new File(PropertyUtil.getProjectProperty("reprofiling.artifact"))

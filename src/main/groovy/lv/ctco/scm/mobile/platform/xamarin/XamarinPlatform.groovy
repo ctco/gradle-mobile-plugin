@@ -171,7 +171,6 @@ class XamarinPlatform {
                     env = _env
                     projectFile = extXand.getProjectFile()
                     projectName = extXand.projectName
-                    assemblyName = extXand.assemblyName
                     javaXmx = extXand.javaXmx
                     javaOpts = extXand.javaOpts
                     signingKeystore = extXand.signingKeystore

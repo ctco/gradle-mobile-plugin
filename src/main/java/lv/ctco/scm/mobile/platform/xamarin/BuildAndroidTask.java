@@ -7,6 +7,7 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.objects.Environment;
+import lv.ctco.scm.mobile.core.utils.CommonUtil;
 import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
@@ -24,6 +25,7 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.List;
 
 public class BuildAndroidTask extends DefaultTask {
 
@@ -31,7 +33,6 @@ public class BuildAndroidTask extends DefaultTask {
 
     private File projectFile;
     private String projectName;
-    private String assemblyName;
 
     private String javaXmx;
     private String javaOpts;
@@ -51,10 +52,6 @@ public class BuildAndroidTask extends DefaultTask {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public void setAssemblyName(String assemblyName) {
-        this.assemblyName = assemblyName;
     }
 
     public void setJavaXmx(String javaXmx) {
@@ -125,6 +122,7 @@ public class BuildAndroidTask extends DefaultTask {
         } else {
             signingKeystore = (new File(signingKeystore.replace("~", System.getProperty("user.home")))).getAbsolutePath();
         }
+        Files.deleteIfExists(getSignedArtifact().toPath());
         CommandLine commandLine = new CommandLine("jarsigner");
         commandLine.addArgument("-verbose");
         commandLine.addArgument("-digestalg");
@@ -137,7 +135,7 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument(storepass);
         commandLine.addArgument("-keypass");
         commandLine.addArgument(keypass);
-        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk");
+        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath());
         commandLine.addArgument(signingCertificateAlias);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
@@ -151,7 +149,7 @@ public class BuildAndroidTask extends DefaultTask {
         CommandLine commandLine = new CommandLine("jarsigner");
         commandLine.addArgument("-verify");
         commandLine.addArgument("-verbose");
-        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk", false);
+        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
         if (!execResult.isSuccess() || !execResult.getOutput().contains("jar verified.")) {
             throw new IOException("Artifact signature verification failed");
@@ -166,22 +164,43 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument("-f");
         commandLine.addArgument("-v");
         commandLine.addArgument("4");
-        commandLine.addArgument(configurationBinPath+"/"+assemblyName+".apk", false);
-        commandLine.addArgument(configurationBinPath+"/"+assemblyName+"-Signed.apk", false);
+        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath(), false);
+        commandLine.addArgument(getSignedArtifact().getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
             throw new GradleException("Zipaligning failed");
         }
-        Files.deleteIfExists(new File(configurationBinPath+"/"+assemblyName+".apk").toPath());
+        Files.deleteIfExists(getUnsignedArtifact().toPath());
         LoggerUtil.info("Zipaligning successful");
     }
 
+    private File getUnsignedArtifact() throws IOException {
+        List<File> files = CommonUtil.findAndroidAppsInDirectory(new File(configurationBinPath));
+        for (File apk : files) {
+            if (!apk.getName().toLowerCase().endsWith("-signed.apk")) {
+                return apk;
+            }
+        }
+        throw new IOException("Expected APK not found in build directory!");
+    }
+
+    private File getSignedArtifact() throws IOException {
+        List<File> files = CommonUtil.findAndroidAppsInDirectory(new File(configurationBinPath));
+        for (File apk : files) {
+            if (apk.getName().toLowerCase().endsWith("-signed.apk")) {
+                return apk;
+            }
+        }
+        throw new IOException("Expected APK not found in build directory!");
+    }
+
     private void moveArtifactToDistDir() throws IOException {
+        Files.deleteIfExists(getUnsignedArtifact().toPath());
         File apkDistDir = PathUtil.getApkDistDir();
-        File sourceApkFile = new File(env.getOutputPath(), assemblyName+"-Signed.apk");
-        File targetApkFile = new File(apkDistDir, assemblyName+" "+env.getUpperCaseName()+".apk");
-        FileUtils.copyFile(sourceApkFile, targetApkFile);
-        FileUtils.forceDelete(sourceApkFile);
+        File sourceApk = getSignedArtifact();
+        File targetApk = new File(apkDistDir, sourceApk.getName().substring(0,sourceApk.getName().length()-11)+" "+env.getUpperCaseName()+".apk");
+        FileUtils.copyFile(sourceApk, targetApk);
+        FileUtils.forceDelete(sourceApk);
     }
 
 }

@@ -36,9 +36,6 @@ class XandroidExtension extends PlatformExtension {
         if (projectFile == null) {
             result = false
         }
-        if (assemblyName == null) {
-            result = false
-        }
         if (projectName == null) {
             result = false
         }
