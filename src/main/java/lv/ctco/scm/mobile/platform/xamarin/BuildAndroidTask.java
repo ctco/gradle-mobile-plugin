@@ -207,11 +207,13 @@ public class BuildAndroidTask extends DefaultTask {
         File apkDistDir = PathUtil.getApkDistDir();
         File sourceApk = getSignedArtifact();
         File targetApk;
+        String apkName;
         if (assemblyName == null) {
-            targetApk = new File(apkDistDir, sourceApk.getName().substring(0,sourceApk.getName().length()-11)+" "+env.getUpperCaseName()+".apk");
+            apkName = sourceApk.getName().substring(0, sourceApk.getName().length()-11);
         } else {
-            targetApk = new File(apkDistDir, assemblyName+" "+env.getUpperCaseName()+".apk");
+            apkName = assemblyName;
         }
+        targetApk = new File(apkDistDir, apkName+" "+env.getUpperCaseName()+".apk");
         FileUtils.copyFile(sourceApk, targetApk);
         FileUtils.forceDelete(sourceApk);
     }

@@ -9,10 +9,12 @@ package lv.ctco.scm.mobile.core.utils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import javax.inject.Singleton;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -63,55 +65,55 @@ public final class CommonUtil {
     }
 
     public static List<File> findIosDsymsinDirectory(File dir) {
-        List<File> dsyms = new ArrayList<>();
-        File[] files = dir.listFiles();
-        if (files != null) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        if (!files.isEmpty()) {
             for (File file : files) {
                 if (file.isDirectory() && "dsym".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
-                    dsyms.add(file);
+                    results.add(file);
                 }
             }
         }
-        return dsyms;
+        return results;
     }
 
     public static List<File> findIosAppsInDirectory(File dir) {
-        List<File> apps = new ArrayList<>();
-        File[] files = dir.listFiles();
-        if (files != null) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        if (!files.isEmpty()) {
             for (File file : files) {
                 if (file.isDirectory() && "app".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
-                    apps.add(file);
+                    results.add(file);
                 }
             }
         }
-        return apps;
+        return results;
     }
 
     public static List<File> findIosIpasInDirectory(File dir) {
-        List<File> apps = new ArrayList<>();
-        File[] files = dir.listFiles();
-        if (files != null) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        if (!files.isEmpty()) {
             for (File file : files) {
                 if ("ipa".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
-                    apps.add(file);
+                    results.add(file);
                 }
             }
         }
-        return apps;
+        return results;
     }
 
     public static List<File> findAndroidAppsInDirectory(File dir) {
-        List<File> apps = new ArrayList<>();
-        File[] files = dir.listFiles();
-        if (files != null) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        if (!files.isEmpty()) {
             for (File file : files) {
                 if ("apk".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
-                    apps.add(file);
+                    results.add(file);
                 }
             }
         }
-        return apps;
+        return results;
     }
 
     private static String getMD5Hex(File file) throws IOException {
