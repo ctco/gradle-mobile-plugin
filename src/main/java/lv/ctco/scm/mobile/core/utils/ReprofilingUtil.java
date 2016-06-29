@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
+import lv.ctco.scm.mobile.core.objects.IosApp;
 import lv.ctco.scm.mobile.core.objects.Profile;
 
 import javax.inject.Singleton;
@@ -92,6 +93,8 @@ public final class ReprofilingUtil {
             }
             BackupUtil.applyChanges();
             IosSigningUtil.signApp(appDir);
+            IosApp iosApp = new IosApp(appDir);
+            BuildReportUtil.addIosAppInfo(iosApp);
             File resultIpa;
             if (targetIpa.getName().contains(" ")) {
                 resultIpa = new File(targetIpa.getName().substring(0, targetIpa.getName().indexOf(' '))+' '+targetEnv+".ipa");

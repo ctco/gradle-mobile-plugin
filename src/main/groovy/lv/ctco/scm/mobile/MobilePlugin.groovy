@@ -23,7 +23,7 @@ import org.gradle.util.GradleVersion;
 
 class MobilePlugin implements Plugin<Project> {
 
-    static final String MINIMUM_REQUIRED_GRADLE_VERSION = "2.14"
+    private static final String MINIMUM_REQUIRED_GRADLE_VERSION = "2.14"
 
     protected Project project
 
@@ -44,7 +44,7 @@ class MobilePlugin implements Plugin<Project> {
         try {
             this.project = project;
             PropertyUtil.setProject(project);
-            LoggerUtil.info("Applying C.T.Co Mobile Plug-in");
+            LoggerUtil.info("Applying C.T.Co Mobile Plugin");
 
             if (project.state.getFailure() == null) {
                 readPluginInfo();
@@ -68,7 +68,7 @@ class MobilePlugin implements Plugin<Project> {
 
             LoggerUtil.info("Applying mobile library Maven publishing rules");
             project.getPlugins().apply(MavenPublishingRules.class);
-            LoggerUtil.info("C.T.Co Mobile Plug-in has been applied");
+            LoggerUtil.info("C.T.Co Mobile Plugin has been applied");
         } catch (IOException e) {
             LoggerUtil.errorInTask("applyPlugin", e.getMessage())
             throw new GradleException(e.getMessage(), e);
@@ -83,7 +83,7 @@ class MobilePlugin implements Plugin<Project> {
         if (project.ctcoMobile.platform) {
             configurePlatforms()
         } else {
-            LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks!')
+            LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks')
         }
         setupCommonTasks()
     }
@@ -95,7 +95,7 @@ class MobilePlugin implements Plugin<Project> {
         CommonTasks.createTarSourcesTask(project)
     }
 
-    void autoDetectMobilePlatform() {
+    private void autoDetectMobilePlatform() {
         List projectFiles = project.projectDir.listFiles().findAll { it.name.endsWith('.xcodeproj') }
         if (projectFiles.size() == 1) {
             LoggerUtil.info("Xcode platform detected, because ${projectFiles[0]} file" +
@@ -103,13 +103,12 @@ class MobilePlugin implements Plugin<Project> {
             project.ctcoMobile.platform = XcodePlatform.NAME
         } else if (projectFiles.size() > 1) {
             throw new IOException('More that one .xproject file detected,' +
-                    ' multiple project builds are not supported.')
+                    ' multiple project builds are not supported')
         }
-
         List solutionFiles = project.projectDir.listFiles().findAll { it.name.endsWith('.sln') }
         if (solutionFiles.size() == 1) {
             if (project.ctcoMobile.platform != null) {
-                throw new IOException('Both Xcode and Xamarin projects detected, unable to choose platform.')
+                throw new IOException('Both Xcode and Xamarin projects detected, unable to choose platform')
             } else {
                 LoggerUtil.info("Xamarin platform detected, because ${solutionFiles[0]} file" +
                         " is present in the project directory")
@@ -118,16 +117,21 @@ class MobilePlugin implements Plugin<Project> {
             }
         } else if (solutionFiles.size() > 1) {
             throw new IOException('More that one .sln file detected,' +
-                    ' multiple project builds are not supported.')
+                    ' multiple project builds are not supported')
         }
-
     }
 
-    protected void configurePlatforms() {
+    private void configurePlatforms() {
         String platformName = project.ctcoMobile.platform
         if (platformName == XcodePlatform.NAME) {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.configure(project.ctcoMobile.xcode)
+            List projectFiles = project.projectDir.listFiles().findAll { it.name.endsWith('.xcodeproj') }
+            if (projectFiles.size() == 1) {
+                XcodePlatform platform = new XcodePlatform(project)
+                platform.configure(project.ctcoMobile.xcode)
+            } else {
+                LoggerUtil.warn("Xcode platform detected, but no project file")
+                LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks')
+            }
         } else if (platformName == XamarinPlatform.NAME) {
             XamarinPlatform platform = new XamarinPlatform(project)
             platform.configure(project.ctcoMobile.xamarin, project.ctcoMobile.xandroid)
