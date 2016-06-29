@@ -23,7 +23,7 @@ import org.gradle.util.GradleVersion;
 
 class MobilePlugin implements Plugin<Project> {
 
-    static final String MINIMUM_REQUIRED_GRADLE_VERSION = "2.10"
+    static final String MINIMUM_REQUIRED_GRADLE_VERSION = "2.14"
 
     protected Project project
 

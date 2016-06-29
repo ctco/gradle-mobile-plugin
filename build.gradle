@@ -29,17 +29,9 @@ repositories {
 }
 
 dependencies {
-	/*
-	 * Note that for now, this jar only contains the ShortTypeHandlingClass. Future versions may include more.
-	 * http://glaforge.appspot.com/article/groovy-2-3-5-out-with-upward-compatibility
-	 * Required for logic that checks for actual and required Gradle versions when executing on Gradle 1.x
-	 */
-	compile group: 'org.codehaus.groovy', name: 'groovy-backports-compat23', version:'2.3.5'
+	compile group: 'org.jparsec', name: 'jparsec', version: '2.2.1'
+	compile group: 'com.googlecode.plist', name: 'dd-plist', version: '1.16'
 
-	compile group: 'jparsec', name: 'jparsec', version: '2.0.1' // Used for sln and csproj file parsing
-	compile group: 'com.googlecode.plist', name: 'dd-plist', version: '1.8'
-
-	compile group: 'commons-collections', name:'commons-collections', version:'3.2.2'
 	compile group: 'commons-io', name: 'commons-io', version:'2.4'
 	compile group: 'org.apache.commons', name:'commons-compress', version:'1.10'
 	compile group: 'org.apache.commons', name:'commons-exec', version:'1.3'
@@ -55,6 +47,7 @@ dependencies {
 	compile localGroovy()
 
 	/* Dependencies for testing functionality. */
+	testCompile group: "junit", name: "junit", version: "4.12"
 	testCompile group: 'org.gmock', name: 'gmock', version: '0.8.3'
 }
 
