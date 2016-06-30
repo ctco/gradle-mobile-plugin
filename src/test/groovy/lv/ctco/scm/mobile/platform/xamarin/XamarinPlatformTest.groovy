@@ -8,8 +8,6 @@ package lv.ctco.scm.mobile.platform.xamarin
 
 import lv.ctco.scm.mobile.core.objects.Environment
 
-import org.gmock.GMockController
-import org.gradle.api.GradleException
 import org.gradle.testfixtures.ProjectBuilder
 
 import org.junit.Before
@@ -20,15 +18,13 @@ import static org.junit.Assert.fail
 
 class XamarinPlatformTest {
 
-    private GMockController gmc
     private File mockSolutionFile
     Solution solution
     Csproj configuration
 
     @Before
     public void setUp() {
-        gmc = new GMockController()
-        mockSolutionFile = createMockSolutionFile()
+        mockSolutionFile = new File("TestY.sln")
     }
 
     @Test
@@ -37,7 +33,7 @@ class XamarinPlatformTest {
         XamarinPlatform platform = createPlatform()
         try {
             platform.configure(extension, null)
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'solutionFile for ctcoMobile.xamarin extension is not defined.'
             return
         }
@@ -54,17 +50,14 @@ class XamarinPlatformTest {
                 new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        gmc.play {
-            XamarinExtension extension = createXamarinExtension()
+        XamarinExtension extension = createXamarinExtension()
+        XamarinPlatform platform = createPlatform()
+        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
 
-            XamarinPlatform platform = createPlatform()
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-            assertEquals extension.environments.size(), 3
-            assertEquals extension.environments['DEV'], expectedEnvironment0
-            assertEquals extension.environments['TRAIN'], expectedEnvironment1
-            assertEquals extension.environments['UAT'], expectedEnvironment2
-        }
+        assertEquals extension.environments.size(), 3
+        assertEquals extension.environments['DEV'], expectedEnvironment0
+        assertEquals extension.environments['TRAIN'], expectedEnvironment1
+        assertEquals extension.environments['UAT'], expectedEnvironment2
     }
 
     @Test
@@ -73,16 +66,12 @@ class XamarinPlatformTest {
                 new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
 
         initMocks(['DEV'], false)
-        gmc.play {
-            XamarinExtension extension = createXamarinExtension()
-            XamarinPlatform platform = createPlatform()
+        XamarinExtension extension = createXamarinExtension()
+        XamarinPlatform platform = createPlatform()
+        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
 
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'),
-                configuration)
-
-            assertEquals extension.environments.size(), 1
-            assertEquals extension.environments['DEV'], expectedEnvironment
-        }
+        assertEquals extension.environments.size(), 1
+        assertEquals extension.environments['DEV'], expectedEnvironment
     }
 
     @Test
@@ -91,26 +80,22 @@ class XamarinPlatformTest {
             new Environment('DEFAULT', 'Ad-Hoc|iPhone', new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/Ad-Hoc').getAbsoluteFile())
 
         initMocks([], true)
-        gmc.play {
-            XamarinExtension extension = createXamarinExtension()
-            XamarinPlatform platform = createPlatform()
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'),
-                configuration)
+        XamarinExtension extension = createXamarinExtension()
+        XamarinPlatform platform = createPlatform()
+        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'),
+            configuration)
 
-            assertEquals extension.environments.size(), 1
-            assertEquals extension.environments['DEFAULT'], expectedEnvironment
-        }
+        assertEquals extension.environments.size(), 1
+        assertEquals extension.environments['DEFAULT'], expectedEnvironment
     }
 
     @Test
     public void autodetectNoEnvironments() {
         initMocks([], false)
         try {
-            gmc.play {
-                XamarinExtension extension = createXamarinExtension()
-                XamarinPlatform platform = createPlatform()
-                platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-            }
+            XamarinExtension extension = createXamarinExtension()
+            XamarinPlatform platform = createPlatform()
+            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
         } catch (Exception e) {
             assert(e.getMessage().equals("No environments detected, no build is going to be performed!"))
             return
@@ -127,19 +112,15 @@ class XamarinPlatformTest {
                 new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        gmc.play {
-            XamarinExtension extension = createXamarinExtension()
-            extension.environment name: 'DEV', configuration: 'My Config|iPhone', outputPath: 'dummy'
+        XamarinExtension extension = createXamarinExtension()
+        extension.environment name: 'DEV', configuration: 'My Config|iPhone', outputPath: 'dummy'
+        XamarinPlatform platform = createPlatform()
+        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
 
-            XamarinPlatform platform = createPlatform()
-
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-            assertEquals extension.environments.size(), 3
-            assertEquals extension.environments['DEV'], expectedEnvironment0
-            assertEquals extension.environments['TRAIN'], expectedEnvironment1
-            assertEquals extension.environments['UAT'], expectedEnvironment2
-        }
+        assertEquals extension.environments.size(), 3
+        assertEquals extension.environments['DEV'], expectedEnvironment0
+        assertEquals extension.environments['TRAIN'], expectedEnvironment1
+        assertEquals extension.environments['UAT'], expectedEnvironment2
     }
 
     @Test
@@ -151,25 +132,20 @@ class XamarinPlatformTest {
                 new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
 
         initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        gmc.play {
-            XamarinExtension extension = createXamarinExtension()
-            extension.environment name: 'MYENV', configuration: 'TestY TRAIN|iPhone', outputPath: 'dummy'
+        XamarinExtension extension = createXamarinExtension()
+        extension.environment name: 'MYENV', configuration: 'TestY TRAIN|iPhone', outputPath: 'dummy'
+        XamarinPlatform platform = createPlatform()
+        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
 
-            XamarinPlatform platform = createPlatform()
-
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-            assertEquals extension.environments.size(), 3
-            assertEquals extension.environments['DEV'], expectedEnvironment0
-            assertEquals extension.environments['MYENV'], expectedEnvironment1
-            assertEquals extension.environments['UAT'], expectedEnvironment2
-        }
-
+        assertEquals extension.environments.size(), 3
+        assertEquals extension.environments['DEV'], expectedEnvironment0
+        assertEquals extension.environments['MYENV'], expectedEnvironment1
+        assertEquals extension.environments['UAT'], expectedEnvironment2
     }
 
     public void initMocks(List<String> environments, boolean defaultEnvironment) {
         solution = createSolution(environments, defaultEnvironment)
-        configuration = createMockMsBuildConfiguration(environments, defaultEnvironment)
+        configuration = createMockCsproj(environments, defaultEnvironment)
     }
 
     public XamarinExtension createXamarinExtension() {
@@ -178,30 +154,19 @@ class XamarinPlatformTest {
         return extension
     }
 
-    public File createMockSolutionFile() {
-        File mockSolutionFile = gmc.mock(File)
-        mockSolutionFile.name.returns("TestY.sln").times(1)
-        return mockSolutionFile
-    }
-
     public XamarinPlatform createPlatform() {
         return new XamarinPlatform(ProjectBuilder.builder().build())
     }
 
-    public Csproj createMockMsBuildConfiguration(List<String> environments, boolean defaultEnvironment) {
-        def mockMsBuildDirectory = gmc.mock(File)
-        mockMsBuildDirectory.absolutePath.returns('/Users/xamarin/solution/TestY.iOS')
-
-        def mockMsBuildConfiguration = gmc.mock(Csproj)
-        mockMsBuildConfiguration.directory.returns(mockMsBuildDirectory)
-        mockMsBuildConfiguration.assemblyName.returns('TesyYiOS')
-        environments.each {
-            mockMsBuildConfiguration.getOutputPathForConfiguration("TestY $it|iPhone").returns("bin/iPhone/TestY $it").atMost(1)
+    public Csproj createMockCsproj(List<String> environments, boolean defaultEnvironment) {
+        Map<String, String> outputMapping = new HashMap<>()
+        for (String env : environments) {
+            outputMapping.put("TestY "+env+"|iPhone", "bin/iPhone/TestY "+env);
         }
         if (defaultEnvironment) {
-            mockMsBuildConfiguration.getOutputPathForConfiguration('Ad-Hoc|iPhone').returns('bin/iPhone/Ad-Hoc').atMost(1)
+            outputMapping.put("Ad-Hoc|iPhone", "bin/iPhone/Ad-Hoc");
         }
-        return mockMsBuildConfiguration
+        Csproj csproj = new Csproj(new File("/Users/xamarin/solution/TestY.iOS/TestY.iOS.csproj"), "TestYiOS", null, outputMapping)
     }
 
     public Solution createSolution(List<String> environments, boolean defaultEnvironment) {

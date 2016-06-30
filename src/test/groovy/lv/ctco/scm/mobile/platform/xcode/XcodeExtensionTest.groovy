@@ -9,8 +9,6 @@ package lv.ctco.scm.mobile.platform.xcode
 import lv.ctco.scm.mobile.core.objects.Environment
 import lv.ctco.scm.mobile.core.objects.Profile
 
-import org.gradle.api.GradleException
-
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -23,7 +21,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.addEnvironment(new Environment())
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Environment name is not defined'
             return
         }
@@ -36,7 +34,7 @@ class XcodeExtensionTest {
             XcodeExtension extension = new XcodeExtension()
             extension.environment name: 'test', target: 'test'
             extension.environment name: 'test', target: 'test'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Environment test is already defined'
             return
         }
@@ -49,7 +47,7 @@ class XcodeExtensionTest {
             XcodeExtension extension = new XcodeExtension()
             extension.environment name: 'TEST', target: 'test'
             extension.environment name: 'test', target: 'test'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Environment test is already defined'
             return
         }
@@ -61,7 +59,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.addProfile(new Profile())
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile environment is not defined'
             return
         }
@@ -73,7 +71,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.profile environment: 'TEST'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile source is not defined'
             return
         }
@@ -85,7 +83,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.profile environment: 'TEST', sources: 'source.tt'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile source *.tt is not supported for Xcode'
             return
         }
@@ -97,7 +95,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.profile environment: 'TEST', sources: 'source.txt'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile target is not defined'
             return
         }
@@ -109,7 +107,7 @@ class XcodeExtensionTest {
         try {
             XcodeExtension extension = new XcodeExtension()
             extension.profile environment: 'TEST', sources: 'source.groovy'
-        } catch (GradleException ignore) {
+        } catch (IOException ignore) {
             fail('Should have NOT thrown exception...')
         }
     }

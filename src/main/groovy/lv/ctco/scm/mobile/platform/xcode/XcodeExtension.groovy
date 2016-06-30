@@ -9,14 +9,10 @@ package lv.ctco.scm.mobile.platform.xcode
 import lv.ctco.scm.mobile.core.objects.Environment
 import lv.ctco.scm.mobile.core.objects.PlatformExtension
 import lv.ctco.scm.mobile.core.objects.Profile
-
-import org.apache.commons.lang3.StringUtils
-
-import org.gradle.api.GradleException
+import lv.ctco.scm.mobile.core.utils.CommonUtil
 
 class XcodeExtension extends PlatformExtension {
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
     String libraryGroupId
 
     String libraryVersion
@@ -54,41 +50,41 @@ class XcodeExtension extends PlatformExtension {
     }
 
     public void addEnvironment(Environment env) {
-        if (StringUtils.isBlank(env.getName())) {
-            throw new GradleException('Environment name is not defined')
+        if (CommonUtil.isBlank(env.getName())) {
+            throw new IOException('Environment name is not defined')
         }
-        if (StringUtils.isBlank(env.getTarget())) {
-            throw new GradleException('Environment target is not defined')
+        if (CommonUtil.isBlank(env.getTarget())) {
+            throw new IOException('Environment target is not defined')
         }
         if (containsEnvironment(env.getName())) {
-            throw new GradleException("Environment "+env.getName()+" is already defined")
+            throw new IOException("Environment "+env.getName()+" is already defined")
         }
-        if (StringUtils.isBlank(env.getConfiguration())) {
+        if (CommonUtil.isBlank(env.getConfiguration())) {
             env.setConfiguration(configuration)
         }
-        if (StringUtils.isBlank(env.getSdk())) {
+        if (CommonUtil.isBlank(env.getSdk())) {
             env.setSdk(sdk)
         }
         environments[env.getName()] = env
     }
 
     public void addProfile(Profile profile) {
-        if (StringUtils.isBlank(profile.getEnvironment())) {
-            throw new GradleException('Profile environment is not defined')
+        if (CommonUtil.isBlank(profile.getEnvironment())) {
+            throw new IOException('Profile environment is not defined')
         }
-        if (StringUtils.isBlank(profile.getSources())) {
-            throw new GradleException('Profile source is not defined')
+        if (CommonUtil.isBlank(profile.getSources())) {
+            throw new IOException('Profile source is not defined')
         }
         if (profile.getSources().endsWith(".tt")) {
-            throw new GradleException('Profile source *.tt is not supported for Xcode')
+            throw new IOException('Profile source *.tt is not supported for Xcode')
         }
         /*
         if (profile.getScopes() != null) {
             profile.scopes = ["build"]
         }
         */
-        if (StringUtils.isBlank(profile.getTarget()) && !profile.getSources().toLowerCase().endsWith(".groovy")) {
-            throw new GradleException('Profile target is not defined')
+        if (CommonUtil.isBlank(profile.getTarget()) && !profile.getSources().toLowerCase().endsWith(".groovy")) {
+            throw new IOException('Profile target is not defined')
         }
         profiles[profile.getEnvironment()+"|"+profile.getTarget()] = profile
     }

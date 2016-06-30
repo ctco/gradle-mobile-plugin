@@ -7,10 +7,7 @@
 package lv.ctco.scm.mobile.platform.xcode
 
 import lv.ctco.scm.mobile.MobilePlugin
-import lv.ctco.scm.mobile.core.utils.PropertyUtil
 import lv.ctco.scm.mobile.core.utils.RevisionUtil
-
-import org.gmock.GMockController
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -20,8 +17,6 @@ import org.gradle.testfixtures.ProjectBuilder
 
 import org.junit.Before
 import org.junit.Test
-
-import static org.gmock.GMock.constructor
 
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
@@ -37,17 +32,10 @@ class XcodePlatformTest {
     void autodetectMultiTarget() {
         def project = ProjectBuilder.builder().build()
         XcodeExtension extension = new XcodeExtension()
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
-        mockXcode.getDefaultTarget().returns('PRJ DEV')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertEquals extension.environments.size(), 3
         assertTrue extension.environments.containsKey('DEV')
         assertTrue extension.environments.containsKey('TRAIN')
@@ -61,17 +49,10 @@ class XcodePlatformTest {
     void autodetectSingleTarget() {
         def project = ProjectBuilder.builder().build()
         XcodeExtension extension = new XcodeExtension()
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ', 'PRJTest'])
-        mockXcode.getDefaultTarget().returns('PRJ')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ', 'PRJTest'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertEquals extension.environments.size(), 1
         assertTrue extension.environments.containsKey('DEFAULT')
         assertEquals extension.environments['DEFAULT'].target, 'PRJ'
@@ -81,17 +62,10 @@ class XcodePlatformTest {
     void autodetectSingleTargetLooksLikeMultiTarget() {
         def project = ProjectBuilder.builder().build()
         XcodeExtension extension = new XcodeExtension()
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ DEV', 'PRJTest'])
-        mockXcode.getDefaultTarget().returns('PRJ DEV')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ DEV', 'PRJTest'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertEquals extension.environments.size(), 1
         assertTrue extension.environments.containsKey('DEFAULT')
         assertEquals extension.environments['DEFAULT'].target, 'PRJ DEV'
@@ -100,21 +74,13 @@ class XcodePlatformTest {
     @Test
     void autodetectMultiTargetConflictsWithManuallyConfigured() {
         def project = ProjectBuilder.builder().build()
-
         XcodeExtension extension = new XcodeExtension()
         extension.environment name: 'DEV', target: 'PRJ DEV CUSTOM'
         extension.environment name: 'TrAIN', target: 'PRJ TRAIN CUSTOM'
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
-        mockXcode.getDefaultTarget().returns('PRJ DEV')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertTrue extension.environments.containsKey('DEV')
         assertTrue extension.environments.containsKey('TrAIN')
         assertTrue extension.environments.containsKey('UAT')
@@ -127,20 +93,12 @@ class XcodePlatformTest {
     @Test
     void autodetectSingleTargetConflictsWithManuallyConfigured() {
         def project = ProjectBuilder.builder().build()
-
         XcodeExtension extension = new XcodeExtension()
         extension.environment name: 'Default', target: 'PRJ DEV CUSTOM'
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ', 'PRJTest'])
-        mockXcode.getDefaultTarget().returns('PRJ')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ', 'PRJTest'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertTrue extension.environments.containsKey('Default')
         assertEquals extension.environments['Default'].target, 'PRJ DEV CUSTOM'
         assertEquals extension.environments.size(), 1
@@ -149,20 +107,12 @@ class XcodePlatformTest {
     @Test
     void autodetectSingleTargetThereIsEnvironmentWithOtherTarget() {
         def project = ProjectBuilder.builder().build()
-
         XcodeExtension extension = new XcodeExtension()
         extension.environment name: 'DEV', target: 'PRJ DEV CUSTOM'
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ', 'PRJTest'])
-        mockXcode.getDefaultTarget().returns('PRJ')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ', 'PRJTest'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertTrue extension.environments.containsKey('DEFAULT')
         assertTrue extension.environments.containsKey('DEV')
         assertEquals extension.environments['DEFAULT'].target, 'PRJ'
@@ -173,20 +123,12 @@ class XcodePlatformTest {
     @Test
     void autodetectSingleTargetThereIsEnvironmentWithSameTarget() {
         def project = ProjectBuilder.builder().build()
-
         XcodeExtension extension = new XcodeExtension()
         extension.environment name: 'DEV', target: 'PRJ DEV CUSTOM'
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['PRJ DEV CUSTOM', 'PRJTest'])
-        mockXcode.getDefaultTarget().returns('PRJ DEV CUSTOM')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodeUtil.setTargets(['PRJ DEV CUSTOM', 'PRJTest'])
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertTrue extension.environments.containsKey('DEV')
         assertEquals extension.environments['DEV'].target, 'PRJ DEV CUSTOM'
         assertEquals extension.environments.size(), 1
@@ -196,22 +138,14 @@ class XcodePlatformTest {
     @Test
     void testCaseFromDocumentation() {
         def project = ProjectBuilder.builder().build()
-
         XcodeExtension extension = new XcodeExtension()
         extension.environment name: 'PROD', target: 'PRODUCTION'
         extension.environment name: 'DEMO', target: 'iDoStuff DemoClientA'
-
-        GMockController gmc = new GMockController()
-        def mockXcode = gmc.mock(XcodeUtil, constructor())
-        mockXcode.getTargets().returns(['iDoStuff DEV', 'iDoStuff TRAIN', 'PRODUCTION', 'iDoStuffTests',
+        XcodeUtil.setTargets(['iDoStuff DEV', 'iDoStuff TRAIN', 'PRODUCTION', 'iDoStuffTests',
                                         'iDoStuff DemoClientA'])
-        mockXcode.getDefaultTarget().returns('iDoStuff DEV')
-
-        gmc.play {
-            XcodePlatform platform = new XcodePlatform(project)
-            platform.performAutomaticConfiguration(extension)
-        }
-
+        XcodePlatform platform = new XcodePlatform(project)
+        platform.performAutomaticConfiguration(extension)
+        //
         assertTrue extension.environments.containsKey('DEV')
         assertTrue extension.environments.containsKey('TRAIN')
         assertTrue extension.environments.containsKey('PROD')
@@ -227,14 +161,14 @@ class XcodePlatformTest {
     @Test
     void containsTaskTarSource() {
         Project project = getProjectConfigure()
-
+        //
         assert project.tasks.findByName('tarSources') instanceof Tar
     }
 
     @Test
     void containsTaskBundleVersionUpdate() {
         Project project = getProjectConfigure()
-
+        //
         assert project.tasks.findByName('updateVersionDev') instanceof DefaultTask
     }
 
@@ -243,7 +177,7 @@ class XcodePlatformTest {
         Project project = getProjectConfigure()
 
         def fooTask = project.tasks.findByName('buildDev')
-        fooTask.name
+        assertTrue fooTask != null
 
         Task listTask = project.tasks.findByName('buildDev').dependsOn.find {
             it instanceof DefaultTask && it.name == 'updateVersionDev'
@@ -256,7 +190,7 @@ class XcodePlatformTest {
         Project project = getProjectConfigure()
 
         def fooTask = project.tasks.findByName('buildDev')
-        fooTask.name
+        assertTrue fooTask != null
 
         Task listTask = project.tasks.findByName('buildDev').dependsOn.find {
             it instanceof DefaultTask && it.name == 'restoreDependencies'
@@ -268,10 +202,8 @@ class XcodePlatformTest {
     @Test
     void xcodeUITestTasksWithoutUIAutomationSetup() {
         Project project = getProjectConfigure()
-
         def buildTask = project.tasks.findByName('buildUITestApp')
         assertTrue buildTask == null
-
     }
 
     @Test
@@ -319,19 +251,18 @@ class XcodePlatformTest {
     /*
      * Project configurations
      */
-
     Project getProjectConfigure() {
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: MobilePlugin
-        project.ctcoMobile {
+        Project _project = ProjectBuilder.builder().build()
+        _project.apply plugin: MobilePlugin
+        _project.ctcoMobile {
             platform = 'xcode'
             xcode {
                 automaticConfiguration = false
                 environment name: 'DEV', target: 'iGREW DEV'
             }
         }
-        project.plugins.findPlugin(MobilePlugin).performDynamicConfiguration()
-        return project
+        _project.plugins.findPlugin(MobilePlugin).performDynamicConfiguration()
+        return _project
     }
 
     Project getProjectConfigureWithUIAutomationSetup() {

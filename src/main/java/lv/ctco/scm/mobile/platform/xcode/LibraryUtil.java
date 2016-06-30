@@ -8,7 +8,6 @@ package lv.ctco.scm.mobile.platform.xcode;
 
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
@@ -18,11 +17,10 @@ import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 
-import javax.inject.Singleton;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Singleton
 public final class LibraryUtil {
 
     private static final String PUBLISHING_EXT_NAME = "publishing";
@@ -76,14 +74,14 @@ public final class LibraryUtil {
         }
     }
 
-    public static void configureSingleMavenLibraryRepository(Project project, String repoName) {
+    public static void configureSingleMavenLibraryRepository(Project project, String repoName) throws IOException {
         List<DefaultMavenArtifactRepository> repositories = getLibrariesRepositories(project);
         if (!repositories.isEmpty()) {
             PublishingExtension publishingExtension = (PublishingExtension)project.getExtensions().findByName(PUBLISHING_EXT_NAME);
             RepositoryHandler repositoryHandler = publishingExtension.getRepositories();
             DefaultMavenArtifactRepository repository = (DefaultMavenArtifactRepository)repositoryHandler.getByName(repoName);
             if (repository == null) {
-                throw new GradleException("Required Maven repository '"+repoName+"' configuration not found!");
+                throw new IOException("Required Maven repository '"+repoName+"' configuration not found!");
             } else {
                 repositoryHandler.clear();
                 repositoryHandler.add(repository);

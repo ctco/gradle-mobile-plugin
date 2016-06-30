@@ -8,8 +8,6 @@ package lv.ctco.scm.mobile.platform.xamarin
 
 import lv.ctco.scm.mobile.core.objects.Profile
 
-import org.gradle.api.GradleException
-
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -45,7 +43,7 @@ class XamarinExtensionTest {
         try {
             XamarinExtension extension = new XamarinExtension()
             extension.addProfile(new Profile())
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile environment is not defined'
             return
         }
@@ -57,7 +55,7 @@ class XamarinExtensionTest {
         try {
             XamarinExtension extension = new XamarinExtension()
             extension.profile environment: 'TEST'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile source is not defined'
             return
         }
@@ -69,7 +67,7 @@ class XamarinExtensionTest {
         try {
             XamarinExtension extension = new XamarinExtension()
             extension.profile environment: 'TEST', sources: 'source.tt', target: 'target.txt'
-        } catch (GradleException ignore) {
+        } catch (IOException ignore) {
             fail('Should have NOT thrown exception...')
         }
     }
@@ -79,7 +77,7 @@ class XamarinExtensionTest {
         try {
             XamarinExtension extension = new XamarinExtension()
             extension.profile environment: 'TEST', sources: 'source.txt'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile target is not defined'
             return
         }
@@ -91,7 +89,7 @@ class XamarinExtensionTest {
         try {
             XamarinExtension extension = new XamarinExtension()
             extension.profile environment: 'TEST', sources: 'source.groovy'
-        } catch (GradleException e) {
+        } catch (IOException e) {
             assertEquals e.getMessage(), 'Profile target is not defined'
             fail('Should have NOT thrown exception...')
         }

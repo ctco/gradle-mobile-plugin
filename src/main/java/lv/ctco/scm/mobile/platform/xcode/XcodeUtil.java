@@ -11,8 +11,7 @@ import lv.ctco.scm.mobile.core.utils.ExecUtil;
 
 import org.apache.commons.exec.CommandLine;
 
-import org.gradle.api.GradleException;
-
+import javax.inject.Singleton;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,39 +20,46 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Singleton
 public class XcodeUtil {
 
-    private List<String> buildTargets;
-    private List<String> buildConfigurations;
+    private static List<String> buildTargets;
+    private static List<String> buildConfigurations;
 
-    private List<String> xcodebuildListOutput;
+    private static List<String> xcodebuildListOutput;
 
-    public List<String> getTargets() throws IOException {
+    private XcodeUtil() {}
+
+    public static List<String> getTargets() throws IOException {
         if (buildTargets == null) {
             getGlobalConfiguration();
         }
         return buildTargets;
     }
 
-    public String getDefaultTarget() throws IOException {
+    private static void setTargets(List<String> targets) {
+        buildTargets = targets;
+    }
+
+    public static String getDefaultTarget() throws IOException {
         String defaultTarget;
         List<String> targets = getTargets();
         if (targets == null || getTargets().isEmpty()) {
-            throw new GradleException("Could not get default Xcode target!");
+            throw new IOException("Could not get default Xcode target!");
         } else {
             defaultTarget = getTargets().get(0);
         }
         return defaultTarget;
     }
 
-    public List<String> getConfigurations() throws IOException {
+    public static List<String> getConfigurations() throws IOException {
         if (buildConfigurations == null) {
             getGlobalConfiguration();
         }
         return buildConfigurations;
     }
 
-    public List<String> getXcodebuildListOutput() {
+    public static List<String> getXcodebuildListOutput() {
         if (xcodebuildListOutput == null) {
             CommandLine commandLine = new CommandLine("xcodebuild");
             commandLine.addArgument("-list");
@@ -73,7 +79,7 @@ public class XcodeUtil {
         return stringBuilder.toString();
     }
 
-    protected void getGlobalConfiguration() throws IOException {
+    protected static void getGlobalConfiguration() throws IOException {
         buildTargets = new ArrayList<>();
         buildConfigurations = new ArrayList<>();
         String commandOutput = getListOfStringsAsString(getXcodebuildListOutput());
@@ -99,7 +105,7 @@ public class XcodeUtil {
         }
     }
 
-    public String getXcodeLibraryPublishRepoType(String libraryVersion) {
+    public static String getXcodeLibraryPublishRepoType(String libraryVersion) {
         String type = "";
         if (libraryVersion != null) {
             if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
@@ -111,11 +117,11 @@ public class XcodeUtil {
         return type;
     }
 
-    public Map<String, String> getBuildSettings() {
+    static Map<String, String> getBuildSettings() throws IOException {
         return getBuildSettings(null);
     }
 
-    public Map<String, String> getBuildSettings(String targetName) {
+    static Map<String, String> getBuildSettings(String targetName) throws IOException {
         CommandLine commandLine = new CommandLine("xcodebuild");
         commandLine.addArgument("-showBuildSettings");
         if (targetName != null) {
@@ -126,7 +132,7 @@ public class XcodeUtil {
         return parseBuildSettings(execResult.getOutput());
     }
 
-    protected Map<String, String> parseBuildSettings(List<String> commandOutput) {
+    protected static Map<String, String> parseBuildSettings(List<String> commandOutput) throws IOException {
         Pattern headingPattern = Pattern.compile("Build settings for action \\S+ and target .*");
         Pattern propertyPattern = Pattern.compile("\\s*(\\S+) = ?+(.*)");
         Map<String, String> properties = new HashMap<>();
@@ -145,12 +151,12 @@ public class XcodeUtil {
             }
         }
         if (properties.size() == 0) {
-            throw new GradleException("Failed to get any xcodebuild settings!");
+            throw new IOException("Failed to get any xcodebuild settings!");
         }
         return properties;
     }
 
-    public String getProductType(String targetName) {
+    static String getProductType(String targetName) throws IOException {
         Map<String, String> buildSettings = getBuildSettings(targetName);
         String productTypeValue = buildSettings.get("PRODUCT_TYPE");
         if (productTypeValue == null) {

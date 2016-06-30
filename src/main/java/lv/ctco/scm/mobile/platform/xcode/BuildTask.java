@@ -51,8 +51,8 @@ public class BuildTask extends DefaultTask {
         }
     }
 
-    private boolean isIphoneosApplicationBuild() {
-        return "iphoneos".equalsIgnoreCase(env.getSdk()) && "com.apple.product-type.application".equalsIgnoreCase(new XcodeUtil().getProductType(env.getTarget()));
+    private boolean isIphoneosApplicationBuild() throws IOException {
+        return "iphoneos".equalsIgnoreCase(env.getSdk()) && "com.apple.product-type.application".equalsIgnoreCase(XcodeUtil.getProductType(env.getTarget()));
     }
 
     private void buildArtifacts() throws IOException {

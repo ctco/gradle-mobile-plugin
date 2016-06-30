@@ -6,14 +6,9 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import org.gradle.api.GradleException
-
 /**
- *
  * MS VisualStudio solution file representation. Contains information from project and global sections.
- *
  */
-
 class Solution {
 
     protected List<SlnProjectSection> projectSections
@@ -30,7 +25,7 @@ class Solution {
     public Set<String> getSolutionConfigurations() {
         SlnGlobalSection section = getSolutionConfigurationsSection()
         if (section == null) {
-            throw new GradleException("There is no SolutionConfigurationPlatforms section")
+            throw new IOException("There is no SolutionConfigurationPlatforms section")
         }
         return section.propertyNames
     }
@@ -66,7 +61,7 @@ class Solution {
     public SlnProjectSection getProject(String name) {
         SlnProjectSection project = projectSections.find { it.name == name }
         if (project == null) {
-            throw new GradleException("Project $name not found in solution $name")
+            throw new IOException("Project $name not found in solution $name")
         }
         return project
     }
@@ -83,7 +78,7 @@ class Solution {
 
         SlnGlobalSection section = projectConfigurationPlatformsSection
         if (!section.propertyExists(propertyName)) {
-            throw new GradleException("Property ${propertyName} does not exist in ${section.name} section," +
+            throw new IOException("Property ${propertyName} does not exist in ${section.name} section," +
                     " unable to determine project configuration in ${projectSection.name} project that corresponds" +
                     " to $solutionConfigurationName solution configuration.")
         }

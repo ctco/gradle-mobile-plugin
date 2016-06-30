@@ -37,7 +37,7 @@ public class ProjectInfoTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
-            Map<String, String> buildSettings = new XcodeUtil().getBuildSettings();
+            Map<String, String> buildSettings = XcodeUtil.getBuildSettings();
             String productType = buildSettings.get("PRODUCT_TYPE");
             if (StringUtils.isBlank(productType)) {
                 LoggerUtil.info("Product Type is undefined");

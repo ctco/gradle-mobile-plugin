@@ -12,7 +12,6 @@ import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
 import lv.ctco.scm.mobile.platform.common.UIAutomationTask;
 
-import org.gradle.api.GradleException;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
@@ -38,7 +37,7 @@ class XamarinPlatform {
      */
     void configure(XamarinExtension extXios, XandroidExtension extXand) {
         if (extXios.solutionFile == null) {
-            throw new GradleException("solutionFile for ctcoMobile.xamarin extension is not defined.")
+            throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined.")
         }
 
         if (extXios.solutionFile.exists()) {
@@ -47,7 +46,7 @@ class XamarinPlatform {
             Solution solution = sp.parse()
 
             if (!solution.containsProject(extXios.projectName)) {
-                throw new GradleException("Project "+extXios.projectName+" does not exist in solution "+extXios.solutionFile)
+                throw new IOException("Project "+extXios.projectName+" does not exist in solution "+extXios.solutionFile)
             }
 
             SlnProjectSection projectSection = solution.getProject(extXios.projectName)
@@ -208,7 +207,7 @@ class XamarinPlatform {
                         extXios.uiasetup.appName + ".app")
                 LoggerUtil.info("Auto-calculated appPath as " + extXios.uiasetup.appPath)
             } else {
-                throw new GradleException("appPath parameter is not defined and can not be auto-calculated")
+                throw new IOException("appPath parameter is not defined and can not be auto-calculated")
             }
         }
         if (extXios.uiasetup.appName == null) {
@@ -323,7 +322,7 @@ class XamarinPlatform {
                 addEnvironment('DEFAULT', 'Release|iPhone', projectSection, solution,
                         csproj, projectDirectory, extXios)
             } else {
-                throw new GradleException("No environments detected, no build is going to be performed!")
+                throw new IOException("No environments detected, no build is going to be performed!")
             }
         }
     }

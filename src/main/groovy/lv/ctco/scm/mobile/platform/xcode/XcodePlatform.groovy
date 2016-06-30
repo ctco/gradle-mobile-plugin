@@ -23,11 +23,8 @@ class XcodePlatform {
 
     protected Project project
 
-    protected XcodeUtil xcodeUtil
-
     XcodePlatform(Project project) {
         this.project = project
-        this.xcodeUtil = new XcodeUtil()
     }
 
     public void configure(XcodeExtension ext) {
@@ -74,8 +71,8 @@ class XcodePlatform {
      */
     void performAutomaticConfiguration(XcodeExtension ext) {
         LoggerUtil.info('Trying to determine project type (single target | multi-target)')
-        List<String> targets = xcodeUtil.getTargets()
-        String defaultTarget = xcodeUtil.getDefaultTarget()
+        List<String> targets = XcodeUtil.getTargets()
+        String defaultTarget = XcodeUtil.getDefaultTarget()
         LoggerUtil.debug("Default target is ["+defaultTarget+"]")
 
         HashMap<String, String> environments = new MultiTargetDetectorUtil().detectEnvironmentTargets(defaultTarget, targets)
@@ -203,7 +200,7 @@ class XcodePlatform {
             Task libraryArchiveTask = XcodeTasks.getOrCreateArchiveLibrariesTask(project)
             Task libraryPublishTask = XcodeTasks.getOrCreatePublishLibrariesTask(project)
             libraryPublishTask.dependsOn(libraryArchiveTask)
-            LibraryUtil.configureSingleMavenLibraryRepository(project, "mobile"+xcodeUtil.getXcodeLibraryPublishRepoType(ext.getLibraryVersion()))
+            LibraryUtil.configureSingleMavenLibraryRepository(project, "mobile"+XcodeUtil.getXcodeLibraryPublishRepoType(ext.getLibraryVersion()))
         }
     }
 

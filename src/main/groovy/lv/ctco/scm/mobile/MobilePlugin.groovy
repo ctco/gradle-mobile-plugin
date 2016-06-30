@@ -129,8 +129,11 @@ class MobilePlugin implements Plugin<Project> {
                 XcodePlatform platform = new XcodePlatform(project)
                 platform.configure(project.ctcoMobile.xcode)
             } else {
-                LoggerUtil.warn("Xcode platform detected, but no project file")
-                LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks')
+                //LoggerUtil.warn("Xcode platform detected, but no project file")
+                //LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks')
+                //Disabled until platform extension configuration fix...
+                XcodePlatform platform = new XcodePlatform(project)
+                platform.configure(project.ctcoMobile.xcode)
             }
         } else if (platformName == XamarinPlatform.NAME) {
             XamarinPlatform platform = new XamarinPlatform(project)
@@ -142,8 +145,8 @@ class MobilePlugin implements Plugin<Project> {
 
     private void readPluginInfo() {
         InputStream pluginInfoStream = this.getClass().getClassLoader().getResourceAsStream("plugin-info.properties");
-        Properties pluginInfoProperties = new Properties();
         if (pluginInfoStream != null) {
+            Properties pluginInfoProperties = new Properties();
             pluginInfoProperties.load(pluginInfoStream);
             PropertyUtil.setPluginGroup(pluginInfoProperties.getProperty("plugin-group"));
             PropertyUtil.setPluginName(pluginInfoProperties.getProperty("plugin-name"));

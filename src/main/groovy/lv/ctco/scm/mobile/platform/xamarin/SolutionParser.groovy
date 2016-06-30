@@ -14,8 +14,6 @@ import org.codehaus.jparsec.functors.Pair
 import org.codehaus.jparsec.pattern.Pattern
 import org.codehaus.jparsec.pattern.Patterns
 
-import org.gradle.api.GradleException
-
 /**
  *
  * MS Visual Studion solution file parser. This parser is quite simple and is not error-proof in case of
@@ -41,7 +39,7 @@ public class SolutionParser {
      */
     Solution parse() {
         if (!file.exists()) {
-            throw new GradleException("Solution file $file.absolutePath does not exist")
+            throw new IOException("Solution file $file.absolutePath does not exist")
         }
         createSolutionParser().parse(file.text)
     }

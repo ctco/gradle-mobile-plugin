@@ -6,12 +6,10 @@
 
 package lv.ctco.scm.mobile.core.objects
 
+import lv.ctco.scm.mobile.core.utils.CommonUtil
 import lv.ctco.scm.mobile.core.utils.LoggerUtil
 
 import org.apache.commons.io.FilenameUtils
-import org.apache.commons.lang3.StringUtils
-
-import org.gradle.api.GradleException
 
 abstract class PlatformExtension {
 
@@ -137,17 +135,17 @@ abstract class PlatformExtension {
     }
 
     public void addEnvironment(Environment env) {
-        if (StringUtils.isBlank(env.getName())) {
-            throw new GradleException('Environment name is not defined')
+        if (CommonUtil.isBlank(env.getName())) {
+            throw new IOException('Environment name is not defined')
         }
-        if (StringUtils.isBlank(env.getConfiguration())) {
-            throw new GradleException('Environment configuration is not defined')
+        if (CommonUtil.isBlank(env.getConfiguration())) {
+            throw new IOException('Environment configuration is not defined')
         }
         if (env.getOutputPath() == null) {
-            throw new GradleException('Environment output path is not defined')
+            throw new IOException('Environment output path is not defined')
         }
         if (containsEnvironment(env.getName())) {
-            throw new GradleException("Environment "+env.getName()+" is already defined")
+            throw new IOException("Environment "+env.getName()+" is already defined")
         }
         environments[env.getName()] = env
     }
@@ -175,11 +173,11 @@ abstract class PlatformExtension {
     }
 
     public void addProfile(Profile profile) {
-        if (StringUtils.isBlank(profile.getEnvironment())) {
-            throw new GradleException('Profile environment is not defined')
+        if (CommonUtil.isBlank(profile.getEnvironment())) {
+            throw new IOException('Profile environment is not defined')
         }
-        if (StringUtils.isBlank(profile.getSources())) {
-            throw new GradleException('Profile source is not defined')
+        if (CommonUtil.isBlank(profile.getSources())) {
+            throw new IOException('Profile source is not defined')
         }
         /*
         if (profile.sources.endsWith('.tt')) {
@@ -191,9 +189,9 @@ abstract class PlatformExtension {
             profile.setScopes(['build'])
         }
         */
-        if (StringUtils.isBlank(profile.getTarget())) {
+        if (CommonUtil.isBlank(profile.getTarget())) {
             if (!profile.getSources().toLowerCase().endsWith(".groovy")) {
-                throw new GradleException('Profile target is not defined')
+                throw new IOException('Profile target is not defined')
             }
         }
         profiles[profile.getEnvironment()+"|"+profile.getTarget()] = profile
@@ -227,7 +225,7 @@ abstract class PlatformExtension {
         if (uiasetup == null) {
             uiasetup = uiaSetup
         } else {
-            throw new GradleException("UI Automation Setup is already defined")
+            throw new IOException("UI Automation Setup is already defined")
         }
     }
 

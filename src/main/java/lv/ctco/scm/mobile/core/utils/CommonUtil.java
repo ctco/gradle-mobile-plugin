@@ -11,14 +11,12 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import javax.inject.Singleton;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Singleton
 public final class CommonUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
@@ -154,6 +152,19 @@ public final class CommonUtil {
         } else {
             throw new IOException("Payload ["+payloadDir.getAbsolutePath()+"] was not found!");
         }
+    }
+
+    public static boolean isBlank(final CharSequence cs) {
+        int strLen;
+        if (cs == null || (strLen = cs.length()) == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(cs.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

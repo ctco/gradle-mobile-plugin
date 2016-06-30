@@ -35,7 +35,7 @@ public class UpdateVersionTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
-            Map<String, String> buildSettings = new XcodeUtil().getBuildSettings(targetName);
+            Map<String, String> buildSettings = XcodeUtil.getBuildSettings(targetName);
             String productType = buildSettings.get("PRODUCT_TYPE");
             if ("com.apple.product-type.application".equalsIgnoreCase(productType)) {
                 String revision = RevisionUtil.getRevision();
