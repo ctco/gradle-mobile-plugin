@@ -42,12 +42,6 @@ public final class RevisionUtil {
         revision = value;
     }
 
-    private static void setRevisionIfNull(String value) {
-        if (revision == null) {
-            revision = value;
-        }
-    }
-
     private static String getGitOrSvnRevision(File projectDir) throws IOException {
         String result;
         if (GitUtil.isGitDir(projectDir)) {

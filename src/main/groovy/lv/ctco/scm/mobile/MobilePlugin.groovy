@@ -14,7 +14,8 @@ import lv.ctco.scm.mobile.platform.xamarin.XamarinExtension;
 import lv.ctco.scm.mobile.platform.xamarin.XamarinPlatform;
 import lv.ctco.scm.mobile.platform.xamarin.XandroidExtension;
 import lv.ctco.scm.mobile.platform.xcode.XcodeExtension;
-import lv.ctco.scm.mobile.platform.xcode.XcodePlatform;
+import lv.ctco.scm.mobile.platform.xcode.XcodePlatform
+import lv.ctco.scm.mobile.platform.xcode.XcodeUtil;
 
 import org.gradle.api.GradleException;
 import org.gradle.api.Plugin;
@@ -96,8 +97,7 @@ class MobilePlugin implements Plugin<Project> {
     }
 
     private void autoDetectMobilePlatform() {
-        List projectFiles = project.projectDir.listFiles().findAll { it.name.endsWith('.xcodeproj') }
-        if (projectFiles.size() == 1) {
+        if (XcodeUtil.getXcodeprojCount(project.projectDir)) {
             LoggerUtil.info("Xcode platform detected, because ${projectFiles[0]} file" +
                     " is present in the project directory")
             project.ctcoMobile.platform = XcodePlatform.NAME
@@ -123,23 +123,22 @@ class MobilePlugin implements Plugin<Project> {
 
     private void configurePlatforms() {
         String platformName = project.ctcoMobile.platform
-        if (platformName == XcodePlatform.NAME) {
-            List projectFiles = project.projectDir.listFiles().findAll { it.name.endsWith('.xcodeproj') }
-            if (projectFiles.size() == 1) {
-                XcodePlatform platform = new XcodePlatform(project)
-                platform.configure(project.ctcoMobile.xcode)
-            } else {
-                //LoggerUtil.warn("Xcode platform detected, but no project file")
-                //LoggerUtil.warn('Unable to detect a mobile platform, configuring only non-build tasks')
-                //Disabled until platform extension configuration fix...
-                XcodePlatform platform = new XcodePlatform(project)
-                platform.configure(project.ctcoMobile.xcode)
-            }
-        } else if (platformName == XamarinPlatform.NAME) {
-            XamarinPlatform platform = new XamarinPlatform(project)
-            platform.configure(project.ctcoMobile.xamarin, project.ctcoMobile.xandroid)
-        } else {
-            throw new IOException("Build of platform '"+platformName+"' is not supported")
+        switch (platformName) {
+            case XcodePlatform.NAME:
+                if (XcodeUtil.getXcodeprojCount(project.projectDir) == 1) {
+                    XcodePlatform platform = new XcodePlatform(project)
+                    platform.configure(project.ctcoMobile.xcode)
+                } else {
+                    LoggerUtil.warn("Xcode platform detected in configuration, but no or multiple project file(s)")
+                    LoggerUtil.warn('Configuring only non-build tasks')
+                }
+                break;
+            case XamarinPlatform.NAME:
+                XamarinPlatform platform = new XamarinPlatform(project)
+                platform.configure(project.ctcoMobile.xamarin, project.ctcoMobile.xandroid)
+                break;
+            default:
+                throw new IOException("Build of platform '" + platformName + "' is not supported")
         }
     }
 

@@ -10,10 +10,15 @@ import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
 
 import org.apache.commons.exec.CommandLine;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import javax.inject.Singleton;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +32,7 @@ public class XcodeUtil {
     private static List<String> buildConfigurations;
 
     private static List<String> xcodebuildListOutput;
+    private static File xcodeproj;
 
     private XcodeUtil() {}
 
@@ -39,6 +45,10 @@ public class XcodeUtil {
 
     private static void setTargets(List<String> targets) {
         buildTargets = targets;
+    }
+
+    private static void setXcodeproj(File file) {
+        xcodeproj = file;
     }
 
     public static String getDefaultTarget() throws IOException {
@@ -163,6 +173,27 @@ public class XcodeUtil {
             return "";
         } else {
             return productTypeValue;
+        }
+    }
+
+    public static int getXcodeprojCount(File dir) {
+        if (xcodeproj == null) {
+            List<File> results = new ArrayList<>();
+            Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+            if (!files.isEmpty()) {
+                for (File file : files) {
+                    if (file.isDirectory() && file.getParentFile().equals(dir)
+                            && "xcodeproj".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+                        results.add(file);
+                    }
+                }
+            }
+            if (results.size() == 1) {
+                xcodeproj = results.get(0);
+            }
+            return results.size();
+        } else {
+            return 1;
         }
     }
 

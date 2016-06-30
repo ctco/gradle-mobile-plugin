@@ -25,7 +25,8 @@ class XcodePlatformTest {
 
     @Before
     public void setUp() throws Exception {
-        RevisionUtil.setRevisionIfNull("0")
+        RevisionUtil.setRevision("0")
+        XcodeUtil.setXcodeproj(new File("dummy"))
     }
 
     @Test
