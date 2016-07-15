@@ -36,7 +36,7 @@ To apply plugin to your project add the following configuration to project's bui
          mavenCentral()
       }
       dependencies {
-        classpath 'lv.ctco.scm:mobile-plugin:XXX'
+        classpath group: 'lv.ctco.scm', name: 'gradle-mobile-plugin', version: 'XXX'
       }
     }
     apply plugin: 'ctco-mobile'
