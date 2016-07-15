@@ -33,12 +33,10 @@ To apply plugin to your project add the following configuration to project's bui
 
     buildscript {
       repositories {
-        maven {
-          url 'https://path.to.your/repository/'
-        }
+         mavenCentral()
       }
       dependencies {
-        classpath 'lv.ctco.scm:mobile-plugin:0.9.0.0-SNAPSHOT'
+        classpath 'lv.ctco.scm:mobile-plugin:XXX'
       }
     }
     apply plugin: 'ctco-mobile'
