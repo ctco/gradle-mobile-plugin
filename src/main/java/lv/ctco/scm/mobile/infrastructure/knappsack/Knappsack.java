@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.infrastructure.knappsack;
 
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +40,7 @@ import java.util.List;
  * artifact. It handles authentication and SSL connections as well. All operations are
  * performed using plain HTTP requests.
  */
-public class Knappsack {
+class Knappsack {
 
     private CloseableHttpClient httpClient;
     private String serverUrl;
@@ -50,9 +49,9 @@ public class Knappsack {
      * Constructor.
      * @param serverUrl Knappsack server URL to connect to.
      */
-    public Knappsack(String serverUrl) {
+    Knappsack(String serverUrl) {
         HttpClientBuilder httpClientBuilder = HttpClients.custom();
-        httpClientBuilder.setUserAgent(PropertyUtil.getPluginName()+"/"+PropertyUtil.getPluginVersion());
+        //TODO//httpClientBuilder.setUserAgent(MobilePluginUtil.getPluginName()+"/"+MobilePluginUtil.getPluginVersion());
         this.httpClient = httpClientBuilder.build();
         this.serverUrl = StringUtils.appendIfMissing(serverUrl, "/");
     }

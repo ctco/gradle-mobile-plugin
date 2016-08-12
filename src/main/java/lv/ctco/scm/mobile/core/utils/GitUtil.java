@@ -10,14 +10,13 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gradle.api.Project;
 
-import javax.inject.Singleton;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-@Singleton
 public final class GitUtil {
 
     private static final int HASH_SIZE_FULL = 40;
@@ -52,11 +51,11 @@ public final class GitUtil {
         return rootDir;
     }
 
-    public static void generateCommitInfo() throws IOException {
+    public static void generateCommitInfo(Project project) throws IOException {
         if (isGitDir(PathUtil.getProjectDir())) {
             List<String> commitInfo;
-            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR).isEmpty()) {
-                File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(PROP_VCS_ROOT_DIR)));
+            if (PropertyUtil.hasProjectProperty(project, PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_DIR).isEmpty()) {
+                File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_DIR)));
                 commitInfo = getCommitInfo(commitDir);
             } else {
                 commitInfo = getCommitInfo(PathUtil.getProjectDir());

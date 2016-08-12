@@ -15,8 +15,9 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
 
-@Singleton
 class XamarinTasks {
+
+    private XamarinTasks() {}
 
     public static Task getOrCreateCleanTask(Project project) {
         Task task = getTaskByName(project, "clean");
@@ -181,7 +182,7 @@ class XamarinTasks {
         if (task != null) {
             return task;
         } else {
-            return project.task(type: UpdateVersionTask, "updateVersion$_env.camelName") {
+            return project.task(type: UpdateVersionIosTask, "updateVersion$_env.camelName") {
                 description = "Updates app version for iOS "+ _env.getName()+" environment"
                 projectName = extXios.projectName
                 environmentName = _env.getName()
@@ -206,7 +207,7 @@ class XamarinTasks {
         if (task != null) {
             return task;
         } else {
-            return project.task(type: ManifestVersionUpdateTask, "updateManifestVersion", overwrite: true) {
+            return project.task(type: UpdateVersionAndroidTask, "updateManifestVersion", overwrite: true) {
                 projectName = extXand.projectName;
                 releaseVersion = _releaseVersion;
                 androidVersionCode = extXand.androidVersionCode;

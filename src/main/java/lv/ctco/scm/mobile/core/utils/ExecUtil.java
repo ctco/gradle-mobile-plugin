@@ -11,11 +11,9 @@ import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.Executor;
 import org.apache.commons.exec.PumpStreamHandler;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 
-@Singleton
 public final class ExecUtil {
 
     private ExecUtil() {}
@@ -31,7 +29,7 @@ public final class ExecUtil {
         ExecOutputStream execOutputStream = new ExecOutputStream(routeToCapture, routeToStdout);
         PumpStreamHandler streamHandler = new PumpStreamHandler(execOutputStream);
         executor.setStreamHandler(streamHandler);
-        LoggerUtil.debug("Executing "+commandLine.toString().replace(", ", " ")+" in ["+executor.getWorkingDirectory().getAbsolutePath()+"]");
+        LoggerUtil.debug("Executing "+commandLine.toString().replace(", ", " ")+" in '"+executor.getWorkingDirectory().getAbsolutePath()+"'");
         try {
             executor.execute(commandLine);
         } catch (IOException e) {

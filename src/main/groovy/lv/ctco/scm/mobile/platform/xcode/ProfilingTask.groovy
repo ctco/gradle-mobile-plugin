@@ -42,7 +42,7 @@ public class ProfilingTask extends DefaultTask {
                     if (profileSourceType.endsWith(".groovy")) {
                         GroovyProfilingUtil.profileUsingGroovyEval(profileFile);
                     } else if (profileSourceType.endsWith(".tt")) {
-                        stopWithException("Unsupported profiling type!");
+                        stopWithException("Unsupported profiling assemblyType!");
                     } else {
                         try {
                             ProfilingUtil.profileUsingPlistEntries(targetFile, profileFile);

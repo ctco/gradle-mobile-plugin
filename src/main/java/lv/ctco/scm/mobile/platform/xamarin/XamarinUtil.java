@@ -8,11 +8,16 @@ package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
 
-import javax.inject.Singleton;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
-@Singleton
 public final class XamarinUtil {
 
     private static final String DEFAULT_RELEASE_VERSION = "0.1";
@@ -28,8 +33,22 @@ public final class XamarinUtil {
         } else {
             LoggerUtil.info("Release version was found in "+csprojName);
         }
-        LoggerUtil.info("Setting release version as '"+releaseVersion+"'");
+        LoggerUtil.info("Setting release version as '"+releaseVersion+"' for builds of '"+csprojName+"'");
         return releaseVersion;
+    }
+
+    public static int getSlnCount(File dir) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, null);
+        if (!files.isEmpty()) {
+            for (File file : files) {
+                if (file.isFile() && file.getParentFile().equals(dir)
+                        && "sln".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+                    results.add(file);
+                }
+            }
+        }
+        return results.size();
     }
 
 }

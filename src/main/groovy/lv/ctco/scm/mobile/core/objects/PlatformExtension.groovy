@@ -65,13 +65,6 @@ abstract class PlatformExtension {
     String svnRevisionRootUrl
 
     /**
-     * Detected SVN revision to skip repeated look-ups
-     * Deprecated since the implementation of RevisionInfoUtil Singleton in version 0.9.x
-     */
-    @Deprecated
-    String svnRevision
-
-    /**
      * Whether CFBundleVersion (Info.plist) and application_version (Root.plist) should be without SVN revision/GIT hash
      */
     boolean cleanReleaseVersionForPROD = false

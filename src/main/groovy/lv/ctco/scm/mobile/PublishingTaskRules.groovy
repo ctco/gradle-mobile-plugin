@@ -1,5 +1,5 @@
 /*
- * @(#)MavenPublishingRules.groovy
+ * @(#)PublishingTaskRules.groovy
  *
  * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
  */
@@ -11,9 +11,8 @@ import org.gradle.model.RuleSource;
 import org.gradle.model.Mutate;
 import org.gradle.model.ModelMap;
 
-class MavenPublishingRules extends RuleSource {
+class PublishingTaskRules extends RuleSource {
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
     @Mutate
     public static void linkPublishingTasks(ModelMap<Task> tasks) {
         Task libraryPublishTask = tasks.get("publishLibraries");

@@ -20,7 +20,7 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.io.IOException;
 
-public class UpdateVersionTask extends DefaultTask {
+public class UpdateVersionIosTask extends DefaultTask {
 
     private String projectName;
     private String environmentName;
@@ -58,13 +58,13 @@ public class UpdateVersionTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
-            String revision = RevisionUtil.getRevision();
+            String revision = RevisionUtil.getRevision(getProject());
 
             String plistFileName = projectName+"/Info.plist";
             LoggerUtil.info("Read project release version as '"+releaseVersion+"'");
 
             String buildVersion;
-            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
+            if (PropertyUtil.hasProjectProperty(getProject(), PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(getProject(), PROP_VCS_ROOT_SUBS).isEmpty()) {
                 buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
             } else {
                 buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"_"+revision;

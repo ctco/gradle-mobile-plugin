@@ -33,10 +33,10 @@ class XamarinPlatformTaskTest {
         platform.validateXamarinExtension(extXios)
         //platform.validateXandroidExtension(extXand) // TODO : reimplement check
 
-        platform.setupProjectInfoTask(null)
+        platform.setupProjectInfoTask("0.1")
         platform.setupCleanTasks(extXios, extXand)
-        platform.setupBuildTasks(extXios, extXand, null)
-        platform.setupUIATestTasks(extXios)
+        platform.setupBuildTasks(extXios, extXand)
+        //platform.setupUIATestTasks(extXios)
 
         checkStandardXamarinConfiguration(project.tasks)
         assertFalse taskExists(project.tasks, 'restoreDependenciesForAndroid')
@@ -64,10 +64,10 @@ class XamarinPlatformTaskTest {
         platform.validateXamarinExtension(extXios)
         //platform.validateXandroidExtension(extXand)  // TODO : reimplement check
 
-        platform.setupProjectInfoTask(null)
+        platform.setupProjectInfoTask("0.1")
         platform.setupCleanTasks(extXios, extXand)
-        platform.setupBuildTasks(extXios, extXand, null)
-        platform.setupUIATestTasks(extXios)
+        platform.setupBuildTasks(extXios, extXand)
+        //platform.setupUIATestTasks(extXios)
 
         checkStandardXamarinConfiguration(project.tasks)
         checkStandardXandroidConfiguration(project.tasks)
@@ -89,10 +89,10 @@ class XamarinPlatformTaskTest {
         platform.validateXamarinExtension(extXios)
         //platform.validateXandroidExtension(extXand)  // TODO : reimplement check
 
-        platform.setupProjectInfoTask(null)
+        platform.setupProjectInfoTask("0.1")
         platform.setupCleanTasks(extXios, extXand)
-        platform.setupBuildTasks(extXios, extXand, null)
-        platform.setupUIATestTasks(extXios)
+        platform.setupBuildTasks(extXios, extXand)
+        //platform.setupUIATestTasks(extXios)
 
         checkStandardXamarinConfiguration(project.tasks)
         checkStandardXandroidConfiguration(project.tasks)

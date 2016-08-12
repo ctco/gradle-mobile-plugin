@@ -26,7 +26,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Singleton
-public class XcodeUtil {
+public final class XcodeUtil {
 
     private static List<String> buildTargets;
     private static List<String> buildConfigurations;

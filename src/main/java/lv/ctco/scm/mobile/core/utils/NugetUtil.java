@@ -8,11 +8,9 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.io.FileUtils;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 
-@Singleton
 final class NugetUtil {
 
     private NugetUtil() {}

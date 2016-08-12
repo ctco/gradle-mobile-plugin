@@ -1,5 +1,5 @@
 /*
- * @(#)ManifestVersionUpdateTask.java
+ * @(#)UpdateVersionAndroidTask.java
  *
  * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
  */
@@ -8,7 +8,6 @@ package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.gradle.api.DefaultTask;
@@ -19,13 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.regex.Pattern;
 
-public class ManifestVersionUpdateTask extends DefaultTask {
+public class UpdateVersionAndroidTask extends DefaultTask {
 
     private String projectName;
     private String releaseVersion;
     private String androidVersionCode;
-
-    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
@@ -42,13 +39,8 @@ public class ManifestVersionUpdateTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         try {
-            String revision = RevisionUtil.getRevision();
-            String buildVersion;
-            if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
-                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
-            } else {
-                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"_"+revision;
-            }
+            String revision = RevisionUtil.getRevision(getProject());
+            String buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
             File manifestFile = new File(projectName+"/Properties/AndroidManifest.xml");
             LoggerUtil.info("Setting versionName in manifest file to '"+buildVersion+"'");
             CommonUtil.replaceInFile(manifestFile, Pattern.compile("(android:versionName=)(\".*?\")"), "android:versionName=\""+buildVersion+"\"");

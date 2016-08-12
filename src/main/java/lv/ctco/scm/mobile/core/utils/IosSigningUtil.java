@@ -11,12 +11,11 @@ import lv.ctco.scm.mobile.core.objects.IosProvisioningProfile;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
+import org.gradle.api.Project;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 
-@Singleton
 public final class IosSigningUtil {
 
     private static final String COMMAND_CODESIGN = "codesign";
@@ -123,14 +122,14 @@ public final class IosSigningUtil {
         return appDir;
     }
 
-    public static File signApp(File appDir) throws IOException {
+    public static File signApp(Project project, File appDir) throws IOException {
         LoggerUtil.info("Signing '"+appDir.getAbsolutePath()+"'...");
         //
         IosProvisioningProfile provisioning;
         String identity;
 
-        if (PropertyUtil.hasProjectProperty("signing.provisioning")) {
-            String providedProvisioning = PropertyUtil.getProjectProperty("signing.provisioning");
+        if (PropertyUtil.hasProjectProperty(project, "signing.provisioning")) {
+            String providedProvisioning = PropertyUtil.getProjectProperty(project, "signing.provisioning");
             LoggerUtil.info("Will use provided provisioning profile value '"+providedProvisioning+"'");
             if (providedProvisioning.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
                 provisioning = IosProvisioningUtil.getProvisioningProfileByUuid(providedProvisioning);
@@ -150,8 +149,8 @@ public final class IosSigningUtil {
             LoggerUtil.info("Will use found provisioning profile '"+provisioning.toString()+"'");
         }
 
-        if (PropertyUtil.hasProjectProperty("signing.identity")) {
-            identity = PropertyUtil.getProjectProperty("signing.identity");
+        if (PropertyUtil.hasProjectProperty(project, "signing.identity")) {
+            identity = PropertyUtil.getProjectProperty(project, "signing.identity");
             LoggerUtil.info("Will use provided identity '"+identity+"'...");
         } else {
             LoggerUtil.info("Will use automatically detected identity from provisioning profile...");

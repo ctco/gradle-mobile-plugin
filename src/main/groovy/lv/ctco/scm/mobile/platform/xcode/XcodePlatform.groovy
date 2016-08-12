@@ -70,10 +70,10 @@ class XcodePlatform {
      * @param ext XcodeExtension where environments should be created.
      */
     void performAutomaticConfiguration(XcodeExtension ext) {
-        LoggerUtil.info('Trying to determine project type (single target | multi-target)')
+        LoggerUtil.info('Trying to determine project assemblyType (single target | multi-target)')
         List<String> targets = XcodeUtil.getTargets()
         String defaultTarget = XcodeUtil.getDefaultTarget()
-        LoggerUtil.debug("Default target is ["+defaultTarget+"]")
+        LoggerUtil.debug("Default target is '"+defaultTarget+"'")
 
         HashMap<String, String> environments = new MultiTargetDetectorUtil().detectEnvironmentTargets(defaultTarget, targets)
         if (environments.size() > 1) {

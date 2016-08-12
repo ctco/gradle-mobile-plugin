@@ -115,12 +115,12 @@ public class BuildAndroidTask extends DefaultTask {
     private void signArtifact() throws IOException {
         LoggerUtil.info("Signing package...");
         String storepass = "";
-        if (PropertyUtil.hasProjectProperty("android.storepass")) {
-            storepass = PropertyUtil.getProjectProperty("android.storepass");
+        if (PropertyUtil.hasProjectProperty(getProject(), "android.storepass")) {
+            storepass = PropertyUtil.getProjectProperty(getProject(), "android.storepass");
         }
         String keypass = "";
-        if (PropertyUtil.hasProjectProperty("android.keypass")) {
-            keypass = PropertyUtil.getProjectProperty("android.keypass");
+        if (PropertyUtil.hasProjectProperty(getProject(), "android.keypass")) {
+            keypass = PropertyUtil.getProjectProperty(getProject(), "android.keypass");
         }
         if (signingKeystore == null) {
             signingKeystore = PathUtil.getAndroidKeystore().getAbsolutePath();
@@ -189,7 +189,7 @@ public class BuildAndroidTask extends DefaultTask {
                 return apk;
             }
         }
-        throw new IOException("Expected APK not found in build directory!");
+        throw new IOException("Expected APK was not found in build directory!");
     }
 
     private File getSignedArtifact() throws IOException {
@@ -199,7 +199,7 @@ public class BuildAndroidTask extends DefaultTask {
                 return apk;
             }
         }
-        throw new IOException("Expected APK not found in build directory!");
+        throw new IOException("Expected APK was not found in build directory!");
     }
 
     private void moveArtifactToDistDir() throws IOException {

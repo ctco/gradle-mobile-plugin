@@ -9,7 +9,6 @@ package lv.ctco.scm.mobile.platform.xcode;
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
 import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-import lv.ctco.scm.mobile.core.utils.PathUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 import lv.ctco.scm.mobile.core.utils.TeamcityUtil;
@@ -36,6 +35,7 @@ public class ProjectInfoTask extends DefaultTask {
 
     @TaskAction
     public void doTaskAction() {
+        // TODO : Clean up ...
         try {
             Map<String, String> buildSettings = XcodeUtil.getBuildSettings();
             String productType = buildSettings.get("PRODUCT_TYPE");
@@ -84,13 +84,11 @@ public class ProjectInfoTask extends DefaultTask {
                     printReleaseVersion(DEFAULT_XCODE_VERSION);
                 }
             }
-            LoggerUtil.lifecycle("Project revision: "+RevisionUtil.getRevision());
-            CommonUtil.printTeamcityInfo(version);
+            LoggerUtil.lifecycle("Project revision: "+RevisionUtil.getRevision(getProject()));
+            GitUtil.generateCommitInfo(getProject());
+            CommonUtil.printTeamcityInfo(getProject(), version);
             printTcVersionLibrary(versionLibrary);
             LibraryUtil.printLibrariesPublicationsInfo(getProject());
-            if (GitUtil.isGitDir(PathUtil.getProjectDir())) {
-                GitUtil.generateCommitInfo();
-            }
         } catch (IOException e) {
             throw new GradleException(e.getMessage(), e);
         }
@@ -105,7 +103,7 @@ public class ProjectInfoTask extends DefaultTask {
     }
 
     private void printTcVersionLibrary(String versionLibrary) throws IOException {
-        String revision = RevisionUtil.getRevision();
+        String revision = RevisionUtil.getRevision(getProject());
         if (versionLibrary != null && !versionLibrary.isEmpty()) {
             TeamcityUtil.setAgentParameter("project.library.version.iteration", versionLibrary);
             setLibraryVersion(versionLibrary, revision);
@@ -114,7 +112,7 @@ public class ProjectInfoTask extends DefaultTask {
 
     private void setLibraryVersion(String libraryVersion, String revision) {
         if(libraryVersion.length() != 0) {
-            TeamcityUtil.setAgentParameter("project.library.version.publish", libraryVersion+"_"+revision);
+            TeamcityUtil.setAgentParameter("project.library.version.publish", libraryVersion+"."+revision);
         } else {
             String error = "Library version is empty!";
             LoggerUtil.errorInTask(this.getName(), error);

@@ -7,12 +7,12 @@
 package lv.ctco.scm.mobile.platform.xcode
 
 import lv.ctco.scm.mobile.MobilePlugin
+import lv.ctco.scm.mobile.MobilePluginUtil
 import lv.ctco.scm.mobile.core.utils.RevisionUtil
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.tasks.bundling.Tar
 import org.gradle.testfixtures.ProjectBuilder
 
 import org.junit.Before
@@ -28,6 +28,8 @@ class XcodePlatformTest {
         RevisionUtil.setRevision("0")
         XcodeUtil.setXcodeproj(new File("dummy"))
     }
+
+    /*
 
     @Test
     void autodetectMultiTarget() {
@@ -135,7 +137,7 @@ class XcodePlatformTest {
         assertEquals extension.environments.size(), 1
     }
 
-    /* See https://confluence.ctco.lv/confluence/x/3j9tAg confluence page for a description. */
+    // See https://confluence.ctco.lv/confluence/x/3j9tAg confluence page for a description.
     @Test
     void testCaseFromDocumentation() {
         def project = ProjectBuilder.builder().build()
@@ -157,13 +159,6 @@ class XcodePlatformTest {
         assertEquals extension.environments['DEMO'].target, 'iDoStuff DemoClientA'
         assertEquals extension.environments.size(), 4
 
-    }
-
-    @Test
-    void containsTaskTarSource() {
-        Project project = getProjectConfigure()
-        //
-        assert project.tasks.findByName('tarSources') instanceof Tar
     }
 
     @Test
@@ -249,9 +244,6 @@ class XcodePlatformTest {
         assertTrue dep5Task != null
     }
 
-    /*
-     * Project configurations
-     */
     Project getProjectConfigure() {
         Project _project = ProjectBuilder.builder().build()
         _project.apply plugin: MobilePlugin
@@ -262,7 +254,7 @@ class XcodePlatformTest {
                 environment name: 'DEV', target: 'iGREW DEV'
             }
         }
-        _project.plugins.findPlugin(MobilePlugin).performDynamicConfiguration()
+        MobilePluginUtil.detectAndConfigurePlatform(_project)
         return _project
     }
 
@@ -283,7 +275,7 @@ class XcodePlatformTest {
                 }
             }
         }
-        project.plugins.findPlugin(MobilePlugin).performDynamicConfiguration()
+        MobilePluginUtil.detectAndConfigurePlatform(project)
         return project
     }
 
@@ -305,8 +297,10 @@ class XcodePlatformTest {
                 }
             }
         }
-        project.plugins.findPlugin(MobilePlugin).performDynamicConfiguration()
+        MobilePluginUtil.detectAndConfigurePlatform(project)
         return project
     }
+
+    */
 
 }

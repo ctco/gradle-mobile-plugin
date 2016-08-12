@@ -24,8 +24,8 @@ public class CreateTagTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         String stamp;
-        if (PropertyUtil.hasProjectProperty(PROP_STAMP)) {
-            stamp = PropertyUtil.getProjectProperty(PROP_STAMP);
+        if (PropertyUtil.hasProjectProperty(getProject(), PROP_STAMP)) {
+            stamp = PropertyUtil.getProjectProperty(getProject(), PROP_STAMP);
         } else {
             String error = "Property '"+PROP_STAMP+"' has not been provided!";
             LoggerUtil.errorInTask(this.getName(), error);

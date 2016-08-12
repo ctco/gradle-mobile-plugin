@@ -14,13 +14,11 @@ import org.gradle.api.artifacts.Configuration;
 import org.gradle.api.artifacts.Dependency;
 import org.gradle.api.artifacts.DependencySet;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 
-@Singleton
 public final class DependencyUtil {
 
     private DependencyUtil() {}

@@ -34,7 +34,7 @@ class XamarinPlatformTest {
         try {
             platform.configure(extension, null)
         } catch (IOException e) {
-            assertEquals e.getMessage(), 'solutionFile for ctcoMobile.xamarin extension is not defined.'
+            assertEquals e.getMessage(), 'solutionFile for ctcoMobile.xamarin extension is not defined'
             return
         }
         fail('Exception expected, solutionFile is not defined.')

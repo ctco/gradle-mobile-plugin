@@ -14,7 +14,6 @@ import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import javax.inject.Singleton;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -23,7 +22,6 @@ import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.*;
 
-@Singleton
 public final class ZipUtil {
 
     private static final List<String> DEFAULT_EXCLUDES = Arrays.asList(".DS_Store");

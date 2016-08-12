@@ -11,6 +11,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
+import org.gradle.api.Project;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,27 +22,16 @@ import java.util.regex.Pattern;
 public final class CommonUtil {
 
     private static final String DEFAULT_ENCODING = "UTF-8";
-    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     private CommonUtil() {}
 
-    /**
-     * Prints Teamcity service messages.
-     * @param releaseVersion Project releaseVersion.
-     * @throws IOException .
-     */
-    public static void printTeamcityInfo(String releaseVersion) throws IOException {
-        String revision = RevisionUtil.getRevision();
-        if (PropertyUtil.hasProjectProperty(PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(PROP_VCS_ROOT_SUBS).isEmpty()) {
-            TeamcityUtil.setBuildNumber(releaseVersion+"."+revision);
-            TeamcityUtil.setAgentParameter("build.number", releaseVersion+"."+revision);
-        } else {
-            TeamcityUtil.setBuildNumber(releaseVersion+"_"+revision);
-            TeamcityUtil.setAgentParameter("build.number", releaseVersion+"_"+revision);
-        }
+    public static void printTeamcityInfo(Project project, String releaseVersion) throws IOException {
+        String revision = RevisionUtil.getRevision(project);
+        TeamcityUtil.setBuildNumber(releaseVersion+"."+revision);
+        TeamcityUtil.setAgentParameter("build.number", releaseVersion+"."+revision);
         TeamcityUtil.setAgentParameter("project.version.iteration", releaseVersion);
-        if (PropertyUtil.hasProjectProperty("stamp")) {
-            StampUtil.updateStamp(PropertyUtil.getProjectProperty("stamp"), releaseVersion);
+        if (PropertyUtil.hasProjectProperty(project, "stamp")) {
+            StampUtil.updateStamp(PropertyUtil.getProjectProperty(project, "stamp"), releaseVersion);
         }
     }
 
@@ -122,7 +113,7 @@ public final class CommonUtil {
     }
 
     public static String getMD5InfoString(File file) throws IOException {
-        return "["+file.getAbsolutePath()+"](MD5="+getMD5Hex(file)+")";
+        return "'"+file.getAbsolutePath()+"' MD5="+getMD5Hex(file);
     }
 
     static File getIpaPayloadApp(File dir) {
@@ -139,18 +130,18 @@ public final class CommonUtil {
     }
 
     static File unpackIpaPayload(File targetIpa, File payloadDir) throws IOException {
-        LoggerUtil.info("Unpacking ["+targetIpa.getAbsolutePath()+"] payload to ["+payloadDir.getAbsolutePath()+"]");
+        LoggerUtil.info("Unpacking '"+targetIpa.getAbsolutePath()+"' payload to '"+payloadDir.getAbsolutePath()+"'");
         FileUtils.deleteDirectory(payloadDir);
         ZipUtil.extractAll(targetIpa, payloadDir);
         return payloadDir;
     }
 
     static void repackIpaPayload(File payloadDir, File targetIpa) throws IOException {
-        LoggerUtil.info("Repacking ["+payloadDir.getAbsolutePath()+"] payload to ["+targetIpa.getAbsolutePath()+"]");
+        LoggerUtil.info("Repacking '"+payloadDir.getAbsolutePath()+"' payload to '"+targetIpa.getAbsolutePath()+"'");
         if (payloadDir.exists()) {
             ZipUtil.compressDirectory(payloadDir, false, targetIpa);
         } else {
-            throw new IOException("Payload ["+payloadDir.getAbsolutePath()+"] was not found!");
+            throw new IOException("Payload '"+payloadDir.getAbsolutePath()+"' was not found!");
         }
     }
 

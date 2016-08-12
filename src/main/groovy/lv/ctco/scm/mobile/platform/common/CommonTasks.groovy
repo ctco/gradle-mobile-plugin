@@ -18,11 +18,10 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
-import org.gradle.api.tasks.bundling.Compression;
-import org.gradle.api.tasks.bundling.Tar;
 
-@Singleton
 public class CommonTasks {
+
+    private CommonTasks() {}
 
     public static boolean hasUIATestConfiguration(UIAutomationSetup uiaSetup) {
         boolean result = true
@@ -78,7 +77,7 @@ public class CommonTasks {
         } else {
             return project.task("createTag", type: CreateTagTask) {
                 group = TaskGroup.UTILITY.getLabel()
-                description = "Calculates and prints new stamp from provided \'changeset\' and \'stamp\'"
+                description = "Calculates and prints new stamp from provided 'changeset' and 'stamp'"
             }
         }
     }
@@ -91,7 +90,7 @@ public class CommonTasks {
             return project.task("knappsackUpload", type: KnappsackUploadTask) {
                 group = TaskGroup.KNAPPSACK.getLabel()
                 description = "Upload an artifact to a Knappsack server"
-                extension = KnappsackUtil.setupKnappsackExtension()
+                extension = KnappsackUtil.setupKnappsackExtension(project)
             }
         }
     }
@@ -104,49 +103,15 @@ public class CommonTasks {
             return project.task("reprofileIpa", type: ReprofileIpaTask) {
                 group = TaskGroup.UTILITY.getLabel()
                 description = "Re-profiles and re-signs an IPA file to other environment"
+
             }
-        }
-    }
-
-    public static Task createTarSourcesTask(Project project) {
-        String TAR_TASK_PROP = 'runTarSources'
-        String SOURCES = 'sources.tgz'
-
-        return project.task("tarSources", type: Tar, overwrite: true) {
-            group = TaskGroup.UTILITY.getLabel()
-            description = 'Compresses projects source files into sources.tgz'
-            onlyIf {
-                def sourceFile = new File(SOURCES)
-                def rtaskBoolean = true
-
-                if (project.hasProperty(TAR_TASK_PROP)) {
-                    if (project.property(TAR_TASK_PROP) == "false") {
-                        rtaskBoolean = false
-                        LoggerUtil.info("Project has property: " + TAR_TASK_PROP + "skipping task")
-                    }
-                }
-                if (sourceFile.exists()) {
-                    LoggerUtil.info(SOURCES + " exists skipping task")
-                    rtaskBoolean = false
-                }
-
-                return rtaskBoolean
-            }
-            from('.')
-            exclude('.git')
-            exclude('.svn')
-            exclude('.gradle')
-            exclude('build')
-            exclude(SOURCES)
-            compression = Compression.GZIP
-            archiveName = SOURCES
         }
     }
 
     private static Task getTaskByName(Project project, String taskName) {
         try {
             Task task = project.getTasks().getByName(taskName)
-            LoggerUtil.debug("Found existing task with name ["+taskName+"] and class ["+task.getClass().getCanonicalName()+"]")
+            LoggerUtil.debug("Found existing task with name '"+taskName+"' and class '"+task.getClass().getCanonicalName()+"'")
             return task
         } catch (UnknownTaskException ignore) {
             return null

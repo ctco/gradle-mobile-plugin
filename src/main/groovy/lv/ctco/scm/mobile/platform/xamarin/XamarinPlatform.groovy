@@ -6,21 +6,26 @@
 
 package lv.ctco.scm.mobile.platform.xamarin;
 
-import lv.ctco.scm.mobile.core.objects.Environment;
+import lv.ctco.scm.mobile.core.objects.Environment
+import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil;
+import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil
+import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
 import lv.ctco.scm.mobile.platform.common.UIAutomationTask;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
-/** Manages Gradle configuration related to Xamarin build system. */
 class XamarinPlatform {
 
     public static final String NAME = "xamarin";
 
     protected Project project;
+
+    private String releaseVersionIos;
+    private String releaseVersionAndroid;
+    private String revision;
 
     XamarinPlatform(Project project) {
         this.project = project;
@@ -36,8 +41,11 @@ class XamarinPlatform {
      * @param extXand XandroidExtension instance from Gradle project.
      */
     void configure(XamarinExtension extXios, XandroidExtension extXand) {
+        revision = RevisionUtil.getRevision(project);
+        GitUtil.generateCommitInfo(project);
+
         if (extXios.solutionFile == null) {
-            throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined.")
+            throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined")
         }
 
         if (extXios.solutionFile.exists()) {
@@ -49,13 +57,13 @@ class XamarinPlatform {
                 throw new IOException("Project "+extXios.projectName+" does not exist in solution "+extXios.solutionFile)
             }
 
-            SlnProjectSection projectSection = solution.getProject(extXios.projectName)
-            File csprojFile = new File(extXios.solutionFile.parentFile.absolutePath, projectSection.buildFilePath)
-            Csproj csproj = new CsprojParser(csprojFile).parse()
+            SlnProjectSection sectionXios = solution.getProject(extXios.projectName)
+            File csprojXiosFile = new File(extXios.solutionFile.parentFile.absolutePath, sectionXios.buildFilePath)
+            Csproj csprojXios = new CsprojParser(csprojXiosFile).parse()
 
             if (extXios.automaticConfiguration) {
                 LoggerUtil.lifecycle("Performing Xamarin iOS settings automatic configuration.")
-                performAutomaticConfiguration(extXios, solution, projectSection, csproj)
+                performAutomaticConfiguration(extXios, solution, sectionXios, csprojXios)
             }
 
             validateXamarinExtension(extXios)
@@ -68,12 +76,26 @@ class XamarinPlatform {
                 LoggerUtil.info("Valid Xamarin Android configuration not found.")
             }
 
-            String releaseVersion = XamarinUtil.getReleaseVersion(csproj)
-            XamarinTasks.getOrCreateIncrementVersionTask(project, extXios, csproj)
+            // Getting release versions from according csproj files
+            releaseVersionIos = XamarinUtil.getReleaseVersion(csprojXios)
+            if (extXand.isValid()) {
+                LoggerUtil.info("Loading solution file $extXand.solutionFile")
+                SolutionParser spXand = new SolutionParser(extXand.solutionFile)
+                Solution slnXand = spXand.parse()
+                if (!slnXand.containsProject(extXand.projectName)) {
+                    throw new IOException("Project "+extXand.projectName+" does not exist in solution "+extXand.solutionFile)
+                }
+                SlnProjectSection sectionXand = solution.getProject(extXand.projectName)
+                File csprojXandFile = new File(extXand.solutionFile.parentFile.absolutePath, sectionXand.buildFilePath)
+                Csproj csprojXand = new CsprojParser(csprojXandFile).parse()
+                releaseVersionAndroid = XamarinUtil.getReleaseVersion(csprojXand)
+            }
+
+            XamarinTasks.getOrCreateIncrementVersionTask(project, extXios, csprojXios)
             setupCleanTasks(extXios, extXand)
-            setupProjectInfoTask(releaseVersion)
-            setupBuildTasks(extXios, extXand, releaseVersion)
-            setupUIATestTasks(extXios)
+            setupProjectInfoTask(releaseVersionIos)
+            setupBuildTasks(extXios, extXand)
+            //setupUIATestTasks(extXios)
         } else {
             LoggerUtil.info("Defined solution file was not found! Will not configure build tasks...")
             LoggerUtil.info(extXios.toString())
@@ -128,7 +150,7 @@ class XamarinPlatform {
      * @param extXios XamarinExension to read configuration from.
      * @param extXand XandroidExension to read configuration from.
      */
-    protected void setupBuildTasks(XamarinExtension extXios, XandroidExtension extXand, String releaseVersion) {
+    protected void setupBuildTasks(XamarinExtension extXios, XandroidExtension extXand) {
         Task buildTask = XamarinTasks.getOrCreateBuildTask(project)
 
         Task dependencyRestoreTask = XamarinTasks.getOrCreateRestoreDependenciesTask(project)
@@ -139,7 +161,7 @@ class XamarinPlatform {
         for (Environment _env : extXios.environments.values()) {
             Task envTask = XamarinTasks.getOrCreateBuildIosEnvTask(project, _env, extXios)
             Task profilingTask = XamarinTasks.getOrCreateProfileIosEnvTask(project, _env, extXios)
-            Task updateVersionTask = XamarinTasks.getOrCreateUpdateVersionIosEnvTask(project, _env, extXios, releaseVersion)
+            Task updateVersionTask = XamarinTasks.getOrCreateUpdateVersionIosEnvTask(project, _env, extXios, releaseVersionIos)
             envTask.dependsOn(dependencyRestoreIosTask)
             if (extXios.skipUpdateVersionForAppstoreConfiguration && "AppStore|iPhone".equals(_env.getConfiguration())) {
                 LoggerUtil.info("Disabling updateVersion task for $envTask.name as requested by configuration!")
@@ -182,7 +204,7 @@ class XamarinPlatform {
                     environmentName = _env.getName()
                     profiles = extXand.getProfilesAsArray()
                 }
-                Task manifestVersionUpdateTask = XamarinTasks.getOrCreateManifestVersionUpdateTask(project, extXand, releaseVersion)
+                Task manifestVersionUpdateTask = XamarinTasks.getOrCreateManifestVersionUpdateTask(project, extXand, releaseVersionAndroid)
                 envTask.dependsOn(dependencyRestoreAndroidTask)
                 envTask.dependsOn(manifestVersionUpdateTask)
                 envTask.dependsOn(profilingTask)

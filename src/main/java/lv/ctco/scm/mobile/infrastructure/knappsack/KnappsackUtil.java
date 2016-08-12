@@ -11,6 +11,7 @@ import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.gradle.api.Project;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,25 +33,25 @@ public final class KnappsackUtil {
 
     private KnappsackUtil() {}
 
-    public static KnappsackExtension setupKnappsackExtension() {
+    public static KnappsackExtension setupKnappsackExtension(Project project) {
         KnappsackExtension ext = new KnappsackExtension();
-        ext.setUrl(getProperty(PROP_URL));
-        ext.setUserName(getProperty(PROP_USER_NAME));
-        ext.setPassword(getProperty(PROP_PSWD));
-        ext.setApplicationId(getProperty(PROP_APP_ID));
-        ext.setGroupId(getProperty(PROP_GROUP_ID));
-        ext.setStorageId(getProperty(PROP_STORAGE_ID));
-        ext.setVersion(getProperty(PROP_VERSION));
-        ext.setWhatsNew(getProperty(PROP_WHATS_NEW));
-        ext.setWhatsNewFileName(getProperty(PROP_WHATS_NEW_FILE));
-        ext.setArtifactFileName(getProperty(PROP_ARTIFACT));
-        ext.setKeyStoreFileName(getProperty(PROP_KEY_STORE_FILE_NAME));
-        ext.setKeyStorePassword(getProperty(PROP_KEY_STORE_PSWD));
+        ext.setUrl(getProperty(project, PROP_URL));
+        ext.setUserName(getProperty(project, PROP_USER_NAME));
+        ext.setPassword(getProperty(project, PROP_PSWD));
+        ext.setApplicationId(getProperty(project, PROP_APP_ID));
+        ext.setGroupId(getProperty(project, PROP_GROUP_ID));
+        ext.setStorageId(getProperty(project, PROP_STORAGE_ID));
+        ext.setVersion(getProperty(project, PROP_VERSION));
+        ext.setWhatsNew(getProperty(project, PROP_WHATS_NEW));
+        ext.setWhatsNewFileName(getProperty(project, PROP_WHATS_NEW_FILE));
+        ext.setArtifactFileName(getProperty(project, PROP_ARTIFACT));
+        ext.setKeyStoreFileName(getProperty(project, PROP_KEY_STORE_FILE_NAME));
+        ext.setKeyStorePassword(getProperty(project, PROP_KEY_STORE_PSWD));
         return ext;
     }
 
-    private static String getProperty(String property) {
-        return PropertyUtil.hasProjectProperty(property) ? PropertyUtil.getProjectProperty(property) : null;
+    private static String getProperty(Project project, String property) {
+        return PropertyUtil.hasProjectProperty(project, property) ? PropertyUtil.getProjectProperty(project, property) : null;
     }
 
     private static void validateKnappsackExtension(KnappsackExtension ext) throws IOException {

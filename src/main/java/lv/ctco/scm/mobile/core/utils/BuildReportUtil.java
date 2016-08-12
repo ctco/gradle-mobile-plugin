@@ -6,16 +6,18 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
+import lv.ctco.scm.mobile.MobilePluginUtil;
 import lv.ctco.scm.mobile.core.objects.IosApp;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 
-import javax.inject.Singleton;
 import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.inject.Singleton;
 
 @Singleton
 public final class BuildReportUtil {
@@ -45,7 +47,7 @@ public final class BuildReportUtil {
 
     private static void writeSysEnvInfo(File reportFile) throws IOException {
         writeReportHeader(reportFile, "Build environment");
-        writeReportEntry(reportFile, "Build plugin version", PropertyUtil.getPluginVersion());
+        writeReportEntry(reportFile, "Build plugin version", MobilePluginUtil.getPluginVersion());
         if (PropertyUtil.hasEnvironmentProperty("TEAMCITY_VERSION")) {
             writeReportEntry(reportFile, "Xcode version", PropertyUtil.getEnvironmentProperty("XCODE_VERSION"));
             writeReportEntry(reportFile, "iOS SDK version", PropertyUtil.getEnvironmentProperty("XCODE_SDK_IPHONEOS"));

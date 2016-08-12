@@ -10,14 +10,12 @@ import com.dd.plist.*;
 import org.apache.commons.exec.CommandLine;
 import org.xml.sax.SAXException;
 
-import javax.inject.Singleton;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 
-@Singleton
 public final class PlistUtil {
 
     private static final String EXCEPTION_MSG_PARSE = "Exception while parsing a plist file";
@@ -63,10 +61,10 @@ public final class PlistUtil {
             throw new IOException(EXCEPTION_MSG_PARSE, e);
         }
         if (baseDict.containsKey(keyName)) {
-            LoggerUtil.info("Replacing node ["+keyName+"] with value ("+keyValue+")");
+            LoggerUtil.info("Replacing node '"+keyName+"' with value '"+keyValue+"'");
             baseDict.put(keyName, keyValue);
         } else {
-            LoggerUtil.info("Adding node ["+keyName+"] with value ("+keyValue+")");
+            LoggerUtil.info("Adding node '"+keyName+"' with value '"+keyValue+"'");
             baseDict.put(keyName, keyValue);
         }
         PropertyListParser.saveAsXML(baseDict, plistFile);

@@ -14,8 +14,9 @@ import org.gradle.api.Project;
 import org.gradle.api.Task;
 import org.gradle.api.UnknownTaskException;
 
-@Singleton
 class XcodeTasks {
+
+    private XcodeTasks() {}
 
     protected static Task getOrCreateCleanTask(Project project) {
         Task task = getTaskByName(project, "clean")
@@ -84,7 +85,7 @@ class XcodeTasks {
         if (task != null) {
             return task
         } else {
-            return project.task("updateVersion"+env.getCamelName(), type: UpdateVersionTask) {
+            return project.task("updateVersion"+env.getCamelName(), type: UpdateVersionIosTask) {
                 //group = TaskGroup.BUILD.getLabel()
                 description = "Updates app version for "+env.getName()+" environment"
                 targetName = env.getTarget()

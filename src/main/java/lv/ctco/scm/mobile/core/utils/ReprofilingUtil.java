@@ -6,14 +6,14 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
+import org.gradle.api.Project;
+
 import lv.ctco.scm.mobile.core.objects.IosApp;
 import lv.ctco.scm.mobile.core.objects.Profile;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
 
-@Singleton
 public final class ReprofilingUtil {
 
     private ReprofilingUtil() {}
@@ -52,7 +52,7 @@ public final class ReprofilingUtil {
         }
     }
 
-    public static void reprofileIpa(File targetIpa, String targetEnv, Profile[] profiles, boolean cleanReleaseVersionForPROD) throws IOException {
+    public static void reprofileIpa(Project project, File targetIpa, String targetEnv, Profile[] profiles, boolean cleanReleaseVersionForPROD) throws IOException {
         LoggerUtil.info("Reprofiling IPA '"+targetIpa.getAbsolutePath()+"' to environment '"+targetEnv+"'");
         File workingDir = targetIpa.getParentFile();
         File payloadDir = new File(workingDir, "temp_ipa_payload");
@@ -71,8 +71,8 @@ public final class ReprofilingUtil {
                     }
                 }
             }
-            if (PropertyUtil.hasProjectProperty("reprofiling.version")) {
-                String version = PropertyUtil.getProjectProperty("reprofiling.version");
+            if (PropertyUtil.hasProjectProperty(project, "reprofiling.version")) {
+                String version = PropertyUtil.getProjectProperty(project, "reprofiling.version");
                 if (version.isEmpty()) {
                     LoggerUtil.warn("Reprofiling version has not been provided. Will use the existing version.");
                 } else {
@@ -92,7 +92,7 @@ public final class ReprofilingUtil {
                 LoggerUtil.warn("Reprofiling version has not been provided. Will use the existing version.");
             }
             BackupUtil.applyChanges();
-            IosSigningUtil.signApp(appDir);
+            IosSigningUtil.signApp(project, appDir);
             IosApp iosApp = new IosApp(appDir);
             BuildReportUtil.addIosAppInfo(iosApp);
             File resultIpa;

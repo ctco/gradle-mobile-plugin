@@ -34,6 +34,7 @@ public final class PathUtil {
     private static final String IPADIST_SUBPATH = "ipadist";
     private static final String DSYMDIST_SUBPATH = "dsymdist";
     private static final String APKDIST_SUBPATH = "apkdist";
+    private static final String AARDIST_SUBPATH = "aardist";
     private static final String ARTIFACT_SUBPATH = "Artifacts";
 
     private static final String XCODE_DST_SUBPATH = "xcodebuild/dst";
@@ -100,6 +101,10 @@ public final class PathUtil {
 
     public static File getApkDistDir() throws IOException {
         return createAndReturn(new File(getBuildDir(), APKDIST_SUBPATH));
+    }
+
+    public static File getAarDistDir() throws IOException {
+        return createAndReturn(new File(getBuildDir(), AARDIST_SUBPATH));
     }
 
     public static File getPublicationArtifactDir() throws IOException {

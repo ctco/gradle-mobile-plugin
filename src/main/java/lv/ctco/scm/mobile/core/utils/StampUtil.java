@@ -8,10 +8,8 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.lang3.StringUtils;
 
-import javax.inject.Singleton;
 import java.io.IOException;
 
-@Singleton
 public final class StampUtil {
 
     private static final Integer EXT_DEPLOYMENT_SUFFIX_POSITION = 1;

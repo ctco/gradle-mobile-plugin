@@ -6,35 +6,37 @@
 
 package lv.ctco.scm.mobile.platform.common
 
-import lv.ctco.scm.mobile.core.objects.Profile
-import lv.ctco.scm.mobile.core.utils.LoggerUtil
-import lv.ctco.scm.mobile.core.utils.PropertyUtil
-import lv.ctco.scm.mobile.core.utils.ReprofilingUtil
+import lv.ctco.scm.mobile.MobileExtension;
+import lv.ctco.scm.mobile.core.objects.Profile;
+import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.utils.PropertyUtil;
+import lv.ctco.scm.mobile.core.utils.ReprofilingUtil;
 
-import org.gradle.api.DefaultTask
-import org.gradle.api.GradleException
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.DefaultTask;
+import org.gradle.api.GradleException;
+import org.gradle.api.tasks.TaskAction;
 
 class ReprofileIpaTask extends DefaultTask {
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
+    MobileExtension ctcoMobile;
+
     @TaskAction
     public void doTaskAction() {
-        checkProvidedParameters()
-        String platform = project.ctcoMobile.platform
-        LoggerUtil.debug('Reading profile configuration for ['+platform+'] platform')
+        checkProvidedParameters();
+        String platform = getProject().ctcoMobile.platform;
+        LoggerUtil.debug("Reading profile configuration for '"+platform+"' platform");
         Profile[] profiles
         boolean cleanReleaseVersion = false
         if (platform.equals('xcode')) {
-            profiles = project.ctcoMobile.xcode.getProfilesAsArray()
+            profiles = getProject().ctcoMobile.xcode.getProfilesAsArray()
         } else if (platform.equals('xamarin')) {
-            profiles = project.ctcoMobile.xamarin.getProfilesAsArray()
-            cleanReleaseVersion = project.ctcoMobile.xamarin.cleanReleaseVersionForPROD
+            profiles = getProject().ctcoMobile.xamarin.getProfilesAsArray()
+            cleanReleaseVersion = getProject().ctcoMobile.xamarin.cleanReleaseVersionForPROD
         } else {
             throw new GradleException("Unsupported project platform! Plugin supports 'xcode' and 'xamarin'.")
         }
-        String targetEnvName = PropertyUtil.getProjectProperty("reprofiling.environment")
-        File targetIpaFile = new File(PropertyUtil.getProjectProperty("reprofiling.artifact"))
+        String targetEnvName = PropertyUtil.getProjectProperty(getProject(), "reprofiling.environment")
+        File targetIpaFile = new File(PropertyUtil.getProjectProperty(getProject(),"reprofiling.artifact"))
         if (targetEnvName == null || targetEnvName.isEmpty()) {
             throw new GradleException('Reprofiling target environment name has not been provided!')
         }
@@ -45,12 +47,13 @@ class ReprofileIpaTask extends DefaultTask {
             throw new GradleException('Reprofiling target artifact has not been found!')
         }
         LoggerUtil.info('Reprofiling IPA file...')
-        ReprofilingUtil.reprofileIpa(targetIpaFile, targetEnvName, profiles, cleanReleaseVersion)
+        ReprofilingUtil.reprofileIpa(getProject(), targetIpaFile, targetEnvName, profiles, cleanReleaseVersion)
         LoggerUtil.info('Reprofiling IPA done.')
     }
 
-    private static void checkProvidedParameters() {
-        if (!(PropertyUtil.hasProjectProperty("reprofiling.artifact") && PropertyUtil.hasProjectProperty("reprofiling.environment"))) {
+    private void checkProvidedParameters() {
+        if (!(PropertyUtil.hasProjectProperty(getProject(), "reprofiling.artifact")
+                && PropertyUtil.hasProjectProperty(getProject(), "reprofiling.environment"))) {
             throw new GradleException("Required parameters have not been provided!")
         }
     }
