@@ -7,10 +7,8 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.objects.Environment
-import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil
-import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
 import lv.ctco.scm.mobile.platform.common.UIAutomationTask;
 
@@ -25,7 +23,6 @@ class XamarinPlatform {
 
     private String releaseVersionIos;
     private String releaseVersionAndroid;
-    private String revision;
 
     XamarinPlatform(Project project) {
         this.project = project;
@@ -41,9 +38,6 @@ class XamarinPlatform {
      * @param extXand XandroidExtension instance from Gradle project.
      */
     void configure(XamarinExtension extXios, XandroidExtension extXand) {
-        revision = RevisionUtil.getRevision(project);
-        GitUtil.generateCommitInfo(project);
-
         if (extXios.solutionFile == null) {
             throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined")
         }
