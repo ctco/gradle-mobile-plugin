@@ -16,7 +16,7 @@ public class MobilePluginUtilTest {
 
     @Test
     public void pluginHasInfoProperties() throws IOException {
-        MobilePluginUtil.getPluginInfo(MobilePluginUtil.class.getClassLoader().getResourceAsStream("plugin-info.properties"));
+        MobilePluginUtil.getPluginInfo(this.getClass().getClassLoader().getResourceAsStream("plugin-info.properties"));
         assertNotNull(MobilePluginUtil.getPluginGroup());
         assertNotNull(MobilePluginUtil.getPluginName());
         assertNotNull(MobilePluginUtil.getPluginVersion());

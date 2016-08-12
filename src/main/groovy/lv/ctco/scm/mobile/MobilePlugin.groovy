@@ -33,6 +33,7 @@ class MobilePlugin implements Plugin<Project> {
             LoggerUtil.info("Applying C.T.Co Mobile Plugin to '"+project.getName()+"' project");
 
             if (project.state.getFailure() == null) {
+                MobilePluginUtil.getPluginInfo(this.getClass().getClassLoader().getResourceAsStream("plugin-info.properties"))
                 checkGradleVersion();
             }
 

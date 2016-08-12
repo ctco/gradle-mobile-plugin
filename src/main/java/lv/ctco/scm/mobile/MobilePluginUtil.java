@@ -6,21 +6,20 @@
 
 package lv.ctco.scm.mobile;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.TeamcityUtil;
 
-import javax.inject.Singleton;
-
-@Singleton
-public final class MobilePluginUtil {
+public class MobilePluginUtil {
 
     private static String pluginGroup;
     private static String pluginName;
     private static String pluginVersion;
 
-    private MobilePluginUtil() {
-        getPluginInfo(MobilePluginUtil.class.getClassLoader().getResourceAsStream("plugin-info.properties"));
-    }
+    private MobilePluginUtil() {}
 
     public static String getPluginGroup() {
         return pluginGroup;
