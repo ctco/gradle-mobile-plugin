@@ -28,23 +28,27 @@ class XcodePlatform {
     }
 
     public void configure(XcodeExtension ext) {
-        if (ext.getAutomaticConfiguration()) {
-            LoggerUtil.debug("Performing Xcode settings automatic configuration")
-            performAutomaticConfiguration(ext)
-        }
-        configureBuildTasks(ext)
-        configureUtilityTasks(ext)
-        configureUnitTestTasks(ext)
-        configureUiaTestTasks(ext)
-        configureLibraryPublications(ext)
+        if (XcodeUtil.getXcodeprojCount(project.projectDir) == 1) {
+            if (ext.getAutomaticConfiguration()) {
+                LoggerUtil.debug("Performing Xcode settings automatic configuration")
+                performAutomaticConfiguration(ext)
+            }
+            configureBuildTasks(ext)
+            configureUtilityTasks(ext)
+            configureUnitTestTasks(ext)
+            configureUiaTestTasks(ext)
+            configureLibraryPublications(ext)
 
-        LoggerUtil.info("Final configuration:")
-        LoggerUtil.info(ext.toString())
-        if (ext.uiasetup != null) {
-            LoggerUtil.info(ext.uiasetup.toString())
-        }
-        if (!LibraryUtil.getLibrariesPublications(project).isEmpty()) {
-            LibraryUtil.printLibrariesRepositoriesInfo(project)
+            LoggerUtil.info("Final configuration:")
+            LoggerUtil.info(ext.toString())
+            if (ext.uiasetup != null) {
+                LoggerUtil.info(ext.uiasetup.toString())
+            }
+            if (!LibraryUtil.getLibrariesPublications(project).isEmpty()) {
+                LibraryUtil.printLibrariesRepositoriesInfo(project)
+            }
+        } else {
+            LoggerUtil.info("xcodeproj file was not found. Will not configure build tasks...")
         }
     }
 
