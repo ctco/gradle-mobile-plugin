@@ -73,7 +73,11 @@ public final class IosSigningUtil {
     private static void codesignApp(File appDir, String identity, File provisioning, File entitlements) throws IOException {
         FileUtils.copyFile(provisioning, new File(appDir, "embedded.mobileprovision"));
         CommandLine commandLine = new CommandLine(COMMAND_CODESIGN);
-        commandLine.addArguments(new String[]{"-f", "-s", identity, OPTION_VERBOSE, "--entitlements", entitlements.getAbsolutePath(), appDir.getAbsolutePath()}, false);
+        if (entitlements == null) {
+            commandLine.addArguments(new String[]{"-f", "-s", identity, OPTION_VERBOSE, appDir.getAbsolutePath()}, false);
+        } else {
+            commandLine.addArguments(new String[]{"-f", "-s", identity, OPTION_VERBOSE, "--entitlements", entitlements.getAbsolutePath(), appDir.getAbsolutePath()}, false);
+        }
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
         if (!execResult.isSuccess()) {
             throw new IOException(execResult.getException());
