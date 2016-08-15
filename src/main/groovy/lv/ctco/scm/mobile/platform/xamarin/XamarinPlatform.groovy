@@ -6,11 +6,13 @@
 
 package lv.ctco.scm.mobile.platform.xamarin;
 
-import lv.ctco.scm.mobile.core.objects.Environment
+import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil
+import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
 import lv.ctco.scm.mobile.platform.common.UIAutomationTask;
+
+import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -39,7 +41,12 @@ class XamarinPlatform {
      */
     void configure(XamarinExtension extXios, XandroidExtension extXand) {
         if (extXios.solutionFile == null) {
-            throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined")
+            if (XamarinUtil.getSlnCount(project.getProjectDir()) == 1) {
+                String[] extensions = ["sln"];
+                extXios.solutionFile = FileUtils.listFiles(project.projectDir, extensions, false)[0];
+            } else {
+                throw new IOException("solutionFile for ctcoMobile.xamarin extension is not defined")
+            }
         }
 
         if (extXios.solutionFile.exists()) {
