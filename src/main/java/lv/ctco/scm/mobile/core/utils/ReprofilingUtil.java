@@ -65,8 +65,9 @@ public final class ReprofilingUtil {
                     File profileFile = new File("Profiles/"+profile.getSources());
                     if (!profileFile.exists()) {
                         profileFile = new File(profile.getSources());
-                    } else {
-                        throw new IOException("Profile file was not found");
+                        if (!profileFile.exists()) {
+                            throw new IOException("Profile file was not found");
+                        }
                     }
                     if ("archived-expanded-entitlements.xcent".equalsIgnoreCase(targetFile.getName())) {
                         ProfilingUtil.profileUsingPlistEntries(targetFile, profileFile, ProfilingUtilMode.UPDATE_AND_ADD);
