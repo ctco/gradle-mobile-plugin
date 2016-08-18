@@ -10,7 +10,6 @@ import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil;
 import lv.ctco.scm.mobile.platform.common.CommonTasks;
-import lv.ctco.scm.mobile.platform.common.UIAutomationTask;
 
 import org.apache.commons.io.FileUtils;
 
@@ -92,11 +91,15 @@ class XamarinPlatform {
                 releaseVersionAndroid = XamarinUtil.getReleaseVersion(csprojXand)
             }
 
-            XamarinTasks.getOrCreateIncrementVersionTask(project, extXios, csprojXios)
             setupCleanTasks(extXios, extXand)
-            setupProjectInfoTask(releaseVersionIos)
             setupBuildTasks(extXios, extXand)
-            //setupUIATestTasks(extXios)
+
+            if (extXios.getEnvironments().size() == 0 && releaseVersionAndroid != null) {
+                setupProjectInfoTask(releaseVersionAndroid)
+            } else {
+                setupProjectInfoTask(releaseVersionIos)
+            }
+            XamarinTasks.getOrCreateIncrementVersionTask(project, extXios, csprojXios)
         } else {
             LoggerUtil.info("Defined solution file was not found! Will not configure build tasks...")
             LoggerUtil.info(extXios.toString())
@@ -214,88 +217,6 @@ class XamarinPlatform {
                 buildTask.dependsOn(envTask)
                 profilingTask.mustRunAfter(dependencyRestoreAndroidTask)
                 manifestVersionUpdateTask.mustRunAfter(dependencyRestoreAndroidTask)
-            }
-        }
-    }
-
-    protected void processUIATestConfiguration(XamarinExtension extXios) {
-        String fs = System.getProperty("file.separator")
-        if (extXios.uiasetup.appPath == null) {
-            if (extXios.projectName != null && extXios.uiasetup.appName != null && extXios.uiasetup.buildTarget != null) {
-                extXios.uiasetup.appPath = new File(extXios.projectName + fs + "bin" + fs +
-                        extXios.uiasetup.buildTarget.substring(
-                                extXios.uiasetup.buildTarget.indexOf("|") + 1,
-                                extXios.uiasetup.buildTarget.length()) + fs +
-                        extXios.uiasetup.buildTarget.substring(0, extXios.uiasetup.buildTarget.indexOf("|")) + fs +
-                        extXios.uiasetup.appName + ".app")
-                LoggerUtil.info("Auto-calculated appPath as " + extXios.uiasetup.appPath)
-            } else {
-                throw new IOException("appPath parameter is not defined and can not be auto-calculated")
-            }
-        }
-        if (extXios.uiasetup.appName == null) {
-            extXios.uiasetup.appName = extXios.uiasetup.appPath.substring(
-                    extXios.uiasetup.appName.lastIndexOf("/"),
-                    extXios.uiasetup.appName.length()
-            ).replace(".app", "")
-            LoggerUtil.info("Auto-calculated appName as " + extXios.uiasetup.appName)
-        }
-        if (extXios.uiasetup.resultsPath == null) {
-            extXios.uiasetup.resultsPath = new File(".")
-        }
-    }
-
-    protected void setupUIATestTasks(XamarinExtension extXios) {
-        Task testAllTask
-        if (CommonTasks.hasUIATestConfiguration(extXios.uiasetup)) {
-            LoggerUtil.info("UIAutomation test configuration was found. Configuring the UI testing tasks...")
-            processUIATestConfiguration(extXios)
-            testAllTask = project.task 'runUITests', {
-                group = 'Mobile UI Test'
-                description = "Runs all UI tests in $extXios.projectName project"
-            }
-            Task buildTask = project.task type: BuildIosTask, "buildUITestApp", {
-                group = 'Mobile UI Test'
-                description = "Builds app for testing with $extXios.uiasetup.buildTarget configuration"
-                solutionFile = extXios.solutionFile
-                configuration = extXios.uiasetup.buildTarget
-                envCamelName = "UITestApp"
-            }
-            Task dependencyRestoreTask = XamarinTasks.getOrCreateRestoreDependenciesTask(project)
-            buildTask.dependsOn dependencyRestoreTask
-
-            testAllTask.dependsOn buildTask
-            if (extXios.uiasetup.applyProfile != null) {
-                String envCamelName = extXios.uiasetup.applyProfile[0].toUpperCase() +
-                        extXios.uiasetup.applyProfile[1..extXios.uiasetup.applyProfile.length() - 1].toLowerCase()
-                Task profilingTask = project.task type: ProfilingTask, overwrite: true, "applyProfile$envCamelName", {
-                    description = "Profiles plist files for $extXios.uiasetup.applyProfile environment"
-                    projectName = extXios.projectName
-                    environmentName = extXios.uiasetup.applyProfile
-                    profiles = extXios.getProfilesAsArray()
-                    enforcePlistSyntax = extXios.enforcePlistSyntax
-                }
-                buildTask.dependsOn profilingTask
-                buildTask.finalizedBy CommonTasks.getOrCreateCleanupBuildTask(project, buildTask.getName())
-            }
-
-            int t = 0
-            for (String uiaTest : extXios.uiasetup.jsPath) {
-                t++
-                String uiTestNum = ("0" + t.toString()).substring(Math.max(0, ("0" + t.toString()).length() - 2))
-                String uiTestName = (uiaTest.substring(uiaTest.lastIndexOf("/") + 1, uiaTest.length())).replace(".js", "")
-                Task testTask = project.task type: UIAutomationTask, "runUITest" + uiTestNum + uiTestName, {
-                    group = 'Mobile UI Test'
-                    description = "Runs $uiTestName test"
-                    testName = "UITest" + uiTestNum + uiTestName
-                    appPath = new File(extXios.uiasetup.appPath)
-                    resultsPath = new File(extXios.uiasetup.resultsPath)
-                    targetDevice = extXios.uiasetup.targetDevice
-                    jsPath = new File(uiaTest)
-                }
-                testTask.dependsOn buildTask
-                testTask.finalizedBy(CommonTasks.getOrCreateCleanupSimulatorTask(project, testTask.getName()))
-                testAllTask.dependsOn testTask
             }
         }
     }

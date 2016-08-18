@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.platform.common
 
 import lv.ctco.scm.mobile.core.objects.TaskGroup;
-import lv.ctco.scm.mobile.core.objects.UIAutomationSetup;
 import lv.ctco.scm.mobile.core.utils.BackupUtil;
 import lv.ctco.scm.mobile.core.utils.IosSimulatorUtil;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
@@ -22,21 +21,6 @@ import org.gradle.api.UnknownTaskException;
 public class CommonTasks {
 
     private CommonTasks() {}
-
-    public static boolean hasUIATestConfiguration(UIAutomationSetup uiaSetup) {
-        boolean result = true
-        if (uiaSetup == null) {
-            result = false
-        } else {
-            if (uiaSetup.buildTarget == null) {
-                result = false
-            }
-            if (uiaSetup.jsPath == null) {
-                result = false
-            }
-        }
-        return result
-    }
 
     public static Task getOrCreateCleanupSimulatorTask(Project project, String taskName) {
         String taskNamePostfix = taskName[0].toUpperCase() + taskName[1..taskName.length() - 1]

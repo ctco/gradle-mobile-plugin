@@ -9,11 +9,8 @@ package lv.ctco.scm.mobile.platform.xcode
 import lv.ctco.scm.mobile.core.objects.Environment
 import lv.ctco.scm.mobile.core.utils.LoggerUtil
 import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil
-import lv.ctco.scm.mobile.core.utils.PathUtil
 import lv.ctco.scm.mobile.platform.common.CommonTasks
-import lv.ctco.scm.mobile.platform.common.UIAutomationTask
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 
@@ -36,7 +33,6 @@ class XcodePlatform {
             configureBuildTasks(ext)
             configureUtilityTasks(ext)
             configureUnitTestTasks(ext)
-            configureUiaTestTasks(ext)
             configureLibraryPublications(ext)
 
             LoggerUtil.info("Final configuration:")
@@ -131,72 +127,6 @@ class XcodePlatform {
         testTask.dependsOn(XcodeTasks.getOrCreateRestoreDependenciesTask(project))
         // TODO : Fix Simulator controls
         //testTask.finalizedBy(CommonTasks.getOrCreateCleanupSimulatorTask(project, testTask.getName()))
-    }
-
-    private void configureUiaTestTasks(XcodeExtension _ext) {
-        Task testAllTask
-        if (CommonTasks.hasUIATestConfiguration(_ext.uiasetup)) {
-            processUIATestConfiguration(_ext)
-
-            Environment uitestEnv = new Environment()
-            uitestEnv.setTarget(_ext.uiasetup.buildTarget)
-            uitestEnv.setName("UIA-TEST")
-            uitestEnv.setConfiguration("Release")
-            uitestEnv.setSdk("iphonesimulator")
-
-            testAllTask = project.task 'runUITests', {
-                group = 'Mobile UI Test'
-                description = "Runs all UI tests in project"
-            }
-            Task buildTestAppTask = project.task("buildUITestApp", type: BuildTask) {
-                group = 'Mobile UI Test'
-                description = "Builds UI test environment with '"+uitestEnv.getTarget()+"' target"
-                env = uitestEnv
-            }
-            buildTestAppTask.dependsOn(XcodeTasks.getOrCreateRestoreDependenciesTask(project))
-            buildTestAppTask.finalizedBy CommonTasks.getOrCreateCleanupBuildTask(project, buildTestAppTask.getName())
-            testAllTask.dependsOn buildTestAppTask
-
-            int t = 0
-            for (String uiaTest : _ext.uiasetup.jsPath) {
-                t++
-                String uiTestNum = ("0" + t.toString()).substring(Math.max(0, ("0" + t.toString()).length() - 2))
-                String uiTestName = (uiaTest.substring(uiaTest.lastIndexOf("/") + 1, uiaTest.length())).replace(".js", "")
-                Task testTask = project.task type: UIAutomationTask, "runUITest" + uiTestNum + uiTestName, {
-                    group = 'Mobile UI Test'
-                    description = "Runs $uiTestName test"
-                    testName = "UITest" + uiTestNum + uiTestName
-                    appPath = new File(_ext.uiasetup.appPath)
-                    resultsPath = new File(_ext.uiasetup.resultsPath)
-                    targetDevice = _ext.uiasetup.targetDevice
-                    jsPath = new File(uiaTest)
-                }
-                testTask.dependsOn buildTestAppTask
-                testTask.finalizedBy(CommonTasks.getOrCreateCleanupSimulatorTask(project, testTask.getName()))
-                testAllTask.dependsOn testTask
-            }
-        }
-    }
-
-    protected void processUIATestConfiguration(XcodeExtension _ext) {
-        if (_ext.uiasetup.appPath == null) {
-            if (_ext.uiasetup.appName != null && _ext.uiasetup.buildTarget != null) {
-                _ext.uiasetup.appPath = new File(PathUtil.getXcodeSymDir(), "UIA-TEST/Release-iphonesimulator/"+_ext.uiasetup.appName+".app")
-                LoggerUtil.info("Auto-calculated appPath as " + _ext.uiasetup.appPath)
-            } else {
-                throw new GradleException("appPath parameter is not defined and can not be auto-calculated")
-            }
-        }
-        if (_ext.uiasetup.appName == null) {
-            _ext.uiasetup.appName = _ext.uiasetup.appPath.substring(
-                    _ext.uiasetup.appName.lastIndexOf("/"),
-                    _ext.uiasetup.appName.length()
-            ).replace(".app", "")
-            LoggerUtil.info("Auto-calculated appName as " + _ext.uiasetup.appName)
-        }
-        if (_ext.uiasetup.resultsPath == null) {
-            _ext.uiasetup.resultsPath = new File(".")
-        }
     }
 
     private void configureLibraryPublications(XcodeExtension ext) {

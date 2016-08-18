@@ -18,7 +18,6 @@ class UIAutomationSetup {
 
     UIAutomationSetup() {}
 
-    @SuppressWarnings("GroovyUnusedDeclaration")
     UIAutomationSetup(String buildTarget, String applyProfile, String appName, File appPath,
                       File resultsPath, String targetDevice, String[] jsPath) {
         this.buildTarget = buildTarget
