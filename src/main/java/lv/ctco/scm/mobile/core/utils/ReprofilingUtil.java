@@ -1,7 +1,7 @@
 /*
  * @(#)ReprofilingUtil.java
  *
- * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
+ * Copyright C.T.Co Ltd, 33 Meistaru Street, Riga LV-1076, Latvia. All rights reserved.
  */
 
 package lv.ctco.scm.mobile.core.utils;
@@ -44,6 +44,8 @@ public final class ReprofilingUtil {
         return result;
     }
 
+    // TODO : Remove as build version generation does not set "_<githash>" anymore
+    @Deprecated
     private static String getCleanVersion(String providedVersion) {
         if (providedVersion.contains("_")) {
             return providedVersion.substring(0, providedVersion.indexOf('_'));

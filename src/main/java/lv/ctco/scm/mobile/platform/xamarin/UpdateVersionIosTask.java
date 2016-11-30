@@ -1,7 +1,7 @@
 /*
- * @(#)UpdateVersionTask.java
+ * @(#)UpdateVersionIosTask.java
  *
- * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
+ * Copyright C.T.Co Ltd, 33 Meistaru Street, Riga LV-1076, Latvia. All rights reserved.
  */
 
 package lv.ctco.scm.mobile.platform.xamarin;
@@ -64,11 +64,7 @@ public class UpdateVersionIosTask extends DefaultTask {
             LoggerUtil.info("Read project release version as '"+releaseVersion+"'");
 
             String buildVersion;
-            if (PropertyUtil.hasProjectProperty(getProject(), PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(getProject(), PROP_VCS_ROOT_SUBS).isEmpty()) {
-                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
-            } else {
-                buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"_"+revision;
-            }
+            buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
 
             if (cleanReleaseVersionForPROD && "PROD".equals(environmentName)) {
                 PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", releaseVersion);

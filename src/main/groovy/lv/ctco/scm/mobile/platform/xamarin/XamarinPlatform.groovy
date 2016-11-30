@@ -1,7 +1,7 @@
 /*
  * @(#)XamarinPlatform.groovy
  *
- * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
+ * Copyright C.T.Co Ltd, 33 Meistaru Street, Riga LV-1076, Latvia. All rights reserved.
  */
 
 package lv.ctco.scm.mobile.platform.xamarin;
@@ -157,11 +157,13 @@ class XamarinPlatform {
     protected void setupBuildTasks(XamarinExtension extXios, XandroidExtension extXand) {
         Task buildTask = XamarinTasks.getOrCreateBuildTask(project)
 
+        Task buildIosTask = XamarinTasks.getOrCreateBuildIosTask(project)
+        buildTask.dependsOn(buildIosTask)
+
         Task dependencyRestoreTask = XamarinTasks.getOrCreateRestoreDependenciesTask(project)
         Task dependencyRestoreIosTask = XamarinTasks.getOrCreateRestoreDependenciesIosTask(project, extXios.getSolutionFile(), extXios.getNugetPackagesConfigRootDir())
         dependencyRestoreTask.dependsOn(dependencyRestoreIosTask)
 
-        Task buildIosTask = XamarinTasks.getOrCreateBuildIosTask(project)
         for (Environment _env : extXios.environments.values()) {
             Task envTask = XamarinTasks.getOrCreateBuildIosEnvTask(project, _env, extXios)
             Task profilingTask = XamarinTasks.getOrCreateProfileIosEnvTask(project, _env, extXios)
@@ -175,9 +177,8 @@ class XamarinPlatform {
             envTask.dependsOn(profilingTask)
             envTask.finalizedBy(CommonTasks.getOrCreateCleanupBuildTask(project, envTask.getName()))
             buildIosTask.dependsOn(envTask)
-            buildTask.dependsOn(envTask)
             profilingTask.mustRunAfter(dependencyRestoreIosTask)
-            updateVersionTask.mustRunAfter(dependencyRestoreIosTask)
+            updateVersionTask.mustRunAfter(profilingTask)
         }
 
         Task unitTestTask = XamarinTasks.getOrCreateUnitTestTask(project, extXios.unitTestProject)
@@ -185,6 +186,7 @@ class XamarinPlatform {
 
         if (extXand.isValid()) {
             Task buildAndroidTask = XamarinTasks.getOrCreateBuildAndroidTask(project)
+            buildTask.dependsOn(buildAndroidTask)
 
             Task dependencyRestoreAndroidTask = XamarinTasks.getOrCreateRestoreDependenciesAndroidTask(project, extXand.getSolutionFile(), extXand.getNugetPackagesConfigRootDir())
             dependencyRestoreTask.dependsOn(dependencyRestoreAndroidTask)
@@ -208,15 +210,15 @@ class XamarinPlatform {
                     environmentName = _env.getName()
                     profiles = extXand.getProfilesAsArray()
                 }
-                Task manifestVersionUpdateTask = XamarinTasks.getOrCreateManifestVersionUpdateTask(project, extXand, releaseVersionAndroid)
+                Task versionUpdateTask = XamarinTasks.getOrCreateUpdateVersionAndroidTask(project, _env, extXand, releaseVersionAndroid)
+                //
                 envTask.dependsOn(dependencyRestoreAndroidTask)
-                envTask.dependsOn(manifestVersionUpdateTask)
+                envTask.dependsOn(versionUpdateTask)
                 envTask.dependsOn(profilingTask)
                 envTask.finalizedBy(CommonTasks.getOrCreateCleanupBuildTask(project, envTask.getName()))
                 buildAndroidTask.dependsOn(envTask)
-                buildTask.dependsOn(envTask)
                 profilingTask.mustRunAfter(dependencyRestoreAndroidTask)
-                manifestVersionUpdateTask.mustRunAfter(dependencyRestoreAndroidTask)
+                versionUpdateTask.mustRunAfter(profilingTask)
             }
         }
     }

@@ -1,15 +1,16 @@
 /*
  * @(#)XamarinTasks.groovy
  *
- * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
+ * Copyright C.T.Co Ltd, 33 Meistaru Street, Riga LV-1076, Latvia. All rights reserved.
  */
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import lv.ctco.scm.mobile.core.objects.Environment
+import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.objects.TaskGroup;
 import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 
+import org.apache.commons.lang3.StringUtils;
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
@@ -202,12 +203,14 @@ class XamarinTasks {
         }
     }
 
-    public static Task getOrCreateManifestVersionUpdateTask(Project project, XandroidExtension extXand, String _releaseVersion) {
-        Task task = getTaskByName(project, "updateManifestVersion");
+    static Task getOrCreateUpdateVersionAndroidTask(Project project, Environment _env, XandroidExtension extXand, String _releaseVersion) {
+        String taskName = "updateVersionAndroid"+StringUtils.capitalize(_env.getName().toLowerCase());
+        Task task = project.getTasks().findByName(taskName);
         if (task != null) {
             return task;
         } else {
-            return project.task(type: UpdateVersionAndroidTask, "updateManifestVersion", overwrite: true) {
+            return project.task(type: UpdateVersionAndroidTask, taskName) {
+                description = "Updates version for Android "+ _env.getName()+" environment"
                 projectName = extXand.projectName;
                 releaseVersion = _releaseVersion;
                 androidVersionCode = extXand.androidVersionCode;
