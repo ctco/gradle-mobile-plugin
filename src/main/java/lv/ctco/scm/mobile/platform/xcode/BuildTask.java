@@ -86,9 +86,10 @@ public class BuildTask extends DefaultTask {
         }
         IosApp iosApp = new IosApp(appDir, env);
         BuildReportUtil.addIosAppInfo(iosApp);
-        if (iosApp.isSignedWithDeveloperIdentity()
-                && (!"Debug".equalsIgnoreCase(env.getConfiguration()) || !"UITests".equalsIgnoreCase(env.getConfiguration()))) {
-            throw new IOException("iPhone Developer identity is not allowed for "+env.getConfiguration()+" configuration!");
+        if (iosApp.isSignedWithDeveloperIdentity()) {
+            if (!("Debug".equalsIgnoreCase(env.getConfiguration()) || "UITests".equalsIgnoreCase(env.getConfiguration()))) {
+                throw new IOException("iPhone Developer identity is not allowed for "+env.getConfiguration()+" configuration");
+            }
         }
     }
 
