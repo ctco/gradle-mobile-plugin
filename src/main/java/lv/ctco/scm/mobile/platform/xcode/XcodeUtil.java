@@ -133,6 +133,7 @@ public final class XcodeUtil {
 
     static Map<String, String> getBuildSettings(String targetName) throws IOException {
         CommandLine commandLine = new CommandLine("xcodebuild");
+        commandLine.addArgument("clean"); // A workaround for Xcode 8 bug
         commandLine.addArgument("-showBuildSettings");
         if (targetName != null) {
             commandLine.addArgument("-target");
