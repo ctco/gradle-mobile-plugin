@@ -183,6 +183,7 @@ release {
 
 nexusStaging {
     packageGroup = "lv.ctco"
+    numberOfRetries = 30
 }
 
 afterReleaseBuild.dependsOn uploadArchives
