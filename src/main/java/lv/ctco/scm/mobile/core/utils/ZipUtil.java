@@ -9,27 +9,48 @@ package lv.ctco.scm.mobile.core.utils;
 import org.apache.commons.compress.archivers.ArchiveException;
 import org.apache.commons.compress.archivers.ArchiveOutputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
-import org.apache.commons.compress.archivers.zip.*;
+import org.apache.commons.compress.archivers.zip.UnixStat;
+import org.apache.commons.compress.archivers.zip.X5455_ExtendedTimestamp;
+import org.apache.commons.compress.archivers.zip.X7875_NewUnix;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.archivers.zip.ZipExtraField;
+import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
-import java.io.*;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public final class ZipUtil {
 
-    private static final List<String> DEFAULT_EXCLUDES = Arrays.asList(".DS_Store");
+    private static final Logger logger = Logging.getLogger(ZipUtil.class);
+
+    private static final List<String> DEFAULT_EXCLUDES = Collections.singletonList(".DS_Store");
 
     private ZipUtil() {}
 
     public static void extractAll(File sourceZip, File outputDir) throws IOException {
-        try (ZipFile zipFile = new ZipFile(sourceZip);) {
+        try (ZipFile zipFile = new ZipFile(sourceZip)) {
             List<ZipArchiveEntry> zipArchiveEntries = Collections.list(zipFile.getEntries());
             for (ZipArchiveEntry zipArchiveEntry : zipArchiveEntries) {
                 extract(zipArchiveEntry, zipFile, outputDir);
@@ -38,7 +59,7 @@ public final class ZipUtil {
     }
 
     public static void extract(String zipArchiveEntryName, File sourceZip, File outputDir) throws IOException {
-        try (ZipFile zipFile = new ZipFile(sourceZip);) {
+        try (ZipFile zipFile = new ZipFile(sourceZip)) {
             ZipArchiveEntry zipArchiveEntry = zipFile.getEntry(zipArchiveEntryName);
             extract(zipArchiveEntry, zipFile, outputDir);
         }
@@ -49,20 +70,20 @@ public final class ZipUtil {
         FileUtils.forceMkdir(extractedFile.getParentFile());
         if (zipArchiveEntry.isUnixSymlink()) {
             if (PosixUtil.isPosixFileStore(outputDir)) {
-                LoggerUtil.debug("Extracting [l] "+zipArchiveEntry.getName());
+                logger.debug("Extracting [l] "+zipArchiveEntry.getName());
                 String symlinkTarget = zipFile.getUnixSymlink(zipArchiveEntry);
                 Files.createSymbolicLink(extractedFile.toPath(), new File(symlinkTarget).toPath());
             } else {
-                LoggerUtil.debug("Skipping ! [l] "+zipArchiveEntry.getName());
+                logger.debug("Skipping ! [l] "+zipArchiveEntry.getName());
             }
         } else if (zipArchiveEntry.isDirectory()) {
-            LoggerUtil.debug("Extracting [d] "+zipArchiveEntry.getName());
+            logger.debug("Extracting [d] "+zipArchiveEntry.getName());
             FileUtils.forceMkdir(extractedFile);
         } else {
-            LoggerUtil.debug("Extracting [f] "+zipArchiveEntry.getName());
+            logger.debug("Extracting [f] "+zipArchiveEntry.getName());
             try (
-                InputStream in = zipFile.getInputStream(zipArchiveEntry);
-                OutputStream out = new FileOutputStream(extractedFile);
+                    InputStream in = zipFile.getInputStream(zipArchiveEntry);
+                    OutputStream out = new FileOutputStream(extractedFile)
             ) {
                 IOUtils.copy(in, out);
             }
@@ -83,10 +104,8 @@ public final class ZipUtil {
         if (!rootDir.isDirectory()) {
             throw new IOException("Provided file is not a directory");
         }
-        OutputStream archiveStream = new FileOutputStream(output);
-        ArchiveOutputStream archive;
-        try {
-            archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
+        try (OutputStream archiveStream = new FileOutputStream(output)) {
+            ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream);
             String rootName = "";
             if (includeAsRoot) {
                 insertDirectory(rootDir, rootDir.getName(), archive);
@@ -101,9 +120,7 @@ public final class ZipUtil {
                 }
             }
             archive.finish();
-            archiveStream.close();
         } catch (IOException | ArchiveException e) {
-            archiveStream.close();
             throw new IOException(e);
         }
     }
@@ -143,7 +160,7 @@ public final class ZipUtil {
 
     private static void insertFile(File file, String entryName, ArchiveOutputStream archive) throws IOException {
         if (DEFAULT_EXCLUDES.contains(file.getName())) {
-            LoggerUtil.debug("Skipping ! [l] "+entryName);
+            logger.debug("Skipping ! [l] {}", entryName);
             return;
         }
         if (file.isFile()) {

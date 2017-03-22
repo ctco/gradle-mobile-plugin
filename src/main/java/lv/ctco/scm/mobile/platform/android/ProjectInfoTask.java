@@ -6,16 +6,18 @@
 
 package lv.ctco.scm.mobile.platform.android;
 
+import lv.ctco.scm.mobile.core.utils.PropertyUtil;
+import lv.ctco.scm.mobile.core.utils.StampUtil;
+import lv.ctco.scm.mobile.core.utils.TeamcityUtil;
+
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
-import java.io.IOException;
-
-import lv.ctco.scm.mobile.core.utils.CommonUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-
 public class ProjectInfoTask extends DefaultTask {
+
+    private final Logger logger = Logging.getLogger(ProjectInfoTask.class);
 
     private String releaseVersion;
     private String revision;
@@ -30,13 +32,16 @@ public class ProjectInfoTask extends DefaultTask {
 
     @TaskAction
     public void doTaskAction() {
-        try {
-            LoggerUtil.lifecycle("Project version: "+releaseVersion);
-            LoggerUtil.lifecycle("Project revision: "+revision);
-            CommonUtil.printTeamcityInfo(getProject(), releaseVersion);
-        } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+        String buildVersion = releaseVersion+"."+revision;
+        logger.lifecycle("Project's release version is '{}'", releaseVersion);
+        logger.lifecycle("Project's revision is '{}'", revision);
+        logger.lifecycle("Project's build version is '{}'", buildVersion);
+
+        TeamcityUtil.setBuildNumber(buildVersion);
+        TeamcityUtil.setAgentParameter("build.number", buildVersion);
+        TeamcityUtil.setAgentParameter("project.version.iteration", releaseVersion);
+        if (PropertyUtil.hasProjectProperty(getProject(), "stamp")) {
+            StampUtil.updateStamp(PropertyUtil.getProjectProperty(getProject(), "stamp"), releaseVersion);
         }
     }
 

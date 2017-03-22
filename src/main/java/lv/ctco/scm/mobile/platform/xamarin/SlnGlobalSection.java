@@ -66,8 +66,7 @@ public class SlnGlobalSection {
     public int hashCode() {
         int result;
         result = properties.hashCode();
-        result = 31 * result + name.hashCode();
-        return result;
+        return 31 * result + name.hashCode();
     }
 
     @Override

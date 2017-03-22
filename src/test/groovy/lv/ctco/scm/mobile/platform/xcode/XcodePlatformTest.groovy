@@ -37,7 +37,7 @@ class XcodePlatformTest {
         XcodeExtension extension = new XcodeExtension()
         XcodeUtil.setTargets(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertEquals extension.environments.size(), 3
         assertTrue extension.environments.containsKey('DEV')
@@ -54,7 +54,7 @@ class XcodePlatformTest {
         XcodeExtension extension = new XcodeExtension()
         XcodeUtil.setTargets(['PRJ', 'PRJTest'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertEquals extension.environments.size(), 1
         assertTrue extension.environments.containsKey('DEFAULT')
@@ -67,7 +67,7 @@ class XcodePlatformTest {
         XcodeExtension extension = new XcodeExtension()
         XcodeUtil.setTargets(['PRJ DEV', 'PRJTest'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertEquals extension.environments.size(), 1
         assertTrue extension.environments.containsKey('DEFAULT')
@@ -82,7 +82,7 @@ class XcodePlatformTest {
         extension.environment name: 'TrAIN', target: 'PRJ TRAIN CUSTOM'
         XcodeUtil.setTargets(['PRJ DEV', 'PRJ TRAIN', 'PRJ UAT'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertTrue extension.environments.containsKey('DEV')
         assertTrue extension.environments.containsKey('TrAIN')
@@ -100,7 +100,7 @@ class XcodePlatformTest {
         extension.environment name: 'Default', target: 'PRJ DEV CUSTOM'
         XcodeUtil.setTargets(['PRJ', 'PRJTest'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertTrue extension.environments.containsKey('Default')
         assertEquals extension.environments['Default'].target, 'PRJ DEV CUSTOM'
@@ -114,7 +114,7 @@ class XcodePlatformTest {
         extension.environment name: 'DEV', target: 'PRJ DEV CUSTOM'
         XcodeUtil.setTargets(['PRJ', 'PRJTest'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertTrue extension.environments.containsKey('DEFAULT')
         assertTrue extension.environments.containsKey('DEV')
@@ -130,7 +130,7 @@ class XcodePlatformTest {
         extension.environment name: 'DEV', target: 'PRJ DEV CUSTOM'
         XcodeUtil.setTargets(['PRJ DEV CUSTOM', 'PRJTest'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertTrue extension.environments.containsKey('DEV')
         assertEquals extension.environments['DEV'].target, 'PRJ DEV CUSTOM'
@@ -147,7 +147,7 @@ class XcodePlatformTest {
         XcodeUtil.setTargets(['iDoStuff DEV', 'iDoStuff TRAIN', 'PRODUCTION', 'iDoStuffTests',
                                         'iDoStuff DemoClientA'])
         XcodePlatform platform = new XcodePlatform(project)
-        platform.performAutomaticConfiguration(extension)
+        platform.performAutomaticEnvironmentConfiguration(extension)
         //
         assertTrue extension.environments.containsKey('DEV')
         assertTrue extension.environments.containsKey('TRAIN')
@@ -256,49 +256,6 @@ class XcodePlatformTest {
         }
         MobilePluginUtil.detectAndConfigurePlatform(_project)
         return _project
-    }
-
-    Project getProjectConfigureWithUIAutomationSetup() {
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: MobilePlugin
-        project.ctcoMobile {
-            platform = 'xcode'
-            xcode {
-                automaticConfiguration = false
-                environment name: 'DEV', target: 'iGREW DEV'
-                UIAutomationSetup {
-                    buildTarget = 'iGREW_UIT'
-                    appName = 'iGREW'
-                    appPath = null
-                    resultsPath = null
-                    jsPath = ['testA.js', 'testB.js']
-                }
-            }
-        }
-        MobilePluginUtil.detectAndConfigurePlatform(project)
-        return project
-    }
-
-    Project getProjectConfigureWithUIAutomationSetup(String _buildTarget, String _appName, String _appPath,
-                                                     String _resultsPath, String[] _jsPath) {
-        Project project = ProjectBuilder.builder().build()
-        project.apply plugin: MobilePlugin
-        project.ctcoMobile {
-            platform = 'xcode'
-            xcode {
-                automaticConfiguration = false
-                environment name: 'DEV', target: 'iGREW DEV'
-                UIAutomationSetup {
-                    buildTarget = _buildTarget
-                    appName = _appName
-                    appPath = _appPath
-                    resultsPath = _resultsPath
-                    jsPath = _jsPath
-                }
-            }
-        }
-        MobilePluginUtil.detectAndConfigurePlatform(project)
-        return project
     }
 
     */

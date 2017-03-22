@@ -6,12 +6,12 @@
 
 package lv.ctco.scm.mobile.platform.xcode;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.publish.Publication;
 import org.gradle.api.publish.PublicationContainer;
 import org.gradle.api.publish.PublishingExtension;
@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class LibraryUtil {
+
+    private static final Logger logger = Logging.getLogger(LibraryUtil.class);
 
     private static final String PUBLISHING_EXT_NAME = "publishing";
     private static final String PUBLISHING_PREFIX = "library";
@@ -45,9 +47,9 @@ public final class LibraryUtil {
     static void printLibrariesPublicationsInfo(Project project) {
         List<DefaultMavenPublication> libraries = getLibrariesPublications(project);
         if (!libraries.isEmpty()) {
-            LoggerUtil.info("Detected "+libraries.size()+" defined library publication(s):");
+            logger.info("Detected {} defined library publication(s):", libraries.size());
             for (DefaultMavenPublication library : libraries) {
-                LoggerUtil.info(" - '"+library.getName()+"' '"+library.getCoordinates()+"'");
+                logger.info(" - '"+library.getName()+"' '"+library.getCoordinates()+"'");
             }
         }
     }
@@ -67,9 +69,9 @@ public final class LibraryUtil {
     public static void printLibrariesRepositoriesInfo(Project project) {
         List<DefaultMavenArtifactRepository> repositories = getLibrariesRepositories(project);
         if (!repositories.isEmpty()) {
-            LoggerUtil.info("Detected defined library publication repositories:");
+            logger.info("Detected defined library publication repositories:");
             for (ArtifactRepository repository : repositories) {
-                LoggerUtil.info(" - '"+repository.getName()+"' "+((DefaultMavenArtifactRepository)repository).getUrl());
+                logger.info(" - '"+repository.getName()+"' "+((DefaultMavenArtifactRepository)repository).getUrl());
             }
         }
     }

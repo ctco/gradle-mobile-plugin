@@ -10,14 +10,21 @@ import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.gradle.api.Project;
 
-import java.io.*;
+import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
+import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
 public final class GitUtil {
+
+    private static final Logger logger = Logging.getLogger(GitUtil.class);
 
     private static final int HASH_SIZE_FULL = 40;
     private static final int HASH_SIZE_SHORT = 7;
@@ -45,7 +52,7 @@ public final class GitUtil {
             ExecResult execResult = ExecUtil.execCommand(commandLine, dir, null, true, false);
             if (execResult.isSuccess()) {
                 rootDir = new File(dir, StringUtils.chomp(execResult.getOutput().get(0)));
-                LoggerUtil.debug("Git root project path: '"+rootDir.getAbsolutePath()+"'");
+                logger.debug("Git root project path: '"+rootDir.getAbsolutePath()+"'");
             }
         }
         return rootDir;
@@ -61,9 +68,9 @@ public final class GitUtil {
                 commitInfo = getCommitInfo(PathUtil.getProjectDir());
             }
             if (!commitInfo.isEmpty()) {
-                LoggerUtil.debug("Git commit info:");
+                logger.debug("Git commit info:");
                 for (String line : commitInfo) {
-                    LoggerUtil.debug(line);
+                    logger.debug(line);
                 }
                 File commitInfoFile = new File(PathUtil.getReportCommitDir(), "commit-info.html");
                 Files.deleteIfExists(commitInfoFile.toPath());
@@ -115,9 +122,9 @@ public final class GitUtil {
         commandLine.addArguments(new String[]{"fetch", "--all"}, false);
         ExecResult fetchExecResult = ExecUtil.execCommand(commandLine, dir, null, false, false);
         if (fetchExecResult.isSuccess()){
-            LoggerUtil.info("Git all reference fetch for "+dir.getName()+" succeeded");
+            logger.info("Git all reference fetch for "+dir.getName()+" succeeded");
         } else {
-            LoggerUtil.warn("Git all reference fetch for "+dir.getName()+" failed");
+            logger.warn("Git all reference fetch for "+dir.getName()+" failed");
         }
     }
 

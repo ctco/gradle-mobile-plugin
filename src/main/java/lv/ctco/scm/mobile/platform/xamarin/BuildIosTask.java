@@ -6,13 +6,12 @@
 
 package lv.ctco.scm.mobile.platform.xamarin;
 
-import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.objects.IosApp;
 import lv.ctco.scm.mobile.core.utils.BuildReportUtil;
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PathUtil;
 import lv.ctco.scm.mobile.core.utils.ZipUtil;
 
@@ -23,6 +22,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -31,10 +32,13 @@ import java.util.List;
 
 public class BuildIosTask extends DefaultTask {
 
+    private static final Logger logger = Logging.getLogger(BuildIosTask.class);
+
     private Environment env;
     private File solutionFile;
     private String projectName;
-    private String assemblyName;
+
+    private String configurationBinPath;
 
     public void setEnv(Environment env) {
         this.env = env;
@@ -48,19 +52,15 @@ public class BuildIosTask extends DefaultTask {
         this.projectName = projectName;
     }
 
-    public void setAssemblyName(String assemblyName) {
-        this.assemblyName = assemblyName;
-    }
-
     @TaskAction
     public void doTaskAction() {
         try {
+            configurationBinPath = projectName+"/bin/"+env.getPlatform()+"/"+env.getConfiguration();
             buildArtifacts();
             checkArtifacts();
             moveArtifactsToDistDir();
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 
@@ -72,52 +72,54 @@ public class BuildIosTask extends DefaultTask {
             commandLine.addArgument("-p:"+projectName);
         }
         if (StringUtils.isNotBlank(env.getConfiguration())) {
-            commandLine.addArgument("-c:"+env.getConfiguration());
+            commandLine.addArgument("-c:"+env.getConfiguration()+"|"+env.getPlatform());
         }
         commandLine.addArgument(solutionFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
         FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
         if (!execResult.isSuccess()) {
-            LoggerUtil.errorInTask(this.getName(), execResult.getException().getMessage());
-            throw new GradleException("Artifact build failed");
+            ErrorUtil.errorInTask(this.getName(), execResult.getException());
         }
     }
 
     private void checkArtifacts() throws IOException {
         File appDir;
-        List<File> apps = CommonUtil.findIosAppsInDirectory(env.getOutputPath());
+        List<File> apps = CommonUtil.findIosAppsInDirectory(new File(configurationBinPath));
         if (apps.size() == 1) {
             appDir = apps.get(0);
         } else {
             throw new GradleException("None or multiple apps found in build directory");
         }
 
-        IosApp iosApp = new IosApp(appDir, env);
+        IosApp iosApp = new IosApp(appDir);
+        iosApp.setName(env.getName());
+        iosApp.setBuildCnf(env.getConfiguration());
+        iosApp.setBuildSdk(env.getPlatform());
         BuildReportUtil.addIosAppInfo(iosApp);
     }
 
     private void moveArtifactsToDistDir() throws IOException {
         File ipa;
-        List<File> ipas = CommonUtil.findIosIpasInDirectory(env.getOutputPath());
+        List<File> ipas = CommonUtil.findIosIpasInDirectory(new File(configurationBinPath));
         if (ipas.size() == 1) {
             ipa = ipas.get(0);
         } else {
             throw new GradleException("None or multiple IPAs found!");
         }
         String ipaName = FilenameUtils.getBaseName(ipa.getName());
-        if (!StringUtils.endsWithIgnoreCase(ipaName, env.getUpperCaseName())) {
-            ipaName = assemblyName+" "+env.getUpperCaseName();
+        if (!StringUtils.endsWithIgnoreCase(ipaName, env.getName().toUpperCase())) {
+            ipaName = projectName+" "+env.getName().toUpperCase();
         }
         FileUtils.copyFile(ipa, new File(PathUtil.getIpaDistDir(), ipaName+".ipa"));
         FileUtils.forceDelete(ipa);
         //
-        List<File> dsyms = CommonUtil.findIosDsymsinDirectory(env.getOutputPath());
+        List<File> dsyms = CommonUtil.findIosDsymsinDirectory(new File(configurationBinPath));
         if (dsyms.size() == 1 ) {
             File dsymDir = dsyms.get(0);
             ZipUtil.compressDirectory(dsymDir, true, new File(PathUtil.getDsymDistDir(), "dSYM."+env.getName()+".zip"));
             FileUtils.deleteDirectory(dsymDir);
         } else {
-            LoggerUtil.warn("None or multiple DSYMs found! Not moving to distribution folder.");
+            logger.warn("None or multiple DSYMs found! Not moving to distribution folder.");
         }
     }
 

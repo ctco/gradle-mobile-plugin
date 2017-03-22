@@ -9,11 +9,15 @@ package lv.ctco.scm.mobile.core.utils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.Project;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import java.io.File;
 import java.io.IOException;
 
 public final class RevisionUtil {
+
+    private static final Logger logger = Logging.getLogger(RevisionUtil.class);
 
     private static String revision = null;
 
@@ -27,10 +31,10 @@ public final class RevisionUtil {
         if (StringUtils.isBlank(revision)) {
             if (PropertyUtil.hasProjectProperty(project, PROP_VCS_REVISION) && !StringUtils.isBlank(PropertyUtil.getProjectProperty(project, PROP_VCS_REVISION))) {
                 setRevision(GitUtil.getShortHash(PropertyUtil.getProjectProperty(project, PROP_VCS_REVISION)));
-                LoggerUtil.info("Revision '"+revision+"' was set from passed property");
+                logger.info("Revision '{}' was set from passed property", revision);
             } else {
                 setRevision(getRevisionFromProjectDir(project, PathUtil.getProjectDir()));
-                LoggerUtil.info("Revision '"+revision+"' was auto-detected");
+                logger.info("Revision '{}' was auto-detected", revision);
             }
         }
         return revision;
@@ -43,7 +47,6 @@ public final class RevisionUtil {
     private static String getRevisionFromProjectDir(Project project, File projectDir) throws IOException {
         String result;
         if (GitUtil.isGitDir(projectDir)) {
-            LoggerUtil.info("Git repo detected.");
             if (PropertyUtil.hasProjectProperty(project, PROP_VCS_ROOT_DIR) && !PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_DIR).isEmpty()) {
                 if (PropertyUtil.hasProjectProperty(project, PROP_VCS_ROOT_SUBS) && !PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_SUBS).isEmpty()) {
                     File vcsRootDir = new File(PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_DIR));
@@ -55,14 +58,13 @@ public final class RevisionUtil {
                     }
                 } else {
                     File commitDir = GitUtil.getSubdirWithLatestCommit(new File(PropertyUtil.getProjectProperty(project, PROP_VCS_ROOT_DIR)));
-                    result = ""+GitUtil.getCheckedoutCommitNumber(commitDir);
+                    result = Long.toString(GitUtil.getCheckedoutCommitNumber(commitDir));
                 }
             } else {
-                result = ""+GitUtil.getCheckedoutCommitNumber(GitUtil.getGitProjectRoot(projectDir));
+                result = Long.toString(GitUtil.getCheckedoutCommitNumber(GitUtil.getGitProjectRoot(projectDir)));
             }
         } else {
             String error = "Failed to detect project's version control system, please pass revision as a property";
-            LoggerUtil.warn(error);
             throw new IOException(error);
         }
         return result;

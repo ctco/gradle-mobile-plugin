@@ -52,14 +52,12 @@ public final class XcodeUtil {
     }
 
     public static String getDefaultTarget() throws IOException {
-        String defaultTarget;
         List<String> targets = getTargets();
         if (targets == null || getTargets().isEmpty()) {
             throw new IOException("Could not get default Xcode target!");
         } else {
-            defaultTarget = getTargets().get(0);
+            return getTargets().get(0);
         }
-        return defaultTarget;
     }
 
     public static List<String> getConfigurations() throws IOException {
@@ -101,13 +99,15 @@ public final class XcodeUtil {
         Matcher m = xcodebuildListPattern.matcher(commandOutput);
         if (m.matches()) {
             for (String item : m.group(2).split(System.lineSeparator())) {
-                if (item.trim().length() > 0) {
-                    buildTargets.add(item.trim());
+                item = item.trim();
+                if (item.length() > 0) {
+                    buildTargets.add(item);
                 }
             }
             for (String item : m.group(3).split(System.lineSeparator())) {
-                if (item.trim().length() > 0) {
-                    buildConfigurations.add(item.trim());
+                item = item.trim();
+                if (item.length() > 0) {
+                    buildConfigurations.add(item);
                 }
             }
         } else {
@@ -161,7 +161,7 @@ public final class XcodeUtil {
                 }
             }
         }
-        if (properties.size() == 0) {
+        if (properties.isEmpty()) {
             throw new IOException("Failed to get any xcodebuild settings!");
         }
         return properties;
@@ -179,23 +179,58 @@ public final class XcodeUtil {
 
     public static int getXcodeprojCount(File dir) {
         if (xcodeproj == null) {
-            List<File> results = new ArrayList<>();
-            Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
-            if (!files.isEmpty()) {
-                for (File file : files) {
-                    if (file.isDirectory() && file.getParentFile().equals(dir)
-                            && "xcodeproj".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
-                        results.add(file);
-                    }
-                }
-            }
-            if (results.size() == 1) {
-                xcodeproj = results.get(0);
-            }
-            return results.size();
+            List<File> files = getXcodeProjectFiles(dir);
+            return files.size();
         } else {
             return 1;
         }
+    }
+
+    public static File getXcodeprojFile(File dir) {
+        if (xcodeproj == null) {
+            List<File> files = getXcodeProjectFiles(dir);
+            return files.get(0);
+        } else {
+            return xcodeproj;
+        }
+    }
+
+    private static List<File> getXcodeProjectFiles(File dir) {
+        List<File> results = new ArrayList<>();
+        Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
+        if (!files.isEmpty()) {
+            for (File file : files) {
+                if (file.isDirectory() && file.getParentFile().equals(dir)
+                        && "xcodeproj".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+                    results.add(file);
+                }
+            }
+        }
+        return results;
+    }
+    
+    public static List<Environment> getAutodetectedEnvironments(String defaultTarget, List<String> allTargets) {
+        List<Environment> environments = new ArrayList<>();
+        Matcher defaultTargetMatcher = Pattern.compile("(\\w+) \\w+").matcher(defaultTarget);
+        if (defaultTargetMatcher.matches()) {
+            String prefix = defaultTargetMatcher.group(1);
+            Pattern multitargetPattern = Pattern.compile(Pattern.quote(prefix)+" (\\w+)");
+            for (String target : allTargets) {
+                Matcher multitargetMatcher = multitargetPattern.matcher(target);
+                if (multitargetMatcher.matches()) {
+                    Environment env = new Environment();
+                    env.setName(multitargetMatcher.group(1));
+                    env.setTarget(target);
+                    environments.add(env);
+                }
+            }
+        } else {
+            Environment env = new Environment();
+            env.setName("DEFAULT");
+            env.setTarget(defaultTarget);
+            environments.add(env);
+        }
+        return environments;
     }
 
 }

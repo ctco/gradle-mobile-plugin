@@ -6,29 +6,23 @@
 
 package lv.ctco.scm.mobile.core.objects;
 
-import java.util.Arrays;
-import java.util.List;
+import org.apache.commons.lang3.ObjectUtils;
 
-public class Profile {
+import java.util.Objects;
+
+public class Profile implements Comparable<Profile> {
 
     private String environment;
+    private String scope;
+    private String source;
     private String target;
-    private String sources;
-    private String[] scopes;
-    private String[] additionalTargets;
-
-    private static final String DEFAULT_SCOPE = "build";
+    private Integer order;
+    private Integer level;
 
     public Profile() {
-        this.scopes = new String[]{DEFAULT_SCOPE};
-    }
-
-    public Profile(String environment, String target, String sources, String[] scopes, String[] additionalTargets) {
-        this.environment = environment;
-        this.target = target;
-        this.sources = sources;
-        this.scopes = scopes != null ? scopes : new String[]{DEFAULT_SCOPE};
-        this.additionalTargets = additionalTargets != null ? additionalTargets : null;
+        this.scope = "build";
+        this.order = 1;
+        this.level = 1;
     }
 
     public String getEnvironment() {
@@ -47,65 +41,98 @@ public class Profile {
         this.target = target;
     }
 
-    public String getSources() {
-        return sources;
+    public String getSource() {
+        return source;
     }
 
-    public void setSources(String sources) {
-        this.sources = sources;
+    public void setSource(String source) {
+        this.source = source;
     }
 
-    public String[] getScopes() {
-        return scopes.clone();
+    public String getScope() {
+        return scope;
     }
 
-    public void setScopes(String[] scopes) {
-        if (scopes != null) {
-            this.scopes = scopes.clone(); // IMPROVEMENT : default if nulled?
-        }
+    public void setScope(String scope) {
+        this.scope = scope;
     }
 
-    public void setScopes(List<String> scopes) {
-        if (scopes != null) {
-            this.scopes = scopes.toArray(new String[scopes.size()]); // IMPROVEMENT : default if nulled?
-        }
+    public Integer getOrder() {
+        return order;
     }
 
-    public String[] getAdditionalTargets() {
-        return additionalTargets.clone();
+    public void setOrder(Integer order) {
+        this.order = order;
     }
 
-    public void setAdditionalTargets(String[] additionalTargets) {
-        if (additionalTargets != null) {
-            this.additionalTargets = additionalTargets.clone();
-        }
+    public Integer getLevel() {
+        return level;
     }
 
-    public boolean hasScope(String scope) {
-        return Arrays.asList(scopes).contains(scope);
-    }
-
-    private static String getArrayAsString(String[] array) {
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String path : array) {
-            if (stringBuilder.length() == 0) {
-                stringBuilder.append('\'').append(path).append('\'');
-            } else {
-                stringBuilder.append(", '").append(path).append('\'');
-            }
-        }
-        return stringBuilder.toString();
+    public void setLevel(Integer level) {
+        this.level = level;
     }
 
     @Override
     public String toString() {
-        return "Profile{" +
-                " environment:\'"+environment+"\'"+
-                (target == null ? "" : ", target:\'"+target+"\'")+
-                ", sources:'" + sources + "'"+
-                (scopes == null ? "" : ", scopes:["+getArrayAsString(scopes)+"]")+
-                (additionalTargets == null ? "" : ",\n            additionalTargets:[" + getArrayAsString(additionalTargets) + ']') +
-                " }";
+        StringBuilder sb = new StringBuilder();
+        sb.append("profile");
+        sb.append(" environment:'").append(environment).append('\'');
+        sb.append(", scope:'").append(scope).append('\'');
+        if (target != null) {
+            sb.append(", target:'").append(target).append('\'');
+        }
+        sb.append(", order:'").append(order).append('\'');
+        sb.append(", level:'").append(level).append('\'');
+        sb.append(", source:'").append(source).append('\'');
+        return sb.toString();
+    }
+
+    @Override
+    public int compareTo(Profile that) {
+        int i = ObjectUtils.compare(environment, that.environment);
+        if (i != 0) {
+            return i;
+        }
+        i = ObjectUtils.compare(scope, that.scope);
+        if (i != 0) {
+            return i;
+        }
+        i = ObjectUtils.compare(target, that.target);
+        if (i != 0) {
+            return i;
+        }
+        i = ObjectUtils.compare(order, that.order);
+        if (i != 0) {
+            return i;
+        }
+        i = ObjectUtils.compare(level, that.level);
+        if (i != 0) {
+            return i;
+        }
+        return ObjectUtils.compare(source, that.source);
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == this) {
+            return true;
+        }
+        if (!(object instanceof Profile)) {
+            return false;
+        }
+        Profile that = (Profile) object;
+        return Objects.equals(environment, that.environment) &&
+                Objects.equals(scope, that.scope) &&
+                Objects.equals(target, that.target) &&
+                Objects.equals(order, that.order) &&
+                Objects.equals(level, that.level) &&
+                Objects.equals(source, that.source);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(environment, scope, target, order, level, source);
     }
 
 }

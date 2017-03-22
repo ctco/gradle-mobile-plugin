@@ -6,11 +6,7 @@
 
 package lv.ctco.scm.mobile.infrastructure.knappsack;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -18,8 +14,6 @@ import org.apache.http.NameValuePair;
 import org.apache.http.client.ResponseHandler;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.conn.scheme.Scheme;
-import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -29,9 +23,14 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
-import java.io.*;
-import java.security.*;
-import java.security.cert.CertificateException;
+import org.gradle.api.logging.LogLevel;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,6 +41,8 @@ import java.util.List;
  */
 class Knappsack {
 
+    private static final Logger logger = Logging.getLogger(Knappsack.class);
+
     private CloseableHttpClient httpClient;
     private String serverUrl;
 
@@ -51,27 +52,8 @@ class Knappsack {
      */
     Knappsack(String serverUrl) {
         HttpClientBuilder httpClientBuilder = HttpClients.custom();
-        //TODO//httpClientBuilder.setUserAgent(MobilePluginUtil.getPluginName()+"/"+MobilePluginUtil.getPluginVersion());
         this.httpClient = httpClientBuilder.build();
         this.serverUrl = StringUtils.appendIfMissing(serverUrl, "/");
-    }
-
-    /**
-     * Configures given HTTP client to use a user defined key store.
-     * @param keyStoreFile Specific keystore to use.
-     * @param password Specific keystore's password.
-     * @throws IOException .
-     */
-    void switchToExternalKeyStore(File keyStoreFile, String password) throws IOException {
-        try {
-            KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
-            keyStore.load(FileUtils.openInputStream(keyStoreFile), password.toCharArray());
-            httpClient.getConnectionManager().getSchemeRegistry().register(
-                    new Scheme("https", 443, new SSLSocketFactory(keyStore)));
-        } catch (IOException | KeyStoreException | CertificateException | NoSuchAlgorithmException
-                | UnrecoverableKeyException | KeyManagementException e) {
-            throw new IOException(e);
-        }
     }
 
     /**
@@ -87,20 +69,21 @@ class Knappsack {
         postParameters.add(new BasicNameValuePair("j_username", username));
         postParameters.add(new BasicNameValuePair("j_password", password));
         httpPost.setEntity(new UrlEncodedFormEntity(postParameters));
-        LoggerUtil.info("Executing request "+httpPost.getRequestLine()+" "
-                +EntityUtils.toString(httpPost.getEntity()).replaceAll(password, "********"));
+        String requestLine = httpPost.getRequestLine().toString();
+        String postEntity = EntityUtils.toString(httpPost.getEntity()).replaceAll(password, "********");
+        logger.info("Executing request {} {}", requestLine, postEntity);
         ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
             @Override
             public String handleResponse(final HttpResponse response) throws IOException {
                 int status = response.getStatusLine().getStatusCode();
                 String location = response.getFirstHeader("Location").getValue();
                 for (Header header : response.getAllHeaders()) {
-                    LoggerUtil.debug(header.toString());
+                    logger.log(LogLevel.DEBUG,"{}", header.toString());
                 }
                 if (status == 302 && serverUrl.equals(location)) {
                     return null;
                 } else {
-                    LoggerUtil.error("Unexpected response status '"+status+"' or redirect '"+location+"' while authenticating");
+                    logger.error("Unexpected response status '{}' or redirect '{}' while authenticating", status, location);
                     throw new IOException("Knappsack authentication exception");
                 }
             }
@@ -123,6 +106,7 @@ class Knappsack {
                         String recentChanges, String filePath) throws IOException {
         File file = new File(filePath);
         InputStream stream = new FileInputStream(file);
+        logger.info("Uploading artifact '{}' with version '{}' to '{}'", file.getName(), versionName, serverUrl);
         uploadArtifact(parentId, groupId, storageConfigurationId, versionName, recentChanges, stream, file.getName());
     }
 
@@ -138,7 +122,7 @@ class Knappsack {
      * @throws IOException .
      */
     void uploadArtifact(final String parentId, String groupId, String storageConfigurationId, String versionName,
-                               String recentChanges, InputStream inputStream, String fileName) throws IOException {
+                        String recentChanges, InputStream inputStream, String fileName) throws IOException {
         HttpPost httpPost = new HttpPost(serverUrl+"manager/uploadVersion");
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
         entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
@@ -156,16 +140,16 @@ class Knappsack {
         entityBuilder.setContentType(ContentType.MULTIPART_FORM_DATA);
         try {
             httpPost.setEntity(entityBuilder.build());
-            LoggerUtil.info("Executing request "+httpPost.getRequestLine());
+            logger.info("Executing request "+httpPost.getRequestLine());
             for (Header header : httpPost.getAllHeaders()) {
-                LoggerUtil.debug(header.toString());
+                logger.log(LogLevel.DEBUG, "{}", header.toString());
             }
             ResponseHandler<String> responseHandler = new ResponseHandler<String>() {
                 @Override
                 public String handleResponse(final HttpResponse response) throws IOException {
                     int status = response.getStatusLine().getStatusCode();
                     for (Header header : response.getAllHeaders()) {
-                        LoggerUtil.debug(header.toString());
+                        logger.log(LogLevel.DEBUG, "{}", header.toString());
                     }
                     HttpEntity entity = response.getEntity();
                     if (status == 302) {
@@ -178,7 +162,7 @@ class Knappsack {
                     } else if (status == 301) {
                         throw new IOException("App with provided version already exists");
                     } else {
-                        LoggerUtil.debug(EntityUtils.toString(entity));
+                        logger.log(LogLevel.DEBUG,"{}", EntityUtils.toString(entity));
                         throw new IOException("Unexpected response status: "+status);
                     }
                 }

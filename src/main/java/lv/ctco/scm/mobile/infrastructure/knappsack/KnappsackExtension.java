@@ -42,12 +42,6 @@ public class KnappsackExtension {
     /** File name of the artifact to upload. */
     private String artifactFileName;
 
-    /** Key store to use instead of JVM default when connecting with SSL. */
-    private String keyStoreFileName;
-
-    /** Key store password for the custom key store. */
-    private String keyStorePassword;
-
     public String getUrl() {
         return url;
     }
@@ -134,26 +128,6 @@ public class KnappsackExtension {
 
     public File getArtifactFile() {
         return StringUtils.isBlank(artifactFileName) ? null : new File(artifactFileName);
-    }
-
-    public String getKeyStoreFileName() {
-        return keyStoreFileName;
-    }
-
-    public void setKeyStoreFileName(String keyStoreFileName) {
-        this.keyStoreFileName = keyStoreFileName;
-    }
-
-    public File getKeyStoreFile() {
-        return StringUtils.isBlank(keyStoreFileName) ? null : new File(keyStoreFileName);
-    }
-
-    public String getKeyStorePassword() {
-        return keyStorePassword;
-    }
-
-    public void setKeyStorePassword(String keyStorePassword) {
-        this.keyStorePassword = keyStorePassword;
     }
 
 }

@@ -6,87 +6,77 @@
 
 package lv.ctco.scm.mobile.platform.xcode
 
-import lv.ctco.scm.mobile.core.objects.Environment
-import lv.ctco.scm.mobile.core.objects.PlatformExtension
 import lv.ctco.scm.mobile.core.objects.Profile
-import lv.ctco.scm.mobile.core.utils.CommonUtil
 
-class XcodeExtension extends PlatformExtension {
+class XcodeExtension {
 
+    private XcodeConfiguration configuration = new XcodeConfiguration()
+
+    boolean automaticConfiguration = true
+    File projectFile
+    String projectName
+    String unitTestScheme
     String libraryGroupId
-
     String libraryVersion
 
-    @Deprecated
-    boolean skipLibraryPublish = false
-
-    /** When true, the automatic configuration should be performed using the Xcode project. */
-    boolean automaticConfiguration = true
-
-    /** SDK to build an application. */
-    String sdk = "iphoneos"
-
-    /** Project configuration to build. */
-    String configuration = "Release"
-
-    /* Name of the scheme to use for unit testing. */
-    String unitTestScheme
-
-    public boolean containsEnvironment(String name) {
-        environments.count { key, value -> key.toLowerCase() == name.toLowerCase() } > 0
-    }
-
-    public boolean containsTarget(String name) {
-        environments.count { key, value -> value.getTarget() == name } > 0
+    public void environment(Closure closure) {
+        Environment env = new Environment()
+        closure.setDelegate(env)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addEnvironment(env)
     }
 
     public void environment(HashMap<String, String> params) {
         Environment env = new Environment()
         env.setName(params.name)
-        if (params.target) {
-            env.setTarget(params.target)
-        }
-        addEnvironment(env)
+        env.setTarget(params.target)
+        configuration.addEnvironment(env)
     }
 
-    public void addEnvironment(Environment env) {
-        if (CommonUtil.isBlank(env.getName())) {
-            throw new IOException('Environment name is not defined')
-        }
-        if (CommonUtil.isBlank(env.getTarget())) {
-            throw new IOException('Environment target is not defined')
-        }
-        if (containsEnvironment(env.getName())) {
-            throw new IOException("Environment "+env.getName()+" is already defined")
-        }
-        if (CommonUtil.isBlank(env.getConfiguration())) {
-            env.setConfiguration(configuration)
-        }
-        if (CommonUtil.isBlank(env.getSdk())) {
-            env.setSdk(sdk)
-        }
-        environments[env.getName()] = env
+    public void profile(Closure closure) {
+        Profile profile = new Profile()
+        closure.setDelegate(profile)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addProfile(profile)
     }
 
-    public void addProfile(Profile profile) {
-        if (CommonUtil.isBlank(profile.getEnvironment())) {
-            throw new IOException('Profile environment is not defined')
+    public void profile(HashMap<String, String> params) {
+        Profile profile = new Profile()
+        profile.setEnvironment(params.environment)
+        profile.setTarget(params.target)
+        profile.setSource(params.source)
+        if (params.scope != null) {
+            profile.setScope(params.scope)
         }
-        if (CommonUtil.isBlank(profile.getSources())) {
-            throw new IOException('Profile source is not defined')
+        if (params.order != null) {
+            profile.setOrder(Integer.parseInt(params.order))
         }
-        if (profile.getSources().endsWith(".tt")) {
-            throw new IOException('Profile source *.tt is not supported for Xcode')
+        if (params.level != null) {
+            profile.setLevel(Integer.parseInt(params.level))
         }
-        /*
-        if (profile.getScopes() != null) {
-            profile.scopes = ["build"]
+        configuration.addProfile(profile)
+    }
+
+    XcodeConfiguration getXcodeConfiguration() {
+        configuration.automaticConfiguration = automaticConfiguration
+        if (projectFile != null) {
+            configuration.setProjectFile(projectFile)
         }
-        */
-        if (CommonUtil.isBlank(profile.getTarget()) && !profile.getSources().toLowerCase().endsWith(".groovy")) {
-            throw new IOException('Profile target is not defined')
+        if (projectName != null) {
+            configuration.setProjectName(projectName)
         }
-        profiles[profile.getEnvironment()+"|"+profile.getTarget()] = profile
+        if (unitTestScheme != null) {
+            configuration.setUnitTestScheme(unitTestScheme)
+        }
+        if (libraryGroupId != null) {
+            configuration.setLibraryGroupId(libraryGroupId)
+        }
+        if (libraryVersion != null) {
+            configuration.setLibraryVersion(libraryVersion)
+        }
+        return configuration
     }
 
 }

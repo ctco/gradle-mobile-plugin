@@ -9,106 +9,96 @@ package lv.ctco.scm.mobile.platform.xamarin
 import lv.ctco.scm.mobile.core.objects.Profile
 import lv.ctco.scm.mobile.core.utils.BackupUtil
 import lv.ctco.scm.mobile.core.utils.CommonUtil
+import lv.ctco.scm.mobile.core.utils.ErrorUtil
 import lv.ctco.scm.mobile.core.utils.GroovyProfilingUtil
-import lv.ctco.scm.mobile.core.utils.LoggerUtil
 import lv.ctco.scm.mobile.core.utils.PlistUtil
 import lv.ctco.scm.mobile.core.utils.ProfilingUtil
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
-class ProfilingTask extends DefaultTask {
+public class ProfilingTask extends DefaultTask {
 
-    /** Name of the project to build. */
-    String projectName = ""
+    private static final Logger logger = Logging.getLogger(ProfilingTask.class)
 
-    /** Name of the environment to profile for. */
-    String environmentName = ""
+    public File targetDir
+    public List<Profile> profiles
 
-    boolean enforcePlistSyntax = false
+    void setProjectDir(File projectDir) {
+        this.targetDir = projectDir
+    }
 
-    /** Profile targets and sources for environments. */
-    Profile[] profiles
+    void setProfiles(List<Profile> profiles) {
+        this.profiles = profiles
+    }
 
     @TaskAction
     public void doTaskAction() {
-        boolean isInfoProfiled = false
-        boolean isRootProfiled = false
-        File projectDir = new File(projectName)
+        logProfiles()
+
         for (Profile profile : profiles) {
-            if (profile.getEnvironment().equals(environmentName) && profile.hasScope('build')) {
-                for (String pathSource : profile.getSources().split(",")) {
-                    File base = null
-                    if (!pathSource.toLowerCase().endsWith('.groovy')) {
-                        base = new File(projectDir, profile.getTarget())
-                        if (!base.exists()) {
-                            throw new GradleException(base.toString() + " does not exist")
-                        }
-                    }
+            File source = new File(profile.getSource())
+            checkWhetherFileExists(source)
+            String profileSourceName = source.getName().toLowerCase()
 
-                    File prof = new File(projectDir, pathSource)
-                    if (!prof.exists()) {
-                        throw new GradleException(prof.toString() + " does not exist")
-                    }
+            if (profileSourceName.endsWith(".groovy")) {
 
-                    if (base != null) {
-                        if (base.getName().equals("Info.plist")) {
-                            isInfoProfiled = true
-                        }
-                        if (base.getName().equals("Root.plist")) {
-                            isRootProfiled = true
-                        }
-                        LoggerUtil.info("Profiling file " + prof.canonicalPath + " to " + base.canonicalPath)
-                    }
+                GroovyProfilingUtil.profileUsingGroovyEval(source)
 
-                    def profileSourceType = prof.getName().toLowerCase()
-                    if (profileSourceType.endsWith(".groovy")) {
-                        GroovyProfilingUtil.profileUsingGroovyEval(prof)
-                    } else if (profileSourceType.endsWith(".tt")) {
-                        for (String pathAdditional : profile.getAdditionalTargets()) {
-                            BackupUtil.backupFile(new File(projectDir, pathAdditional))
-                        }
-                        ProfilingUtil.profileUsingT4Templates(base, prof, environmentName)
-                    } else {
-                        PlistUtil.validatePlist(prof)
-                        ProfilingUtil.profileUsingPlistEntries(base, prof)
-                    }
+            } else if (profileSourceName.endsWith(".plist")) {
 
-                    if (base != null) {
-                        if (base.getName().toLowerCase().endsWith('.plist') && enforcePlistSyntax) {
-                            PlistUtil.validatePlist(base)
-                        }
-                    }
+                File target = new File(targetDir, profile.getTarget())
+                checkWhetherFileExists(target)
+                logger.info("Profiling file " + source.getAbsolutePath() + " to " + target.getAbsolutePath())
+                PlistUtil.validatePlist(source)
+                if ("Settings.bundle/Root.plist".equals(profile.getTarget()) && profile.getLevel() == 2) {
+                    ProfilingUtil.profilePreferenceSpecifiersPlistEntries(target, source)
+                } else {
+                    ProfilingUtil.profileFirstLevelPlistEntries(target, source)
                 }
-            }
-        }
+                PlistUtil.validatePlist(target)
 
-        if (!isInfoProfiled) {
-            File infoPlist = new File(projectDir, "Info.plist")
-            if (infoPlist.exists()) {
-                LoggerUtil.info("Imitating Info.plist update as there is no profiling configuration...")
-                CommonUtil.addNewlineAtEndOfFile(infoPlist)
-                if (enforcePlistSyntax) {
-                    PlistUtil.validatePlist(infoPlist)
-                }
             } else {
-                LoggerUtil.info("No Info.plist in default path...")
+                stopWithException("Unknown profiling source type - '"+profileSourceName+"'")
             }
         }
-        if (!isRootProfiled) {
-            File rootPlist = new File(projectDir, "Settings.bundle/Root.plist")
-            if (rootPlist.exists()) {
-                LoggerUtil.info("Imitating Root.plist update as there is no profiling configuration...")
-                CommonUtil.addNewlineAtEndOfFile(rootPlist)
-                if (enforcePlistSyntax) {
-                    PlistUtil.validatePlist(rootPlist)
-                }
-            } else {
-                LoggerUtil.info("No Root.plist in default path...")
-            }
-        }
+        modifyMainPlistsIfUnprofiled()
+    }
 
+    private void modifyMainPlistsIfUnprofiled() {
+        File infoPlist = new File(targetDir, "Info.plist")
+        File rootPlist = new File(targetDir, "Settings.bundle/Root.plist")
+        if (infoPlist.exists() && !BackupUtil.isBackuped(infoPlist)) {
+            CommonUtil.addNewlineAtEndOfFile(infoPlist)
+            PlistUtil.validatePlist(infoPlist)
+        }
+        if (rootPlist.exists() && !BackupUtil.isBackuped(rootPlist)) {
+            CommonUtil.addNewlineAtEndOfFile(rootPlist)
+            PlistUtil.validatePlist(rootPlist)
+        }
+    }
+
+    private void stopWithException(String message) {
+        ErrorUtil.errorInTask(this.getName(), message)
+        throw new GradleException(message)
+    }
+
+    private void checkWhetherFileExists(File file) {
+        if (!file.exists()) {
+            throw stopWithException("Referenced file '"+file.toString()+"' " + " does not exist")
+        }
+    }
+
+    private void logProfiles() {
+        if (!profiles.isEmpty()) {
+            logger.info("Profiles filtered for target environment: "+profiles.size())
+            for (Profile profile : profiles) {
+                logger.info("  "+profile.toString())
+            }
+        }
     }
 
 }

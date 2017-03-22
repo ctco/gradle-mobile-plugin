@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.TeamcityUtil;
 
 public class MobilePluginUtil {
@@ -33,17 +32,19 @@ public class MobilePluginUtil {
         return pluginVersion;
     }
 
-    static void getPluginInfo(InputStream pluginInfoStream) throws IOException {
+    static String getPluginInfo(InputStream pluginInfoStream) throws IOException {
         if (pluginInfoStream != null) {
             Properties pluginInfoProperties = new Properties();
             pluginInfoProperties.load(pluginInfoStream);
             pluginGroup = pluginInfoProperties.getProperty("plugin-group");
             pluginName = pluginInfoProperties.getProperty("plugin-name");
             pluginVersion = pluginInfoProperties.getProperty("plugin-version");
-            LoggerUtil.info(pluginGroup + ":" + pluginName + ":" + pluginVersion);
             TeamcityUtil.setAgentParameter("tools.build.plugin.group", pluginGroup);
             TeamcityUtil.setAgentParameter("tools.build.plugin.name", pluginName);
             TeamcityUtil.setAgentParameter("tools.build.plugin.version", pluginVersion);
+            return pluginGroup + ":" + pluginName + ":" + pluginVersion;
+        } else {
+            return null;
         }
     }
 

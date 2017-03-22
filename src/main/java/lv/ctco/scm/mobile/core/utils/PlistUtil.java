@@ -6,8 +6,15 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
-import com.dd.plist.*;
+import com.dd.plist.NSDate;
+import com.dd.plist.NSDictionary;
+import com.dd.plist.NSObject;
+import com.dd.plist.PropertyListFormatException;
+import com.dd.plist.PropertyListParser;
+
 import org.apache.commons.exec.CommandLine;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -18,17 +25,14 @@ import java.util.Date;
 
 public final class PlistUtil {
 
+    private static final Logger logger = Logging.getLogger(PlistUtil.class);
+
     private static final String EXCEPTION_MSG_PARSE = "Exception while parsing a plist file";
 
     private PlistUtil() {}
 
     public static String getStringValue(File plistFile, String keyName) throws IOException {
-        NSDictionary baseDict;
-        try {
-            baseDict = (NSDictionary) PropertyListParser.parse(plistFile);
-        } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException(EXCEPTION_MSG_PARSE, e);
-        }
+        NSDictionary baseDict = PlistUtil.getRootDictionary(plistFile);
         if (baseDict.containsKey(keyName)) {
             NSObject entry = baseDict.get(keyName);
             return entry.toString();
@@ -38,12 +42,7 @@ public final class PlistUtil {
     }
 
     public static Date getDateValue(File plistFile, String keyName) throws IOException {
-        NSDictionary baseDict;
-        try {
-            baseDict = (NSDictionary)PropertyListParser.parse(plistFile);
-        } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException(EXCEPTION_MSG_PARSE, e);
-        }
+        NSDictionary baseDict = PlistUtil.getRootDictionary(plistFile);
         if (baseDict.containsKey(keyName)) {
             NSObject entry = baseDict.get(keyName);
             return ((NSDate)entry).getDate();
@@ -54,21 +53,16 @@ public final class PlistUtil {
 
     public static void setStringValue(File plistFile, String keyName, String keyValue) throws IOException {
         BackupUtil.backupFile(plistFile);
-        NSDictionary baseDict;
-        try {
-            baseDict = (NSDictionary)PropertyListParser.parse(plistFile);
-        } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
-            throw new IOException(EXCEPTION_MSG_PARSE, e);
-        }
+        NSDictionary baseDict = PlistUtil.getRootDictionary(plistFile);
         if (baseDict.containsKey(keyName)) {
-            LoggerUtil.info("Replacing node '"+keyName+"' with value '"+keyValue+"'");
+            logger.info("  Replacing key '{}' with value '{}'", keyName, keyValue);
             baseDict.put(keyName, keyValue);
         } else {
-            LoggerUtil.info("Adding node '"+keyName+"' with value '"+keyValue+"'");
+            logger.info("  Adding key '{}' with value '{}'", keyName, keyValue);
             baseDict.put(keyName, keyValue);
         }
         PropertyListParser.saveAsXML(baseDict, plistFile);
-        LoggerUtil.info("Updated file "+CommonUtil.getMD5InfoString(plistFile));
+        logger.info("  current md5={}", CommonUtil.getMD5Hex(plistFile));
     }
 
     public static void validatePlist(File plistFile) throws IOException {
@@ -80,13 +74,22 @@ public final class PlistUtil {
         }
     }
 
-    public static void convertPlistToBinaryFormat(File plistFile) throws IOException {
-        CommandLine commandLine = new CommandLine("plutil");
-        commandLine.addArguments(new String[]{"-convert", "binary1", plistFile.getAbsolutePath()}, false);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
-        if (!execResult.isSuccess()) {
-            throw new IOException(execResult.getException());
+    public static void resaveAsBinaryPlist(File plist) throws IOException {
+        PropertyListParser.saveAsBinary(getRootDictionary(plist), plist);
+    }
+
+    public static void resaveAsXmlPlist(File plist) throws IOException {
+        PropertyListParser.saveAsXML(getRootDictionary(plist), plist);
+    }
+
+    public static NSDictionary getRootDictionary(File plist) throws IOException {
+        NSDictionary rootDictionary;
+        try {
+            rootDictionary = (NSDictionary) PropertyListParser.parse(plist);
+        } catch (PropertyListFormatException | ParseException | ParserConfigurationException | SAXException e) {
+            throw new IOException(EXCEPTION_MSG_PARSE+" - '"+plist.getAbsolutePath()+"'", e);
         }
+        return rootDictionary;
     }
 
 }

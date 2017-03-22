@@ -9,13 +9,23 @@ package lv.ctco.scm.mobile.core.utils;
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public final class BackupUtil {
+
+    private static final Logger logger = Logging.getLogger(BackupUtil.class);
 
     private static File backupIndex;
     private static ArrayList<BackupEntry> backupEntries;
@@ -23,7 +33,7 @@ public final class BackupUtil {
     private static final BackupUtil instance = new BackupUtil();
 
     private BackupUtil() {
-        LoggerUtil.info("Initializing BackupUtil");
+        logger.debug("Initializing BackupUtil");
         try {
             backupIndex = new File(PathUtil.getBackupDir(), "backup.index");
             if (backupIndex.exists()) {
@@ -42,14 +52,14 @@ public final class BackupUtil {
         return instance;
     }
 
-    private static boolean isBackuped(File targetFile) {
+    public static boolean isBackuped(File targetFile) {
         return getBackupEntry(targetFile) != null;
     }
 
     private static void saveBackupData() throws IOException {
         try (
-            FileOutputStream fileOut = new FileOutputStream(backupIndex);
-            ObjectOutputStream streamOut = new ObjectOutputStream(fileOut)
+                FileOutputStream fileOut = new FileOutputStream(backupIndex);
+                ObjectOutputStream streamOut = new ObjectOutputStream(fileOut)
         ) {
             streamOut.writeObject(backupEntries);
         }
@@ -57,8 +67,8 @@ public final class BackupUtil {
 
     private static void loadBackupData() throws IOException {
         try (
-            FileInputStream fileIn = new FileInputStream(backupIndex);
-            ObjectInputStream streamIn = new ObjectInputStream(fileIn)
+                FileInputStream fileIn = new FileInputStream(backupIndex);
+                ObjectInputStream streamIn = new ObjectInputStream(fileIn)
         ) {
             backupEntries = (ArrayList<BackupEntry>)streamIn.readObject();
         }  catch (ClassNotFoundException e) {
@@ -67,9 +77,9 @@ public final class BackupUtil {
     }
 
     private static void showBackupFiles() {
-        LoggerUtil.info("Detected "+backupEntries.size()+" backuped files");
+        logger.debug("Detected {} backuped files", backupEntries.size());
         for (BackupEntry backupEntry : backupEntries) {
-            LoggerUtil.info(backupEntry.getOriginalFile().getAbsolutePath());
+            logger.debug(backupEntry.getOriginalFile().getAbsolutePath());
         }
     }
 
@@ -77,7 +87,7 @@ public final class BackupUtil {
         if (!isBackuped(file)) {
             BackupEntry newEntry = new BackupEntry(file);
             if  (newEntry.hadOriginalExisted()) {
-                LoggerUtil.info("Backing up file "+CommonUtil.getMD5InfoString(newEntry.getOriginalFile()));
+                logger.info("  Backing up '{}'", newEntry.getOriginalFile());
                 FileUtils.copyFile(newEntry.getOriginalFile(), newEntry.getBackupedFile());
             }
             backupEntries.add(newEntry);
@@ -87,7 +97,7 @@ public final class BackupUtil {
 
     public static void restoreAllFiles() throws IOException {
         if (!backupEntries.isEmpty()) {
-            LoggerUtil.info("Restoring all backuped files");
+            logger.info("Restoring all profiling modifications...");
             Iterator<BackupEntry> entryIterator = backupEntries.iterator();
             while (entryIterator.hasNext()) {
                 BackupEntry backupEntry = entryIterator.next();
@@ -104,12 +114,12 @@ public final class BackupUtil {
 
     public static void applyChanges() throws IOException {
         if (!backupEntries.isEmpty()) {
-            LoggerUtil.info("Applying all modifications");
+            logger.info("Applying all profiling modifications...");
             Iterator<BackupEntry> entryIterator = backupEntries.iterator();
             while (entryIterator.hasNext()) {
                 BackupEntry backupEntry = entryIterator.next();
                 if (backupEntry.hadOriginalExisted()) {
-                    LoggerUtil.info("Removing backup file '"+backupEntry.getBackupedFile().getAbsolutePath()+"'");
+                    logger.debug("  Removing backup '{}'", backupEntry.getBackupedFile().getAbsolutePath());
                     FileUtils.forceDelete(backupEntry.getBackupedFile());
                 }
                 entryIterator.remove();
@@ -123,13 +133,14 @@ public final class BackupUtil {
         if (backupEntry == null) {
             throw new IOException("Restorable file not in index");
         }
-        LoggerUtil.info("Restoring file "+CommonUtil.getMD5InfoString(path));
+        logger.info("  Restoring '{}'", path);
+        logger.info("    current md5={}", CommonUtil.getMD5Hex(path));
         if (backupEntry.hadOriginalExisted()) {
             FileUtils.copyFile(backupEntry.getBackupedFile(), backupEntry.getOriginalFile());
             Files.setLastModifiedTime(backupEntry.getOriginalFile().toPath(), FileTime.fromMillis(backupEntry.getOriginalTime()));
             FileUtils.forceDelete(backupEntry.getBackupedFile());
         }
-        LoggerUtil.info("Restored file "+CommonUtil.getMD5InfoString(path));
+        logger.info("    initial md5={}", CommonUtil.getMD5Hex(path));
         if (removeFromList) {
             backupEntries.remove(backupEntry);
             saveBackupData();

@@ -6,10 +6,9 @@
 
 package lv.ctco.scm.mobile.infrastructure.knappsack;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.IOException;
@@ -27,8 +26,7 @@ public class KnappsackUploadTask extends DefaultTask {
         try {
             KnappsackUtil.uploadArtifact(extension);
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 

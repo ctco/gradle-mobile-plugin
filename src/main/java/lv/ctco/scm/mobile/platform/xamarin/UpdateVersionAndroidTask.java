@@ -7,11 +7,12 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class UpdateVersionAndroidTask extends DefaultTask {
+
+    private static final Logger logger = Logging.getLogger(UpdateVersionAndroidTask.class);
 
     private String projectName;
     private String releaseVersion;
@@ -42,15 +45,14 @@ public class UpdateVersionAndroidTask extends DefaultTask {
             String revision = RevisionUtil.getRevision(getProject());
             String buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
             File manifestFile = new File(projectName+"/Properties/AndroidManifest.xml");
-            LoggerUtil.info("Setting versionName in manifest file to '"+buildVersion+"'");
+            logger.info("Setting versionName in manifest file to '{}'", buildVersion);
             CommonUtil.replaceInFile(manifestFile, Pattern.compile("(android:versionName=)(\".*?\")"), "android:versionName=\""+buildVersion+"\"");
             if (androidVersionCode != null) {
-                LoggerUtil.info("Setting versionCode in manifest file to '"+androidVersionCode+"'");
+                logger.info("Setting versionCode in manifest file to '{}'", androidVersionCode);
                 CommonUtil.replaceInFile(manifestFile, Pattern.compile("(android:versionCode=)(\".*?\")"), "android:versionCode=\""+androidVersionCode+"\"");
             }
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 

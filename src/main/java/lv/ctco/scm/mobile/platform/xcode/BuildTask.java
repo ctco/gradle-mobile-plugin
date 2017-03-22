@@ -6,13 +6,13 @@
 
 package lv.ctco.scm.mobile.platform.xcode;
 
-import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.objects.IosApp;
+
 import lv.ctco.scm.mobile.core.utils.BuildReportUtil;
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PathUtil;
 import lv.ctco.scm.mobile.core.utils.ZipUtil;
 
@@ -22,7 +22,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -30,6 +31,8 @@ import java.io.IOException;
 import java.util.List;
 
 public class BuildTask extends DefaultTask {
+
+    private static final Logger logger = Logging.getLogger(BuildTask.class);
 
     private Environment env;
 
@@ -46,8 +49,7 @@ public class BuildTask extends DefaultTask {
                 moveArtifactsToDistDir();
             }
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 
@@ -63,15 +65,14 @@ public class BuildTask extends DefaultTask {
         commandLine.addArgument(env.getSdk());
         commandLine.addArgument("-target");
         commandLine.addArgument(env.getTarget(), false);
-        commandLine.addArgument("DSTROOT="+PathUtil.getXcodeDstDir().getAbsolutePath());
+        commandLine.addArgument("DSTROOT="+ PathUtil.getXcodeDstDir().getAbsolutePath());
         commandLine.addArgument("OBJROOT="+PathUtil.getXcodeObjDir().getAbsolutePath());
         commandLine.addArgument("SYMROOT="+new File(PathUtil.getXcodeSymDir(), env.getName()).getAbsolutePath());
         commandLine.addArgument("SHARED_PRECOMPS_DIR="+PathUtil.getXcodeSharedDir().getAbsolutePath());
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
         FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
         if (!execResult.isSuccess()) {
-            LoggerUtil.errorInTask(this.getName(), execResult.getException().getMessage());
-            throw new GradleException(execResult.getException().getMessage());
+            ErrorUtil.errorInTask(this.getName(), execResult.getException());
         }
     }
 
@@ -84,10 +85,13 @@ public class BuildTask extends DefaultTask {
         } else {
             throw new IOException("None or multiple apps found in build directory!");
         }
-        IosApp iosApp = new IosApp(appDir, env);
+        IosApp iosApp = new IosApp(appDir);
+        iosApp.setName(env.getName());
+        iosApp.setBuildCnf(env.getConfiguration());
+        iosApp.setBuildSdk(env.getSdk());
         BuildReportUtil.addIosAppInfo(iosApp);
         if (iosApp.isSignedWithDeveloperIdentity()) {
-            if (!("Debug".equalsIgnoreCase(env.getConfiguration()) || "UITests".equalsIgnoreCase(env.getConfiguration()))) {
+            if (!("Debug".equalsIgnoreCase(env.getConfiguration()))) {
                 throw new IOException("iPhone Developer identity is not allowed for "+env.getConfiguration()+" configuration");
             }
         }
@@ -108,8 +112,8 @@ public class BuildTask extends DefaultTask {
             FileUtils.deleteDirectory(payloadDir);
         }
         FileUtils.moveDirectoryToDirectory(appDir, payloadDir, true);
-        if (!StringUtils.endsWithIgnoreCase(appName, env.getUpperCaseName())) {
-            appName = appName+" "+env.getUpperCaseName();
+        if (!StringUtils.endsWithIgnoreCase(appName, env.getName().toUpperCase())) {
+            appName = appName+" "+env.getName().toUpperCase();
         }
         File ipaFile = new File(PathUtil.getIpaDistDir(), appName+".ipa");
         ZipUtil.compressDirectory(new File(buildDir, "Payload"), true, ipaFile);
@@ -121,7 +125,7 @@ public class BuildTask extends DefaultTask {
             ZipUtil.compressDirectory(dsymDir, true, new File(PathUtil.getDsymDistDir(), "dSYM."+env.getName()+".zip"));
             FileUtils.deleteDirectory(dsymDir);
         } else {
-            LoggerUtil.warn("None or multiple DSYMs found! Not moving to distribution folder.");
+            logger.warn("None or multiple DSYMs found! Not moving to distribution folder.");
         }
     }
 

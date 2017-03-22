@@ -72,8 +72,7 @@ public class SlnProjectSection {
         result = type.hashCode();
         result = 31 * result + name.hashCode();
         result = 31 * result + uID.hashCode();
-        result = 31 * result + buildFilePath.hashCode();
-        return result;
+        return 31 * result + buildFilePath.hashCode();
     }
 
 }

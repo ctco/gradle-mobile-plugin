@@ -6,49 +6,84 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import lv.ctco.scm.mobile.core.objects.PlatformExtension
-import lv.ctco.scm.mobile.core.utils.LoggerUtil
+import lv.ctco.scm.mobile.core.objects.Profile
 
-class XamarinExtension extends PlatformExtension {
+class XamarinExtension {
 
-    /**
-     * Validate plist syntax with plutil lint command
-     * after profiling and versionUpdate tasks for all build configurations
-     * if set as true.
-     * false by default to keep logic compatibility.
-     */
-    boolean enforcePlistSyntax = false;
+    private XamarinConfiguration configuration = new XamarinConfiguration()
 
-    /**
-     * Skip adding updateVersion task for build configurations
-     * that are configured with Appstore|iPhone
-     * if set as true.
-     * false by default to keep logic compatibility.
-     */
-    boolean skipUpdateVersionForAppstoreConfiguration = false;
+    boolean automaticConfiguration = true
+    File solutionFile
+    File projectFile
+    String projectName
+    String unitTestProject
 
-    /**
-     * Update Info plist key CFBundleShortVersionString with clean version
-     * if set as true.
-     * false by default to keep logic compatibility.
-     */
-    boolean updateCFBundleShortVersionString = false;
+    @Deprecated
+    boolean cleanReleaseVersionForPROD = false
+    @Deprecated
+    boolean updateCFBundleShortVersionString = false
+    @Deprecated
+    boolean skipUpdateVersionForAppstoreConfiguration = false
 
-    public boolean isValid() {
-        boolean result = true;
-        if (assemblyName == null) {
-            LoggerUtil.error("assemblyName for ctcoMobile.xamarin extension is not defined");
-            result = false;
+    public void environment(Closure closure) {
+        Environment env = new Environment()
+        closure.setDelegate(env)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addEnvironment(env)
+    }
+
+    public void environment(HashMap<String, String> params) {
+        Environment env = new Environment()
+        env.setName(params.name)
+        env.setConfiguration(params.configuration)
+        env.setPlatform(params.platform)
+        configuration.addEnvironment(env)
+    }
+
+    public void profile(Closure closure) {
+        Profile prof = new Profile()
+        closure.setDelegate(prof)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addProfile(prof)
+    }
+
+    public void profile(HashMap<String, String> params) {
+        Profile profile = new Profile()
+        profile.setEnvironment(params.environment)
+        profile.setTarget(params.target)
+        profile.setSource(params.source)
+        if (params.scope != null) {
+            profile.setScope(params.scope)
         }
-        if (projectBaseName == null) {
-            LoggerUtil.error("projectBaseName for ctcoMobile.xamarin extension is not defined");
-            result = false;
+        if (params.order != null) {
+            profile.setOrder(Integer.parseInt(params.order))
         }
-        if (projectName == null) {
-            LoggerUtil.error("projectName for ctcoMobile.xamarin extension is not defined");
-            result = false;
+        if (params.level != null) {
+            profile.setLevel(Integer.parseInt(params.level))
         }
-        return result;
+        configuration.addProfile(profile)
+    }
+
+    XamarinConfiguration getXamarinConfiguration() {
+        configuration.setAutomaticConfiguration(automaticConfiguration)
+        if (solutionFile != null) {
+            configuration.setSolutionFile(solutionFile)
+        }
+        if (projectFile != null) {
+            configuration.setProjectFile(projectFile)
+        }
+        if (projectName != null) {
+            configuration.setProjectName(projectName)
+        }
+        if (unitTestProject != null) {
+            configuration.setUnitTestProject(unitTestProject)
+        }
+        configuration.setCleanReleaseVersionForPROD(cleanReleaseVersionForPROD)
+        configuration.setUpdateCFBundleShortVersionString(updateCFBundleShortVersionString)
+        configuration.setSkipUpdateVersionForAppstoreConfiguration(skipUpdateVersionForAppstoreConfiguration)
+        return configuration
     }
 
 }

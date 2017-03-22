@@ -6,109 +6,71 @@
 
 package lv.ctco.scm.mobile.platform.xcode
 
-import lv.ctco.scm.mobile.core.objects.Environment
-import lv.ctco.scm.mobile.core.utils.LoggerUtil
-import lv.ctco.scm.mobile.core.utils.MultiTargetDetectorUtil
-import lv.ctco.scm.mobile.platform.common.CommonTasks
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.lang3.StringUtils
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
 
 class XcodePlatform {
 
+    final Logger logger = Logging.getLogger(XcodePlatform.class)
+
     public static final NAME = "xcode"
 
-    protected Project project
-
-    XcodePlatform(Project project) {
-        this.project = project
-    }
-
-    public void configure(XcodeExtension ext) {
-        if (XcodeUtil.getXcodeprojCount(project.projectDir) == 1) {
-            if (ext.getAutomaticConfiguration()) {
-                LoggerUtil.debug("Performing Xcode settings automatic configuration")
-                performAutomaticConfiguration(ext)
-            }
-            configureBuildTasks(ext)
-            configureUtilityTasks(ext)
-            configureUnitTestTasks(ext)
-            configureLibraryPublications(ext)
-
-            LoggerUtil.info("Final configuration:")
-            LoggerUtil.info(ext.toString())
-            if (ext.uiasetup != null) {
-                LoggerUtil.info(ext.uiasetup.toString())
-            }
-            if (!LibraryUtil.getLibrariesPublications(project).isEmpty()) {
-                LibraryUtil.printLibrariesRepositoriesInfo(project)
-            }
-        } else {
-            LoggerUtil.info("xcodeproj file was not found. Will not configure build tasks...")
+    public void configure(Project project, XcodeConfiguration configuration) {
+        if (XcodeUtil.getXcodeprojCount(project.projectDir) != 1) {
+            return
         }
+
+        if (configuration.getProjectFile() == null) {
+            configuration.setProjectFile(XcodeUtil.getXcodeprojFile(project.projectDir))
+        }
+
+        if (configuration.getProjectName() == null) {
+            configuration.setProjectName(FilenameUtils.getBaseName(configuration.getProjectFile().getName()))
+        }
+
+        if (configuration.getEnvironments().isEmpty() && configuration.isAutomaticConfiguration()) {
+            performAutomaticEnvironmentConfiguration(configuration)
+        }
+
+        printConfiguration(project, configuration)
+
+        configureBuildTasks(project, configuration)
+        configureUtilityTasks(project, configuration)
+        configureUnitTestTasks(project, configuration)
+        configureLibraryPublications(project, configuration)
     }
 
-    /**
-     * Reads Xcode project settings and tries to configure the environment list based on pre-defined configuration
-     * naming conventions.
-     *
-     * 1. If the first configuration does not follow the <project name> <environment name> rule, then the project is
-     * considered to be a single configuration project and only a single environment "Default" with the default configuration name
-     * is configured.
-     * 2. If the first configuration follows the <project name> <environment name> rule, then the method searches for other
-     * configuration that follow the same rule and have the same <project name> part. All these targets are considered to
-     * be parts of a multi-configuration build.
-     * 3. If there is only one such configuration the build is considered to be a single-configuration builds and is handled the same
-     * way as the 1. case.
-     * 4. If there is more that one such configuration the build is considered to be a multi-configuration build and new
-     * environments are crated for each configuration. Environment have the <environment name> name.
-     *
-     * If an environment is detected and the ext already has an environment with the same name, it is ignored and
-     * the process continues. It makes it possible to redefine some environments that do not follow the standard
-     * naming convention.
-     *
-     * @param ext XcodeExtension where environments should be created.
-     */
-    void performAutomaticConfiguration(XcodeExtension ext) {
-        LoggerUtil.info('Trying to determine project assemblyType (single target | multi-target)')
-        List<String> targets = XcodeUtil.getTargets()
+    void performAutomaticEnvironmentConfiguration(XcodeConfiguration configuration) {
         String defaultTarget = XcodeUtil.getDefaultTarget()
-        LoggerUtil.debug("Default target is '"+defaultTarget+"'")
-
-        HashMap<String, String> environments = new MultiTargetDetectorUtil().detectEnvironmentTargets(defaultTarget, targets)
-        if (environments.size() > 1) {
-            LoggerUtil.info("Multi-target project with ${environments.size()} environments detected.")
-            environments.each { String environmentName, String targetName ->
-                if (!ext.containsEnvironment(environmentName) && !ext.containsTarget(targetName)) {
-                    LoggerUtil.info("Adding $environmentName environment with target '$targetName'")
-                    ext.environment name: environmentName, target: targetName
-                } else {
-                    LoggerUtil.info("Environment $environmentName skipped, because it is already configured" +
-                            " and will not be overriden.")
-                }
-            }
+        List<String> allTargets = XcodeUtil.getTargets()
+        List<Environment> environments = XcodeUtil.getAutodetectedEnvironments(defaultTarget, allTargets)
+        if (environments.isEmpty()) {
+            throw new IOException("Failed to autodetect environments")
         } else {
-            LoggerUtil.info("Single target project detected, because the default target name '$defaultTarget'" +
-                    " does not match the multi-target project naming convention.")
-            if (!ext.containsEnvironment('DEFAULT') && !ext.containsTarget(defaultTarget)) {
-                ext.environment(name: 'DEFAULT', target: defaultTarget)
+            for (Environment env : environments) {
+                configuration.addEnvironment(env)
             }
         }
     }
 
-    private void configureBuildTasks(XcodeExtension ext) {
+    private void configureBuildTasks(Project project, XcodeConfiguration configuration) {
         Task dependencyRestoreTask = XcodeTasks.getOrCreateRestoreDependenciesTask(project)
         Task buildAllTask = XcodeTasks.getOrCreateBuildTask(project)
 
-        for (Environment env : ext.getEnvironments().values()) {
+        for (Environment env : configuration.getEnvironments()) {
             Task buildEnvTask = XcodeTasks.getOrCreateBuildEnvTask(project, env)
             Task buildEnvUpdateVersionTask = XcodeTasks.getOrCreateUpdateVersionTask(project, env)
-            Task buildEnvProfileTask = XcodeTasks.getOrCreateProfilingTask(project, env, ext)
+            Task buildEnvProfileTask = getOrCreateProfilingTask(project, env, configuration)
 
             buildEnvTask.dependsOn(dependencyRestoreTask)
             buildEnvTask.dependsOn(buildEnvProfileTask)
             buildEnvTask.dependsOn(buildEnvUpdateVersionTask)
-            buildEnvTask.finalizedBy(CommonTasks.getOrCreateCleanupBuildTask(project, buildEnvTask.getName()))
+            buildEnvTask.finalizedBy(XcodeTasks.getOrCreateCleanTask(project))
 
             buildEnvProfileTask.mustRunAfter(dependencyRestoreTask)
             buildEnvUpdateVersionTask.mustRunAfter(buildEnvProfileTask)
@@ -117,24 +79,43 @@ class XcodePlatform {
         }
     }
 
-    private void configureUtilityTasks(XcodeExtension ext) {
+    private void configureUtilityTasks(Project project, XcodeConfiguration configuration) {
         XcodeTasks.getOrCreateCleanTask(project)
-        XcodeTasks.getOrCreateProjectInfoTask(project, ext)
+        XcodeTasks.getOrCreateProjectInfoTask(project, configuration)
     }
 
-    private void configureUnitTestTasks(XcodeExtension ext) {
-        Task testTask = XcodeTasks.getOrCreateRunUnitTestsTask(project, ext.getUnitTestScheme())
+    private void configureUnitTestTasks(Project project, XcodeConfiguration configuration) {
+        Task testTask = XcodeTasks.getOrCreateRunUnitTestsTask(project, configuration.getUnitTestScheme())
         testTask.dependsOn(XcodeTasks.getOrCreateRestoreDependenciesTask(project))
-        // TODO : Fix Simulator controls
-        //testTask.finalizedBy(CommonTasks.getOrCreateCleanupSimulatorTask(project, testTask.getName()))
     }
 
-    private void configureLibraryPublications(XcodeExtension ext) {
+    private void configureLibraryPublications(Project project, XcodeConfiguration configuration) {
         if (!LibraryUtil.getLibrariesPublications(project).isEmpty()) {
             Task libraryArchiveTask = XcodeTasks.getOrCreateArchiveLibrariesTask(project)
             Task libraryPublishTask = XcodeTasks.getOrCreatePublishLibrariesTask(project)
             libraryPublishTask.dependsOn(libraryArchiveTask)
-            LibraryUtil.configureSingleMavenLibraryRepository(project, "mobile"+XcodeUtil.getXcodeLibraryPublishRepoType(ext.getLibraryVersion()))
+            LibraryUtil.configureSingleMavenLibraryRepository(project, "mobile"+XcodeUtil.getXcodeLibraryPublishRepoType(configuration.getLibraryVersion()))
+        }
+    }
+
+    private void printConfiguration(Project project, XcodeConfiguration configuration) {
+        logger.info(configuration.toString())
+        if (!LibraryUtil.getLibrariesPublications(project).isEmpty()) {
+            LibraryUtil.printLibrariesRepositoriesInfo(project)
+        }
+    }
+
+    private Task getOrCreateProfilingTask(Project project, Environment env, XcodeConfiguration configuration) {
+        String taskName = "applyProfile"+StringUtils.capitalize(env.getName().toLowerCase())
+        Task existingTask = project.getTasks().findByName(taskName)
+        if (existingTask == null) {
+            ProfilingTask newTask = project.getTasks().create(taskName, ProfilingTask.class)
+            newTask.setDescription("Profiles files for '"+env.getName()+"' environment")
+            newTask.setProjectDir(new File(configuration.getProjectName()))
+            newTask.setProfiles(configuration.getSpecificProfiles(env.getName(), "build"))
+            return newTask
+        } else {
+            return existingTask
         }
     }
 

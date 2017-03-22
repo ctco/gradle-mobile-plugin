@@ -6,7 +6,7 @@
 
 package lv.ctco.scm.mobile.core.objects;
 
-import lv.ctco.scm.mobile.core.utils.IosSigningUtil;
+import lv.ctco.scm.mobile.core.utils.IosCodesigningUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
 
 import java.io.File;
@@ -33,15 +33,6 @@ public class IosApp {
     private String bundleVersionShort;
 
     public IosApp(File appDir) throws IOException {
-        getBundleInfo(appDir);
-        getCodesigningIdentity(appDir);
-        getCodesigningProvisioning(appDir);
-    }
-
-    public IosApp(File appDir, Environment env) throws IOException {
-        this.name = env.getName();
-        this.buildCnf = env.getConfiguration();
-        this.buildSdk = env.getSdk();
         getBundleInfo(appDir);
         getCodesigningIdentity(appDir);
         getCodesigningProvisioning(appDir);
@@ -167,8 +158,8 @@ public class IosApp {
         this.bundleVersionShort = PlistUtil.getStringValue(infoPlist, "CFBundleShortVersionString");
     }
 
-    private void getCodesigningIdentity(File appDir) throws IOException {
-        IosCodesigningIdentity identity = IosSigningUtil.getCodesigningIdentity(appDir);
+    private void getCodesigningIdentity(File appDir) {
+        IosCodesigningIdentity identity = IosCodesigningUtil.getCodesigningIdentity(appDir);
         if (identity != null) {
             this.identityName = identity.getIdentityName();
             this.identityType = identity.getIdentityType();
@@ -176,7 +167,7 @@ public class IosApp {
     }
 
     private void getCodesigningProvisioning(File appDir) throws IOException {
-        IosProvisioningProfile profile = IosSigningUtil.getEmbeddedProvisioningProfile(appDir);
+        IosProvisioningProfile profile = IosCodesigningUtil.getEmbeddedProvisioningProfile(appDir);
         if (profile != null) {
             this.provisioningUuid = profile.getUuid();
             this.provisioningProfileName = profile.getProfileName();

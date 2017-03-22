@@ -8,19 +8,24 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.exec.LogOutputStream;
 
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
 import java.util.ArrayList;
 import java.util.List;
 
 class ExecOutputStream extends LogOutputStream {
 
+    private static final Logger logger = Logging.getLogger(ExecOutputStream.class);
+
     private List<String> output = new ArrayList<>();
 
     private boolean routeToOutput;
-    private boolean routeToStdout;
+    private boolean routeToLogger;
 
-    ExecOutputStream(boolean routeToOutput, boolean routeToStdout) {
+    ExecOutputStream(boolean routeToOutput, boolean routeToLogger) {
         this.routeToOutput = routeToOutput;
-        this.routeToStdout = routeToStdout;
+        this.routeToLogger = routeToLogger;
     }
 
     public List<String> getOutput() {
@@ -32,8 +37,8 @@ class ExecOutputStream extends LogOutputStream {
         if (routeToOutput) {
             output.add(line);
         }
-        if (routeToStdout) {
-            LoggerUtil.info(line);
+        if (routeToLogger) {
+            logger.info(line);
         }
     }
 

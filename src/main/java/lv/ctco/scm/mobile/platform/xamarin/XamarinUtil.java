@@ -6,12 +6,13 @@
 
 package lv.ctco.scm.mobile.platform.xamarin;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.apache.commons.lang3.StringUtils;
+
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,6 +20,8 @@ import java.util.Collection;
 import java.util.List;
 
 public final class XamarinUtil {
+
+    private static final Logger logger = Logging.getLogger(XamarinUtil.class);
 
     private static final String DEFAULT_RELEASE_VERSION = "0.1";
 
@@ -28,12 +31,12 @@ public final class XamarinUtil {
         String csprojName = csproj.getFile().getName();
         String releaseVersion = csproj.getReleaseVersion();
         if (StringUtils.isBlank(releaseVersion)) {
-            LoggerUtil.info("Release version not found in "+csprojName);
+            logger.info("Release version not found in '{}'", csprojName);
             releaseVersion = DEFAULT_RELEASE_VERSION;
         } else {
-            LoggerUtil.info("Release version was found in "+csprojName);
+            logger.info("Release version was found in '{}'", csprojName);
         }
-        LoggerUtil.info("Setting release version as '"+releaseVersion+"' for builds of '"+csprojName+"'");
+        logger.info("Setting release version as '{}' for builds of '{}'", releaseVersion, csprojName);
         return releaseVersion;
     }
 

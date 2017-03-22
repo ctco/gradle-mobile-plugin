@@ -11,6 +11,9 @@ import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
 
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
 import org.junit.Test;
 
 import java.io.File;
@@ -26,6 +29,8 @@ import static org.junit.Assert.*;
 
 public class ZipUtilTest {
 
+    private static final Logger logger = Logging.getLogger(ZipUtilTest.class);
+
     @Test
     public void testPosixDirectoryCompressionWithoutRoot() throws IOException {
         File testDir;
@@ -33,7 +38,7 @@ public class ZipUtilTest {
             testDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
         } while (testDir.exists());
         FileUtils.forceMkdir(testDir);
-        LoggerUtil.debug(testDir.getAbsolutePath());
+        logger.debug(testDir.getAbsolutePath());
         File root = createAndGetDir(new File(testDir, "archive"));
         File dirL = createAndGetDir(new File(root, "wLink"));
         File dirR = createAndGetDir(new File(root, "wReal"));
@@ -58,15 +63,15 @@ public class ZipUtilTest {
         }
         Collections.sort(expectedList);
         String expectedContent = expectedList.toString();
-        LoggerUtil.debug("Detected in archive: "+detectedContent);
-        LoggerUtil.debug("Expected in archive: "+expectedContent);
+        logger.debug("Detected in archive: "+detectedContent);
+        logger.debug("Expected in archive: "+expectedContent);
         assertTrue(detectedContent.equals(expectedContent));
         //
         root = createAndGetDir(new File(testDir, "extracted"));
         ZipUtil.extractAll(fileZ, root);
         detectedContent = getDirectoryEntryNames(root).toString();
-        LoggerUtil.debug("Detected in directory: "+detectedContent);
-        LoggerUtil.debug("Expected in directory: "+expectedContent);
+        logger.debug("Detected in directory: "+detectedContent);
+        logger.debug("Expected in directory: "+expectedContent);
         assertTrue(detectedContent.equals(expectedContent));
     }
 
@@ -77,7 +82,7 @@ public class ZipUtilTest {
             testDir = new File(FileUtils.getTempDirectory(), UUID.randomUUID().toString());
         } while (testDir.exists());
         FileUtils.forceMkdir(testDir);
-        LoggerUtil.debug(testDir.getAbsolutePath());
+        logger.debug(testDir.getAbsolutePath());
         File root = createAndGetDir(new File(testDir, "archive"));
         File dirL = createAndGetDir(new File(root, "wLink"));
         File dirR = createAndGetDir(new File(root, "wReal"));
@@ -102,15 +107,15 @@ public class ZipUtilTest {
         }
         Collections.sort(expectedList);
         String expectedContent = expectedList.toString();
-        LoggerUtil.debug("Detected in archive: "+detectedContent);
-        LoggerUtil.debug("Expected in archive: "+expectedContent);
+        logger.debug("Detected in archive: "+detectedContent);
+        logger.debug("Expected in archive: "+expectedContent);
         assertTrue(detectedContent.equals(expectedContent));
         //
         root = createAndGetDir(new File(testDir, "extracted"));
         ZipUtil.extractAll(fileZ, root);
         detectedContent = getDirectoryEntryNames(root).toString();
-        LoggerUtil.debug("Detected in directory: "+detectedContent);
-        LoggerUtil.debug("Expected in directory: "+expectedContent);
+        logger.debug("Detected in directory: "+detectedContent);
+        logger.debug("Expected in directory: "+expectedContent);
         assertTrue(detectedContent.equals(expectedContent));
     }
 

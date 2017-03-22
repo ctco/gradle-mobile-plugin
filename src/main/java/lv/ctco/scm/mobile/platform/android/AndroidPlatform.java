@@ -6,15 +6,16 @@
 
 package lv.ctco.scm.mobile.platform.android;
 
+import lv.ctco.scm.mobile.core.objects.TaskGroup;
+import lv.ctco.scm.mobile.core.utils.GitUtil;
+import lv.ctco.scm.mobile.core.utils.RevisionUtil;
+
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
 import java.io.File;
 import java.io.IOException;
-
-import lv.ctco.scm.mobile.core.utils.GitUtil;
-import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 public final class AndroidPlatform {
 
@@ -29,15 +30,14 @@ public final class AndroidPlatform {
         revision = RevisionUtil.getRevision(project);
         GitUtil.generateCommitInfo(project);
 
-        // Configuration of the minimal set of static build tasks (release and debug targets only)
-
         AndroidTasks.getOrCreateProjectInfoTask(project, releaseVersion, revision);
-        Task runUnitTests = project.getTasks().create("runUnitTests", DefaultTask.class);
-        runUnitTests.setGroup("Z_?");
+
+        project.getTasks().create("runUnitTests", DefaultTask.class);
+
         Task build = project.getTasks().create("build", DefaultTask.class);
-        build.setGroup("Z_?");
+        build.setGroup(TaskGroup.BUILD.getLabel());
         Task buildAndroid = project.getTasks().create("buildAndroid", DefaultTask.class);
-        buildAndroid.setGroup("Z_?");
+
         Task assembleDebug = AndroidTasks.getTaskByName(project, "assembleDebug");
         Task assembleRelease = AndroidTasks.getTaskByName(project, "assembleRelease");
 
@@ -48,8 +48,6 @@ public final class AndroidPlatform {
         Task buildRelease = project.getTasks().create("buildAndroidRelease", DefaultTask.class);
         Environment release = generateEnvironmentForBuildRelease(project);
         addUtilityTasksForBuildRelease(project, release);
-
-        // TODO // Add cleanup tasks (restore backuped...)
 
         buildDebug.dependsOn(assembleDebug);
         buildRelease.dependsOn(assembleRelease);

@@ -6,14 +6,15 @@
 
 package lv.ctco.scm.mobile.platform.xcode;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.PathUtil;
 import lv.ctco.scm.mobile.core.utils.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 import org.gradle.api.tasks.TaskAction;
 
@@ -23,24 +24,24 @@ import java.util.List;
 
 public class LibraryArchiveTask extends DefaultTask {
 
+    private static final Logger logger = Logging.getLogger(LibraryArchiveTask.class);
+
     private static final String ERR_NO_PUBLICATIONS = "No library publication definitions have been found";
 
     @TaskAction
     public void doTaskAction() {
         List<DefaultMavenPublication> libraries = LibraryUtil.getLibrariesPublications(getProject());
         if (libraries.isEmpty()) {
-            LoggerUtil.errorInTask(this.getName(), ERR_NO_PUBLICATIONS);
-            throw new GradleException(ERR_NO_PUBLICATIONS);
+            ErrorUtil.errorInTask(this.getName(), ERR_NO_PUBLICATIONS);
         } else {
             try {
                 File artifactRootDir = PathUtil.getPublicationArtifactDir();
                 for (DefaultMavenPublication artifact : libraries) {
-                    LoggerUtil.info("Found 'library' publication configuration");
+                    logger.info("Found 'library' publication configuration");
                     createArtifact(artifactRootDir, artifact.getArtifactId());
                 }
             } catch (IOException e) {
-                LoggerUtil.errorInTask(this.getName(), e.getMessage());
-                throw new GradleException(e.getMessage(), e);
+                ErrorUtil.errorInTask(this.getName(), e);
             }
         }
     }
@@ -49,11 +50,11 @@ public class LibraryArchiveTask extends DefaultTask {
         File artifactDir = new File(artifactRootDir, artifactId);
         File artifactFile = new File(artifactRootDir, artifactId+".zip");
         if (artifactDir.exists()) {
-            LoggerUtil.info("Archiving artifact folder '"+artifactDir.getAbsolutePath()+"'");
+            logger.info("Archiving artifact folder '"+artifactDir.getAbsolutePath()+"'");
             FileUtils.deleteQuietly(artifactFile);
             ZipUtil.compressDirectory(artifactDir, true, artifactFile);
         } else if (artifactFile.exists()) {
-            LoggerUtil.warn("Missing defined artifact folder but located a ready artifact file!");
+            logger.warn("Missing defined artifact folder but located a ready artifact file!");
         } else {
             throw new IOException("Missing defined artifact folder and/or artifact file "+artifactDir.getAbsolutePath());
         }

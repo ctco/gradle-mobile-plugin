@@ -25,7 +25,6 @@ public class CsprojParser {
     public Csproj parse() {
         def project = new XmlSlurper().parse(file)
 
-        // TODO: Support for conditional property overrides in MSBuild file
         String assemblyName = project.PropertyGroup[0].AssemblyName
         String releaseVersion = project.PropertyGroup[0].ReleaseVersion
         StringUtils.trimToNull(releaseVersion)
@@ -34,7 +33,7 @@ public class CsprojParser {
 
         project.PropertyGroup.depthFirst().collect { def group ->
             String condition = group.@Condition
-            def m = condition =~ " '\\\$\\(Configuration\\)\\|\\\$\\(Platform\\)' == '([^']+)' "
+            def m = condition =~ " '\\\$\\(XcodeConfiguration\\)\\|\\\$\\(Platform\\)' == '([^']+)' "
             if (m.matches()) {
                 String configurationName = m.group(1)
                 String outputPath = group.OutputPath.text().replace('\\'.toCharacter(), File.separatorChar)

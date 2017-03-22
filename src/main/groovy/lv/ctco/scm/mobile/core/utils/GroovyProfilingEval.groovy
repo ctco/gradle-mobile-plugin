@@ -8,16 +8,22 @@ package lv.ctco.scm.mobile.core.utils
 
 import org.apache.commons.io.FileUtils
 
+import org.gradle.api.logging.Logger
+import org.gradle.api.logging.Logging
+
 import java.util.regex.Pattern
 
 class GroovyProfilingEval {
 
+    private static final Logger logger = Logging.getLogger(GroovyProfilingEval.class)
+
     def copyFile(String sourceFilePath, String targetFilePath) {
         File targetFile = new File(targetFilePath)
         File sourceFile = new File(sourceFilePath)
+        logger.info("Replacing requested file '{}'", targetFile.getAbsolutePath());
         BackupUtil.backupFile(targetFile)
         FileUtils.copyFile(sourceFile, targetFile)
-        LoggerUtil.info("Updated file "+CommonUtil.getMD5InfoString(targetFile))
+        logger.info("  current md5={}", CommonUtil.getMD5Hex(targetFile))
     }
 
     def replaceInFile(String targetFilePath, String toFind, String replaceWith) {

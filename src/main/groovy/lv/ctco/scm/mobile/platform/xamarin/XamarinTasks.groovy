@@ -6,24 +6,40 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import lv.ctco.scm.mobile.core.objects.Environment;
-import lv.ctco.scm.mobile.core.objects.TaskGroup;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.objects.TaskGroup
+import lv.ctco.scm.mobile.core.utils.BackupUtil
 
-import org.apache.commons.lang3.StringUtils;
-import org.gradle.api.DefaultTask;
-import org.gradle.api.Project;
-import org.gradle.api.Task;
-import org.gradle.api.UnknownTaskException;
+import org.apache.commons.lang3.StringUtils
+
+import org.gradle.api.DefaultTask
+import org.gradle.api.Project
+import org.gradle.api.Task
+import org.gradle.api.UnknownTaskException
 
 class XamarinTasks {
 
     private XamarinTasks() {}
 
-    public static Task getOrCreateCleanTask(Project project) {
-        Task task = getTaskByName(project, "clean");
+    public static Task getOrCreateCleanupBuildTask(Project project, String taskName) {
+        String taskNamePostfix = taskName[0].toUpperCase()+taskName[1..taskName.length()-1]
+        Task task = getTaskByName(project, "cleanup$taskNamePostfix")
         if (task != null) {
-            return task;
+            return task
+        } else {
+            return project.task("cleanup$taskNamePostfix", type: DefaultTask,) {
+                group = TaskGroup.UTILITY.getLabel()
+                description = "Cleans up after $taskName task (restores backuped plists)"
+                doFirst {
+                    BackupUtil.restoreAllFiles()
+                }
+            }
+        }
+    }
+
+    public static Task getOrCreateCleanTask(Project project) {
+        Task task = getTaskByName(project, "clean")
+        if (task != null) {
+            return task
         } else {
             return project.task(type: DefaultTask, "clean") {
                 group = TaskGroup.UTILITY.getLabel()
@@ -33,9 +49,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateCleanIosTask(Project project, File slnFile) {
-        Task task = getTaskByName(project, "cleanIos");
+        Task task = getTaskByName(project, "cleanIos")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: CleanTask, "cleanIos") {
                 group = TaskGroup.UTILITY.getLabel()
@@ -46,9 +62,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateCleanAndroidTask(Project project, File slnFile) {
-        Task task = getTaskByName(project, "cleanAndroid");
+        Task task = getTaskByName(project, "cleanAndroid")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: CleanTask, "cleanAndroid") {
                 group = TaskGroup.UTILITY.getLabel()
@@ -59,22 +75,22 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateProjectInfoTask(Project project, String _releaseVersion) {
-        Task task = getTaskByName(project, "projectInfo");
+        Task task = getTaskByName(project, "projectInfo")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: ProjectInfoTask, "projectInfo") {
-                group = TaskGroup.UTILITY.getLabel();
-                description = "Prints project's configuration information";
-                releaseVersion = _releaseVersion;
+                group = TaskGroup.UTILITY.getLabel()
+                description = "Prints project's configuration information"
+                releaseVersion = _releaseVersion
             }
         }
     }
 
     public static Task getOrCreateRestoreDependenciesTask(Project project) {
-        Task task = getTaskByName(project, "restoreDependencies");
+        Task task = getTaskByName(project, "restoreDependencies")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DefaultTask, "restoreDependencies") {
                 group = TaskGroup.BUILD.getLabel()
@@ -84,9 +100,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateRestoreDependenciesIosTask(Project project, File slnFile, File nugetConfigRoot) {
-        Task task = getTaskByName(project, "restoreDependenciesForIos");
+        Task task = getTaskByName(project, "restoreDependenciesForIos")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DependencyRestoreTask, "restoreDependenciesForIos") {
                 group = TaskGroup.BUILD.getLabel()
@@ -98,9 +114,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateRestoreDependenciesAndroidTask(Project project, File slnFile, File nugetConfigRoot) {
-        Task task = getTaskByName(project, "restoreDependenciesForAndroid");
+        Task task = getTaskByName(project, "restoreDependenciesForAndroid")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DependencyRestoreTask, "restoreDependenciesForAndroid") {
                 group = TaskGroup.BUILD.getLabel()
@@ -112,9 +128,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateBuildTask(Project project) {
-        Task task = getTaskByName(project, "build");
+        Task task = getTaskByName(project, "build")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DefaultTask, "build") {
                 group = TaskGroup.BUILD.getLabel()
@@ -124,9 +140,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateBuildIosTask(Project project) {
-        Task task = getTaskByName(project, "buildIos");
+        Task task = getTaskByName(project, "buildIos")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DefaultTask, "buildIos") {
                 group = TaskGroup.BUILD.getLabel()
@@ -136,9 +152,9 @@ class XamarinTasks {
     }
 
     public static Task getOrCreateBuildAndroidTask(Project project) {
-        Task task = getTaskByName(project, "buildAndroid");
+        Task task = getTaskByName(project, "buildAndroid")
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: DefaultTask, "buildAndroid") {
                 group = TaskGroup.BUILD.getLabel()
@@ -147,99 +163,98 @@ class XamarinTasks {
         }
     }
 
-    public static Task getOrCreateBuildIosEnvTask(Project project, Environment _env, XamarinExtension extXios) {
-        Task task = getTaskByName(project, "build"+_env.getCamelName());
+    public static Task getOrCreateBuildIosEnvTask(Project project, Environment _env, XamarinConfiguration extXios) {
+        Task task = getTaskByName(project, "build"+getCamelCase(_env.getName()))
         if (task != null) {
-            return task;
+            return task
         } else {
-            return project.task(type: BuildIosTask, "build"+_env.getCamelName()) {
+            return project.task(type: BuildIosTask, "build"+getCamelCase(_env.getName())) {
                 group = TaskGroup.BUILD.getLabel()
-                description = "Builds iOS "+_env.getCamelName()+" environment with "+ _env.getConfiguration()+" configuration"
+                description = "Builds iOS "+getCamelCase(_env.getName())+" environment with "+ _env.getConfiguration()+" configuration"
                 env = _env
                 solutionFile = extXios.solutionFile
                 projectName = extXios.projectName
-                assemblyName = extXios.assemblyName
             }
         }
     }
 
-    public static Task getOrCreateProfileIosEnvTask(Project project, Environment _env, XamarinExtension extXios) {
-        Task task = getTaskByName(project, "applyProfile"+_env.getCamelName());
+    public static Task getOrCreateProfileIosEnvTask(Project project, Environment _env, XamarinConfiguration extXios) {
+        Task task = getTaskByName(project, "applyProfile"+getCamelCase(_env.getName()))
         if (task != null) {
-            return task;
+            return task
         } else {
-            return project.task(type: ProfilingTask, "applyProfile"+_env.getCamelName()) {
+            return project.task(type: ProfilingTask, "applyProfile"+getCamelCase(_env.getName())) {
                 description = "Profiles files for iOS "+ _env.getName()+" environment"
-                projectName = extXios.projectName
-                environmentName = _env.getName()
-                profiles = extXios.getProfilesAsArray()
-                enforcePlistSyntax = extXios.enforcePlistSyntax
+                projectDir = new File(extXios.projectName)
+                profiles = extXios.getSpecificProfiles(_env.getName(), "build")
             }
         }
     }
 
-    public static Task getOrCreateUpdateVersionIosEnvTask(Project project, Environment _env, XamarinExtension extXios, String _releaseVersion) {
-        Task task = getTaskByName(project, "updateVersion"+_env.getCamelName());
+    public static Task getOrCreateUpdateVersionIosEnvTask(Project project, Environment _env, XamarinConfiguration extXios, String _releaseVersion) {
+        Task task = getTaskByName(project, "updateVersion"+getCamelCase(_env.getName()))
         if (task != null) {
-            return task;
+            return task
         } else {
-            return project.task(type: UpdateVersionIosTask, "updateVersion$_env.camelName") {
+            return project.task(type: UpdateVersionIosTask, "updateVersion"+getCamelCase(_env.getName())) {
                 description = "Updates app version for iOS "+ _env.getName()+" environment"
                 projectName = extXios.projectName
                 environmentName = _env.getName()
                 releaseVersion = _releaseVersion
                 updateCFBundleShortVersionString = extXios.updateCFBundleShortVersionString
                 cleanReleaseVersionForPROD = extXios.cleanReleaseVersionForPROD
-                enforcePlistSyntax = extXios.enforcePlistSyntax
             }
         }
     }
 
     public static Task getOrCreateUnitTestTask(Project project, String _unitTestProject) {
         return project.task(type: UnitTestingTask, "runUnitTests") {
-            group = TaskGroup.UTESTS.getLabel()
+            group = TaskGroup.TESTS.getLabel()
             description = "Runs unit tests for project"
             unitTestProject = _unitTestProject
         }
     }
 
-    static Task getOrCreateUpdateVersionAndroidTask(Project project, Environment _env, XandroidExtension extXand, String _releaseVersion) {
-        String taskName = "updateVersionAndroid"+StringUtils.capitalize(_env.getName().toLowerCase());
-        Task task = project.getTasks().findByName(taskName);
+    static Task getOrCreateUpdateVersionAndroidTask(Project project, Environment _env, XandroidConfiguration extXand, String _releaseVersion) {
+        String taskName = "updateVersionAndroid"+getCamelCase(_env.getName())
+        Task task = project.getTasks().findByName(taskName)
         if (task != null) {
-            return task;
+            return task
         } else {
             return project.task(type: UpdateVersionAndroidTask, taskName) {
                 description = "Updates version for Android "+ _env.getName()+" environment"
-                projectName = extXand.projectName;
-                releaseVersion = _releaseVersion;
-                androidVersionCode = extXand.androidVersionCode;
+                projectName = extXand.projectName
+                releaseVersion = _releaseVersion
+                androidVersionCode = extXand.androidVersionCode
             }
         }
     }
 
-    public static Task getOrCreateIncrementVersionTask(Project project, XamarinExtension extXios, Csproj _csproj) {
+    public static Task getOrCreateIncrementVersionTask(Project project, XamarinConfiguration extXios, Csproj _csproj) {
         Task task = getTaskByName(project, "incrementProjectVersion")
         if (task != null) {
             return task
         } else {
             return project.task(type: IncrementProjectVersionTask, "incrementProjectVersion") {
                 group = TaskGroup.UTILITY.getLabel()
-                description = "Increments version in .sln and .csproj files";
-                solutionFile = extXios.getSolutionFile();
-                csproj = _csproj;
+                description = "Increments version in .sln and .csproj files"
+                solutionFile = extXios.getSolutionFile()
+                csproj = _csproj
             }
         }
     }
 
     private static Task getTaskByName(Project project, String taskName) {
         try {
-            Task task = project.getTasks().getByName(taskName);
-            LoggerUtil.debug("Found existing task with name '"+taskName+"' and class '"+task.getClass().getCanonicalName()+"'");
-            return task;
+            Task task = project.getTasks().getByName(taskName)
+            return task
         } catch (UnknownTaskException ignore) {
-            return null;
+            return null
         }
+    }
+
+    private static String getCamelCase(String string) {
+        return StringUtils.capitalize(string.toLowerCase())
     }
 
 }

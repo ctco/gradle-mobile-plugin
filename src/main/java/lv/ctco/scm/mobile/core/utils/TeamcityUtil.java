@@ -6,7 +6,12 @@
 
 package lv.ctco.scm.mobile.core.utils;
 
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
 public final class TeamcityUtil {
+
+    private static final Logger logger = Logging.getLogger(TeamcityUtil.class);
 
     private TeamcityUtil() {}
 
@@ -14,40 +19,40 @@ public final class TeamcityUtil {
         return PropertyUtil.hasEnvironmentProperty("TEAMCITY_VERSION");
     }
 
-    public static void setProjectParameter(String parameter, String value) {
+    public static void setAgentParameter(String parameter, String value) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[setProjectParameter "+parameter+"='"+value+"']");
-            setAgentParameter(parameter, value);
+            logger.lifecycle("##teamcity[setParameter name='"+parameter+"' value='"+value+"']");
         }
     }
 
-    public static void setAgentParameter(String parameter, String value) {
+    public static void setProjectParameter(String parameter, String value) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[setParameter name='"+parameter+"' value='"+value+"']");
+            logger.lifecycle("##teamcity[setProjectParameter "+parameter+"='"+value+"']");
+            setAgentParameter(parameter, value);
         }
     }
 
     public static void setBuildNumber(String buildNumber) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[buildNumber '"+buildNumber+"']");
+            logger.lifecycle("##teamcity[buildNumber '"+buildNumber+"']");
         }
     }
 
     public static void setBuildStatus(String statusMessage) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[buildStatus text='"+statusMessage+"']");
+            logger.lifecycle("##teamcity[buildStatus text='"+statusMessage+"']");
         }
     }
 
     public static void setErrorMessage(String errorMessage) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[message text='"+errorMessage+"' status='ERROR']");
+            logger.lifecycle("##teamcity[message text='"+errorMessage+"' status='ERROR']");
         }
     }
 
     public static void setErrorDescription(String errorDescription) {
         if (isTeamcityEnvironment()) {
-            LoggerUtil.lifecycle("##teamcity[buildProblem description='"+errorDescription+"']");
+            logger.lifecycle("##teamcity[buildProblem description='"+errorDescription+"']");
         }
     }
 

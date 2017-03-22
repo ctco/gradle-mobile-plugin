@@ -6,11 +6,10 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import lv.ctco.scm.mobile.core.objects.Environment
-
 import org.gradle.testfixtures.ProjectBuilder
 
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 
 import static org.junit.Assert.assertEquals
@@ -27,12 +26,13 @@ class XamarinPlatformTest {
         mockSolutionFile = new File("TestY.sln")
     }
 
+    @Ignore
     @Test
     public void solutionFileUndefined() {
-        XamarinExtension extension = new XamarinExtension()
+        XamarinConfiguration configuration = new XamarinConfiguration()
         XamarinPlatform platform = createPlatform()
         try {
-            platform.configure(extension, null)
+            platform.configure(configuration, null)
         } catch (IOException e) {
             assertEquals e.getMessage(), 'solutionFile for ctcoMobile.xamarin extension is not defined'
             return
@@ -40,152 +40,60 @@ class XamarinPlatformTest {
         fail('Exception expected, solutionFile is not defined.')
     }
 
-    @Test
-    public void autodetectMultiTarget() {
-        Environment expectedEnvironment0 = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
-        Environment expectedEnvironment1 = new Environment('TRAIN', 'TestY TRAIN|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN').getAbsoluteFile())
-        Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
-
-        initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        XamarinExtension extension = createXamarinExtension()
-        XamarinPlatform platform = createPlatform()
-        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-        assertEquals extension.environments.size(), 3
-        assertEquals extension.environments['DEV'], expectedEnvironment0
-        assertEquals extension.environments['TRAIN'], expectedEnvironment1
-        assertEquals extension.environments['UAT'], expectedEnvironment2
-    }
-
-    @Test
-    public void autodetectSingleEnvironmentTarget() {
-        Environment expectedEnvironment = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
-
-        initMocks(['DEV'], false)
-        XamarinExtension extension = createXamarinExtension()
-        XamarinPlatform platform = createPlatform()
-        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-        assertEquals extension.environments.size(), 1
-        assertEquals extension.environments['DEV'], expectedEnvironment
-    }
-
+    @Ignore
     @Test
     public void autodetectNoEnvironmentTargets() {
-        Environment expectedEnvironment =
-            new Environment('DEFAULT', 'Ad-Hoc|iPhone', new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/Ad-Hoc').getAbsoluteFile())
+        Environment expectedEnvironment = new Environment()
+        expectedEnvironment.setName("DEFAULT")
+        expectedEnvironment.setConfiguration("Ad-Hoc")
+        expectedEnvironment.setPlatform("iPhone")
 
-        initMocks([], true)
+        initMocks()
         XamarinExtension extension = createXamarinExtension()
         XamarinPlatform platform = createPlatform()
-        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'),
-            configuration)
+        platform.performAutomaticEnvironmentConfiguration(extension, solution, configuration)
 
-        assertEquals extension.environments.size(), 1
-        assertEquals extension.environments['DEFAULT'], expectedEnvironment
+        assertEquals(1, extension.environments.size())
+        assertEquals(expectedEnvironment, extension.getEnvironments().get(0))
     }
 
-    @Test
-    public void autodetectNoEnvironments() {
-        initMocks([], false)
-        try {
-            XamarinExtension extension = createXamarinExtension()
-            XamarinPlatform platform = createPlatform()
-            platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-        } catch (Exception e) {
-            assert(e.getMessage().equals("No environments detected, no build is going to be performed!"))
-            return
-        }
-        fail('Exception expected, no environments detected.')
+    //
+
+    private void initMocks() {
+        solution = createSolution()
+        configuration = createMockCsproj()
     }
 
-    @Test
-    public void autodetectEnvironmentsPartiallyDefinedSameName() {
-        Environment expectedEnvironment0 = new Environment('DEV', 'My Config|iPhone', new File('dummy'))
-        Environment expectedEnvironment1 = new Environment('TRAIN', 'TestY TRAIN|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY TRAIN').getAbsoluteFile())
-        Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
-
-        initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        XamarinExtension extension = createXamarinExtension()
-        extension.environment name: 'DEV', configuration: 'My Config|iPhone', outputPath: 'dummy'
-        XamarinPlatform platform = createPlatform()
-        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-        assertEquals extension.environments.size(), 3
-        assertEquals extension.environments['DEV'], expectedEnvironment0
-        assertEquals extension.environments['TRAIN'], expectedEnvironment1
-        assertEquals extension.environments['UAT'], expectedEnvironment2
-    }
-
-    @Test
-    public void autodetectEnvironmentsPartiallyDefinedSameConfiguration() {
-        Environment expectedEnvironment0 = new Environment('DEV', 'TestY DEV|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY DEV').getAbsoluteFile())
-        Environment expectedEnvironment1 = new Environment('MYENV', 'TestY TRAIN|iPhone', new File('dummy'))
-        Environment expectedEnvironment2 = new Environment('UAT', 'TestY UAT|iPhone',
-                new File('/Users/xamarin/solution/TestY.iOS/bin/iPhone/TestY UAT').getAbsoluteFile())
-
-        initMocks(['DEV', 'TRAIN', 'UAT'], false)
-        XamarinExtension extension = createXamarinExtension()
-        extension.environment name: 'MYENV', configuration: 'TestY TRAIN|iPhone', outputPath: 'dummy'
-        XamarinPlatform platform = createPlatform()
-        platform.performAutomaticConfiguration(extension, solution, solution.getProject('TestY.iOS'), configuration)
-
-        assertEquals extension.environments.size(), 3
-        assertEquals extension.environments['DEV'], expectedEnvironment0
-        assertEquals extension.environments['MYENV'], expectedEnvironment1
-        assertEquals extension.environments['UAT'], expectedEnvironment2
-    }
-
-    public void initMocks(List<String> environments, boolean defaultEnvironment) {
-        solution = createSolution(environments, defaultEnvironment)
-        configuration = createMockCsproj(environments, defaultEnvironment)
-    }
-
-    public XamarinExtension createXamarinExtension() {
+    private XamarinExtension createXamarinExtension() {
         XamarinExtension extension = new XamarinExtension()
         extension.solutionFile = mockSolutionFile
         return extension
     }
 
-    public XamarinPlatform createPlatform() {
+    private XamarinPlatform createPlatform() {
         return new XamarinPlatform(ProjectBuilder.builder().build())
     }
 
-    public Csproj createMockCsproj(List<String> environments, boolean defaultEnvironment) {
+    private Csproj createMockCsproj() {
         Map<String, String> outputMapping = new HashMap<>()
-        for (String env : environments) {
-            outputMapping.put("TestY "+env+"|iPhone", "bin/iPhone/TestY "+env);
-        }
-        if (defaultEnvironment) {
-            outputMapping.put("Ad-Hoc|iPhone", "bin/iPhone/Ad-Hoc");
-        }
+        outputMapping.put("Debug|iPhone", "bin/iPhone/Debug");
+        outputMapping.put("Ad-Hoc|iPhone", "bin/iPhone/Ad-Hoc");
+        outputMapping.put("Release|iPhone", "bin/iPhone/Release");
         Csproj csproj = new Csproj(new File("/Users/xamarin/solution/TestY.iOS/TestY.iOS.csproj"), "TestYiOS", null, outputMapping)
     }
 
-    public Solution createSolution(List<String> environments, boolean defaultEnvironment) {
+    private Solution createSolution() {
         LinkedList<SlnProjectSection> projectSections = new LinkedList<SlnProjectSection>()
         projectSections.add(new SlnProjectSection('TestY.iOS', '{111}', 'TestY.iOS/TestY.iOS.csproj', '{211}'))
 
         SlnGlobalSection projectConfigurationPlatforms = new SlnGlobalSection('ProjectConfigurationPlatforms')
-        environments.each {
-            projectConfigurationPlatforms.putProperty("{211}.TestY $it|iPhone.Build.0", "TestY $it|iPhone")
-        }
         projectConfigurationPlatforms.putProperty("{211}.Ad-Hoc|iPhone.Build.0", "Ad-Hoc|iPhone")
+        projectConfigurationPlatforms.putProperty("{211}.Release|iPhone.Build.0", "Release|iPhone")
 
         SlnGlobalSection solutionConfigurationPlatforms = new SlnGlobalSection('SolutionConfigurationPlatforms')
-        environments.each {
-            solutionConfigurationPlatforms.putProperty("TestY $it|iPhone", "TestY $it|iPhone")
-        }
-        if (defaultEnvironment) {
-            solutionConfigurationPlatforms.putProperty("Ad-Hoc|iPhone", "Ad-Hoc|iPhone")
-        }
+        solutionConfigurationPlatforms.putProperty("Debug|iPhone", "Debug|iPhone")
+        solutionConfigurationPlatforms.putProperty("Ad-Hoc|iPhone", "Ad-Hoc|iPhone")
+        solutionConfigurationPlatforms.putProperty("Release|iPhone", "Release|iPhone")
 
         LinkedList<SlnGlobalSection> globalSections = new LinkedList<SlnGlobalSection>()
         globalSections.add(projectConfigurationPlatforms)

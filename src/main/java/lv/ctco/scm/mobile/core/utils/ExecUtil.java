@@ -29,7 +29,6 @@ public final class ExecUtil {
         ExecOutputStream execOutputStream = new ExecOutputStream(routeToCapture, routeToStdout);
         PumpStreamHandler streamHandler = new PumpStreamHandler(execOutputStream);
         executor.setStreamHandler(streamHandler);
-        LoggerUtil.debug("Executing "+commandLine.toString().replace(", ", " ")+" in '"+executor.getWorkingDirectory().getAbsolutePath()+"'");
         try {
             executor.execute(commandLine);
         } catch (IOException e) {

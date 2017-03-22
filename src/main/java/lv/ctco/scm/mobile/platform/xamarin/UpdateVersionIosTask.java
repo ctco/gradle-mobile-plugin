@@ -7,14 +7,14 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.BackupUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
 import lv.ctco.scm.mobile.core.utils.ProfilingUtil;
-import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -22,14 +22,13 @@ import java.io.IOException;
 
 public class UpdateVersionIosTask extends DefaultTask {
 
+    private static final Logger logger = Logging.getLogger(UpdateVersionIosTask.class);
+
     private String projectName;
     private String environmentName;
     private String releaseVersion;
     private boolean updateCFBundleShortVersionString;
     private boolean cleanReleaseVersionForPROD;
-    private boolean enforcePlistSyntax;
-
-    private static final String PROP_VCS_ROOT_SUBS = "vcs.root.subs";
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
@@ -51,50 +50,40 @@ public class UpdateVersionIosTask extends DefaultTask {
         this.cleanReleaseVersionForPROD = cleanReleaseVersionForPROD;
     }
 
-    public void setEnforcePlistSyntax(boolean enforcePlistSyntax) {
-        this.enforcePlistSyntax = enforcePlistSyntax;
-    }
-
     @TaskAction
     public void doTaskAction() {
         try {
             String revision = RevisionUtil.getRevision(getProject());
 
-            String plistFileName = projectName+"/Info.plist";
-            LoggerUtil.info("Read project release version as '"+releaseVersion+"'");
+            File infoPlist = new File(projectName+"/Info.plist");
+            logger.info("Read project release version as '{}'", releaseVersion);
 
-            String buildVersion;
-            buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
+            String buildVersion = "".equals(releaseVersion) ? revision : releaseVersion+"."+revision;
 
+            logger.info("Updating '{}'...", infoPlist);
             if (cleanReleaseVersionForPROD && "PROD".equals(environmentName)) {
-                PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", releaseVersion);
+                PlistUtil.setStringValue(infoPlist, "CFBundleVersion", releaseVersion);
             } else {
-                PlistUtil.setStringValue(new File(plistFileName), "CFBundleVersion", buildVersion);
+                PlistUtil.setStringValue(infoPlist, "CFBundleVersion", buildVersion);
             }
             if (updateCFBundleShortVersionString) {
-                PlistUtil.setStringValue(new File(plistFileName), "CFBundleShortVersionString", releaseVersion);
+                PlistUtil.setStringValue(infoPlist, "CFBundleShortVersionString", releaseVersion);
             }
-            if (enforcePlistSyntax) {
-                PlistUtil.validatePlist(new File(plistFileName));
-            }
+            PlistUtil.validatePlist(infoPlist);
             //
-            String rootPlistFileName = projectName+"/Settings.bundle/Root.plist";
-            File rootPlistFile = new File(rootPlistFileName);
-            if (rootPlistFile.exists()) {
-                BackupUtil.backupFile(rootPlistFile);
-                LoggerUtil.info("Searching for dict containing key 'application_version' in '"+rootPlistFileName+"'");
+            File rootPlist = new File(projectName+"/Settings.bundle/Root.plist");
+            if (rootPlist.exists()) {
+                BackupUtil.backupFile(rootPlist);
+                logger.info("Searching for dict containing key 'application_version' in '{}'", rootPlist);
                 if (cleanReleaseVersionForPROD && "PROD".equals(environmentName)) {
-                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlistFile, "application_version", releaseVersion);
+                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlist, "application_version", releaseVersion);
                 } else {
-                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlistFile, "application_version", buildVersion);
+                    ProfilingUtil.updateRootPlistPreferenceSpecifiersKeyDefaultValue(rootPlist, "application_version", buildVersion);
                 }
-                if (enforcePlistSyntax) {
-                    PlistUtil.validatePlist(rootPlistFile);
-                }
+                PlistUtil.validatePlist(rootPlist);
             }
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 

@@ -7,20 +7,23 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.BackupUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 
 import org.apache.commons.exec.CommandLine;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.io.IOException;
 
 public class CleanTask extends DefaultTask {
+
+    private static final Logger logger = Logging.getLogger(CleanTask.class);
 
     private File solutionFile;
 
@@ -33,8 +36,7 @@ public class CleanTask extends DefaultTask {
         try {
             BackupUtil.restoreAllFiles();
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
         try {
             cleanConfiguration("Debug");
@@ -43,19 +45,18 @@ public class CleanTask extends DefaultTask {
             cleanConfiguration("AppStore");
             cleanConfiguration("UITests");
         } catch (IOException ignore) {
-            LoggerUtil.debug(ignore.getMessage());
+            logger.debug(ignore.getMessage(), ignore);
         }
     }
 
     private void cleanConfiguration(String configuration) throws IOException {
         CommandLine commandLine = new CommandLine("xbuild");
         commandLine.addArgument("/t:Clean");
-        commandLine.addArgument("/p:Configuration="+configuration);
+        commandLine.addArgument("/p:XcodeConfiguration="+configuration);
         commandLine.addArgument(solutionFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
-            LoggerUtil.errorInTask(this.getName(), execResult.getException().getMessage());
-            throw new IOException("Clean for configuration "+configuration+" failed");
+            ErrorUtil.errorInTask(this.getName(), execResult.getException());
         }
     }
 

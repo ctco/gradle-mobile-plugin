@@ -6,11 +6,10 @@
 
 package lv.ctco.scm.mobile.platform.xamarin;
 
-import lv.ctco.scm.mobile.core.objects.Environment;
 import lv.ctco.scm.mobile.core.utils.CommonUtil;
+import lv.ctco.scm.mobile.core.utils.ErrorUtil;
 import lv.ctco.scm.mobile.core.utils.ExecResult;
 import lv.ctco.scm.mobile.core.utils.ExecUtil;
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PathUtil;
 import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 
@@ -20,6 +19,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.GradleException;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
@@ -29,14 +30,12 @@ import java.util.List;
 
 public class BuildAndroidTask extends DefaultTask {
 
+    private static final Logger logger = Logging.getLogger(BuildAndroidTask.class);
+
     private Environment env;
 
     private File projectFile;
     private String projectName;
-    private String assemblyName;
-
-    private String javaXmx;
-    private String javaOpts;
 
     private String signingKeystore;
     private String signingCertificateAlias;
@@ -53,18 +52,6 @@ public class BuildAndroidTask extends DefaultTask {
 
     public void setProjectName(String projectName) {
         this.projectName = projectName;
-    }
-
-    public void setAssemblyName(String assemblyName) {
-        this.assemblyName = assemblyName;
-    }
-
-    public void setJavaXmx(String javaXmx) {
-        this.javaXmx = javaXmx;
-    }
-
-    public void setJavaOpts(String javaOpts) {
-        this.javaOpts = javaOpts;
     }
 
     public void setSigningKeystore(String signingKeystore) {
@@ -87,8 +74,7 @@ public class BuildAndroidTask extends DefaultTask {
             }
             moveArtifactToDistDir();
         } catch (IOException e) {
-            LoggerUtil.errorInTask(this.getName(), e.getMessage());
-            throw new GradleException(e.getMessage(), e);
+            ErrorUtil.errorInTask(this.getName(), e);
         }
     }
 
@@ -97,12 +83,6 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument("/t:SignAndroidPackage");
         if (StringUtils.isNotBlank(env.getConfiguration())) {
              commandLine.addArgument("/p:Configuration="+env.getConfiguration());
-        }
-        if (StringUtils.isNotBlank(javaXmx)) {
-            commandLine.addArgument("/p:JavaMaximumHeapSize="+javaXmx);
-        }
-        if (StringUtils.isNotBlank(javaOpts)) {
-            commandLine.addArgument("/p:JavaOptions="+javaOpts);
         }
         commandLine.addArgument(projectFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
@@ -113,7 +93,7 @@ public class BuildAndroidTask extends DefaultTask {
     }
 
     private void signArtifact() throws IOException {
-        LoggerUtil.info("Signing package...");
+        logger.info("Codesigning package...");
         String storepass = "";
         if (PropertyUtil.hasProjectProperty(getProject(), "android.storepass")) {
             storepass = PropertyUtil.getProjectProperty(getProject(), "android.storepass");
@@ -144,13 +124,13 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument(signingCertificateAlias);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
-            throw new IOException("Signing for "+env.getUpperCaseName()+" failed");
+            throw new IOException("Signing for "+env.getName().toUpperCase()+" failed");
         }
-        LoggerUtil.info("Signing successful.");
+        logger.info("Codesigning done.");
     }
 
     private void verifyArtifact() throws IOException {
-        LoggerUtil.info("Verifying artifact signature...");
+        logger.info("Verifying artifact signature...");
         CommandLine commandLine = new CommandLine("jarsigner");
         commandLine.addArgument("-verify");
         commandLine.addArgument("-verbose");
@@ -159,12 +139,12 @@ public class BuildAndroidTask extends DefaultTask {
         if (!execResult.isSuccess() || !execResult.getOutput().contains("jar verified.")) {
             throw new IOException("Artifact signature verification failed");
         } else {
-            LoggerUtil.info("Artifact signature verification successful");
+            logger.info("Artifact signature verification successful.");
         }
     }
 
     private void zipalignArtifact() throws IOException {
-        LoggerUtil.info("Zipaligning artifact...");
+        logger.info("Zipaligning artifact...");
         File sourceApk = getUnsignedArtifact();
         File targetApk = new File(sourceApk.getParentFile(), sourceApk.getName().substring(0,sourceApk.getName().length()-4)+"-signed.apk");
         CommandLine commandLine = new CommandLine("zipalign");
@@ -179,7 +159,7 @@ public class BuildAndroidTask extends DefaultTask {
         }
         Files.deleteIfExists(sourceApk.toPath());
         FileUtils.copyFile(targetApk, sourceApk);
-        LoggerUtil.info("Zipaligning successful");
+        logger.info("Zipaligning successful");
     }
 
     private File getUnsignedArtifact() throws IOException {
@@ -208,12 +188,12 @@ public class BuildAndroidTask extends DefaultTask {
         File sourceApk = getSignedArtifact();
         File targetApk;
         String apkName;
-        if (assemblyName == null) {
+        if (projectName == null) {
             apkName = sourceApk.getName().substring(0, sourceApk.getName().length()-11);
         } else {
-            apkName = assemblyName;
+            apkName = projectName;
         }
-        targetApk = new File(apkDistDir, apkName+" "+env.getUpperCaseName()+".apk");
+        targetApk = new File(apkDistDir, apkName+" "+env.getName().toUpperCase()+".apk");
         FileUtils.copyFile(sourceApk, targetApk);
         FileUtils.forceDelete(sourceApk);
     }

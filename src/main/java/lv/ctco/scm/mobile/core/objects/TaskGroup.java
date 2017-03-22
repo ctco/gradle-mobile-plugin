@@ -8,12 +8,11 @@ package lv.ctco.scm.mobile.core.objects;
 
 public enum TaskGroup {
 
-    BUILD("Mobile Build"),
-    UTILITY("Mobile Utility"),
-    UTESTS("Mobile Unit Test"),
-    UITESTS("Mobile UI Test"),
-    PUBLISH("Mobile Artifact Publishing"),
-    KNAPPSACK("Knappsack");
+    UTILITY("Utility"),
+    BUILD("Build"),
+    TESTS("Test"),
+    UPLOAD("Upload"),
+    PUBLISH("Publish");
 
     private String label;
 

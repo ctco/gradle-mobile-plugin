@@ -22,20 +22,18 @@ public final class StampUtil {
         String[] digits = splitStamp(tmpStamp);
         Integer extDepNum = digits.length-EXT_DEPLOYMENT_SUFFIX_POSITION;
         String externalDeploymentOfStamp = getExternalDeploymentOfStamp(tmpStamp);
-        Integer deployDigit = Integer.parseInt(externalDeploymentOfStamp);
+        Integer deployDigit = Integer.valueOf(externalDeploymentOfStamp);
         deployDigit = deployDigit+1;
         digits[extDepNum] = deployDigit.toString();
         return transformStampToString(digits);
     }
 
-    static String updateStamp(String oldStamp, String newIterationVersion) {
+    public static String updateStamp(String oldStamp, String newIterationVersion) {
         String oldIterationVersion = getIterationVersionFromStamp(oldStamp);
         String stamp;
         if(oldIterationVersion.equals(newIterationVersion)) {
-            LoggerUtil.info("Iteration version are equal");
             stamp = oldIterationVersion;
         } else {
-            LoggerUtil.info("Setting new iteration version");
             stamp = iterationToStamp(newIterationVersion);
             if (TeamcityUtil.isTeamcityEnvironment()) {
                 TeamcityUtil.setProjectParameter("stamp", stamp);
@@ -51,7 +49,6 @@ public final class StampUtil {
             String[] parts = splitStamp(tmpStamp);
             if (parts.length > EXT_DEPLOYMENT_SUFFIX_POSITION) {
                 number = parts[parts.length-EXT_DEPLOYMENT_SUFFIX_POSITION];
-                LoggerUtil.debug("external deployment: "+number);
                 return number;
             }
         }
@@ -89,7 +86,6 @@ public final class StampUtil {
                 newStamp.append('.');
             }
         }
-        LoggerUtil.debug("Transforming array to string: "+newStamp.toString());
         return newStamp.toString();
     }
 

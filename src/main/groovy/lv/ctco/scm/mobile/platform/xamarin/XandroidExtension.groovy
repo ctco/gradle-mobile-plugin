@@ -6,43 +6,81 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
-import lv.ctco.scm.mobile.core.objects.PlatformExtension
+import lv.ctco.scm.mobile.core.objects.Profile
 
-class XandroidExtension extends PlatformExtension {
+class XandroidExtension {
 
-    /**
-     * Automatic configuration currently is unsupported for Android extension
-     */
+    private XandroidConfiguration configuration = new XandroidConfiguration()
+
     boolean automaticConfiguration = false
-
-    /**
-     * Android target specific extension properties
-     */
+    File solutionFile
     File projectFile
-
-    String javaXmx
-    String javaOpts
+    String projectName
+    String unitTestProject
 
     String signingKeystore
     String signingCertificateAlias
-
     String androidVersionCode
 
-    public boolean isValid() {
-        boolean result = true
-        if (solutionFile == null) {
-            result = false;
+    public void environment(Closure closure) {
+        Environment env = new Environment()
+        closure.setDelegate(env)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addEnvironment(env)
+    }
+
+    public void environment(HashMap<String, String> params) {
+        Environment env = new Environment()
+        env.setName(params.name)
+        env.setConfiguration(params.configuration)
+        env.setPlatform(params.platform)
+        configuration.addEnvironment(env)
+    }
+
+    public void profile(Closure closure) {
+        Profile prof = new Profile()
+        closure.setDelegate(prof)
+        closure.setResolveStrategy(Closure.DELEGATE_FIRST)
+        closure.call()
+        configuration.addProfile(prof)
+    }
+
+    public void profile(HashMap<String, String> params) {
+        Profile profile = new Profile()
+        profile.setEnvironment(params.environment)
+        profile.setTarget(params.target)
+        profile.setSource(params.source)
+        if (params.scope != null) {
+            profile.setScope(params.scope)
         }
-        if (projectFile == null) {
-            result = false
+        if (params.order != null) {
+            profile.setOrder(Integer.parseInt(params.order))
         }
-        if (projectName == null) {
-            result = false
+        if (params.level != null) {
+            profile.setLevel(Integer.parseInt(params.level))
         }
-        if (environments.size() == 0) {
-            result = false
+        configuration.addProfile(profile)
+    }
+
+    XandroidConfiguration getXandroidConfiguration() {
+        configuration.setAutomaticConfiguration(automaticConfiguration)
+        if (solutionFile != null) {
+            configuration.setSolutionFile(solutionFile)
         }
-        return result;
+        if (projectFile != null) {
+            configuration.setProjectFile(projectFile)
+        }
+        if (projectName != null) {
+            configuration.setProjectName(projectName)
+        }
+        if (unitTestProject != null) {
+            configuration.setUnitTestProject(unitTestProject)
+        }
+        configuration.setSigningCertificateAlias(signingCertificateAlias)
+        configuration.setSigningKeystore(signingKeystore)
+        configuration.setAndroidVersionCode(androidVersionCode)
+        return configuration
     }
 
 }

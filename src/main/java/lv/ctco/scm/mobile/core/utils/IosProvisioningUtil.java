@@ -11,13 +11,16 @@ import lv.ctco.scm.mobile.core.objects.IosProvisioningProfile;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 
-import javax.inject.Singleton;
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 
-@Singleton
 final class IosProvisioningUtil {
+
+    private static final Logger logger = Logging.getLogger(IosProvisioningUtil.class);
 
     private static HashMap<String, IosProvisioningProfile> provisioningProfiles = new HashMap<>();
 
@@ -28,19 +31,19 @@ final class IosProvisioningUtil {
         provisioningProfiles.clear();
         int available = 0;
         int expired = 0;
-        LoggerUtil.info("Reading available provisioning profiles...");
+        logger.info("Reading available provisioning profiles...");
         for (File file : FileUtils.listFiles(profileDir, new String[] {"mobileprovision"}, false)) {
             IosProvisioningProfile profile = IosProvisioningUtil.getProvisioningProfileFromFile(file);
             if (profile.isExpired()) {
-                LoggerUtil.debug("  expired '"+profile.toString()+"'");
+                logger.debug("  expired '{}'", profile);
                 expired++;
             } else {
-                LoggerUtil.debug("  valid '"+profile.toString()+"'");
+                logger.debug("  valid '{}'", profile);
                 provisioningProfiles.put(profile.getUuid(), profile);
                 available++;
             }
         }
-        LoggerUtil.info("Found "+available+" provisioning profiles ("+expired+" of them are expired).");
+        logger.info("Found {} provisioning profiles ({} of them are expired).", available, expired);
     }
 
     static IosProvisioningProfile getProvisioningProfileFromFile(File profileFile) throws IOException {
@@ -68,11 +71,7 @@ final class IosProvisioningUtil {
     static IosProvisioningProfile getProvisioningProfileByProfileName(String profileName) {
         for (IosProvisioningProfile profile : provisioningProfiles.values()) {
             if (profileName.equalsIgnoreCase(profile.getProfileName())) {
-                if (profile.isExpired()) {
-                    LoggerUtil.warn("Found an expired profile with name '"+profile.getProfileName()+"'");
-                } else {
-                    return profile;
-                }
+                return profile;
             }
         }
         return null;

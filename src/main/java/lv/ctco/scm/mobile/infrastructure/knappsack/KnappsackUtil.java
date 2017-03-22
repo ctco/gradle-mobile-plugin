@@ -6,11 +6,11 @@
 
 package lv.ctco.scm.mobile.infrastructure.knappsack;
 
-import lv.ctco.scm.mobile.core.utils.LoggerUtil;
 import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import org.gradle.api.Project;
 
 import java.io.File;
@@ -28,8 +28,6 @@ public final class KnappsackUtil {
     private static final String PROP_WHATS_NEW = "knappsack.whatsnew";
     private static final String PROP_WHATS_NEW_FILE = "knappsack.whatsnew.file";
     private static final String PROP_ARTIFACT = "knappsack.artifact";
-    private static final String PROP_KEY_STORE_FILE_NAME = "knappsack.keystore.file";
-    private static final String PROP_KEY_STORE_PSWD = "knappsack.keystore.password";
 
     private KnappsackUtil() {}
 
@@ -45,8 +43,6 @@ public final class KnappsackUtil {
         ext.setWhatsNew(getProperty(project, PROP_WHATS_NEW));
         ext.setWhatsNewFileName(getProperty(project, PROP_WHATS_NEW_FILE));
         ext.setArtifactFileName(getProperty(project, PROP_ARTIFACT));
-        ext.setKeyStoreFileName(getProperty(project, PROP_KEY_STORE_FILE_NAME));
-        ext.setKeyStorePassword(getProperty(project, PROP_KEY_STORE_PSWD));
         return ext;
     }
 
@@ -88,11 +84,6 @@ public final class KnappsackUtil {
         if (StringUtils.isBlank(ext.getArtifactFileName())) {
             failMissingProperty("Knappsack artifact file name", "knappsack.artifact", PROP_ARTIFACT);
         }
-        if (StringUtils.isNotBlank(ext.getKeyStoreFileName()) && StringUtils.isBlank(ext.getKeyStorePassword())) {
-            throw new IOException("When custom key store for Knappsack https connection is defined, it\"s" +
-                    " password should also be specified (convention: knappsack.keystorePassword, property:" +
-                    " "+ PROP_KEY_STORE_PSWD);
-        }
     }
 
     private static void failMissingProperty(String name, String conv, String prop) throws IOException {
@@ -129,15 +120,7 @@ public final class KnappsackUtil {
         validateKnappsackExtension(ext);
         ensureArtifactExists(ext.getArtifactFile());
         loadWhatsNewFile(ext);
-        LoggerUtil.info("Uploading artifact '"+ext.getArtifactFile().getName()+"' with version '"+ext.getVersion()+"' to '"+ext.getUrl()+"'");
         Knappsack knappsack = new Knappsack(ext.getUrl());
-        File keyStore = ext.getKeyStoreFile();
-        if (keyStore != null) {
-            if (!keyStore.exists()) {
-                throw new IOException("Custom key store file "+keyStore.getAbsolutePath()+" does not exist");
-            }
-            knappsack.switchToExternalKeyStore(keyStore, ext.getKeyStorePassword());
-        }
         knappsack.authenticate(ext.getUserName(), ext.getPassword());
         knappsack.uploadArtifact(ext.getApplicationId(), ext.getGroupId(), ext.getStorageId(), ext.getVersion(), ext.getWhatsNew(), ext.getArtifactFile().getAbsolutePath());
     }

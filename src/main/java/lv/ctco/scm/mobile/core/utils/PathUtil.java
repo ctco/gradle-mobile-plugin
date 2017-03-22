@@ -8,13 +8,9 @@ package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.io.FileUtils;
 
-import javax.inject.Singleton;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
-@Singleton
 public final class PathUtil {
 
     private static File userDir = FileUtils.getUserDirectory();
@@ -125,39 +121,6 @@ public final class PathUtil {
 
     public static File getXcodeSharedDir() throws IOException {
         return createAndReturn(new File(getBuildDir(), XCODE_SHARED_SUBPATH));
-    }
-
-    public static File getXcodeSimulatorDir() {
-        List<File> usualLocations = new ArrayList<>();
-        usualLocations.add(new File("/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app"));
-        usualLocations.add(new File("/Applications/Xcode.app/Contents/Applications/iOS Simulator.app"));
-        usualLocations.add(new File("/Applications/Xcode.app/Contents/Applications/iPhone Simulator.app"));
-        for (File location : usualLocations) {
-            if (location.exists()) {
-                LoggerUtil.debug("Simulator app found at '"+location+"'");
-                return location;
-            }
-        }
-        LoggerUtil.debug("Simulator not found!");
-        return null;
-    }
-
-    /**
-     * @deprecated
-     */
-    @Deprecated
-    static File getTextTransformExecutable() {
-        List<File> usualLocations = new ArrayList<>();
-        usualLocations.add(new File("/Applications/Xamarin Studio.app/Contents/MacOS/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe"));
-        usualLocations.add(new File("/Applications/Xamarin Studio.app/Contents/Resources/lib/monodevelop/AddIns/MonoDevelop.TextTemplating/TextTransform.exe"));
-        for (File location : usualLocations) {
-            if (location.exists()) {
-                LoggerUtil.debug("TextTransform found at '"+location+"'");
-                return location;
-            }
-        }
-        LoggerUtil.debug("TextTransform not found!");
-        return null;
     }
 
     public static File getAndroidKeystore() {

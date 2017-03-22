@@ -1,15 +1,16 @@
 # C.T.Co Mobile Plugin for Gradle
 
 ## About
-The C.T.Co mobile plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps. You can configure a project to build multiple artifacts with profiling for specific environments and build them all with a single or only the ones you specify. You can profile plist file values, regex replace values in any text based file and replace binary files. Plugin also supports uploading artifacts to a Knappsack server.
+The C.T.Co mobile plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps.
+You can configure a project to build multiple artifacts with profiling for specific environments and build them all with a single or only the ones you specify. You can profile plist file values, regex replace values in any text based file and replace binary files. Plugin also supports uploading artifacts to a Knappsack server.
 
 ## Requirements to build plugin
 - Java 1.7 or greater
-- Gradle 2.10 or greater
+- Gradle 2.14.1 or greater
 
 ## Requirements to use plugin
 - Java 1.7 or greater
-- Gradle 2.10 or greater
+- Gradle 2.14.1 or greater
 - Xcode and Xcode command line tools
 - Xamarin Studio, Mono framework, Xamarin.iOS, Xamarin.Android
 
@@ -36,7 +37,7 @@ To apply plugin to your project add the following configuration to project's bui
          mavenCentral()
       }
       dependencies {
-        classpath group: 'lv.ctco.scm', name: 'gradle-mobile-plugin', version: 'XXX'
+        classpath group: 'lv.ctco.scm', name: 'gradle-mobile-plugin', version: '0.11.+'
       }
     }
     apply plugin: 'ctco-mobile'
@@ -47,17 +48,16 @@ To build an Xcode project let the plugin auto-detect environments or add a speci
       platform = 'xcode'
 
       xcode {
-        // Configuration for all environments
+        // General configuration
         automaticConfiguration = false
-        sdk = 'iphoneos'
-        configuration = 'Release'
+        projectName = 'APP'
 
         // A list of environments mapped to targets
-        environment name: 'DEV', target: 'APP DEV'
-        environment name: 'TRAIN', target: 'APP TRAIN'
+        environment name:'DEV', target:'APP DEV'
+        environment name:'UAT', target:'APP UAT'
 
         // A list of profiling actions for environments
-        profile environment:'TRAIN', target:'Info.plist', sources:'../Profiles/Info-TRAIN.plist'
+        profile environment:'UAT', target:'Info.plist', source:'Profiles/Info-UAT.plist'
       }
     }
 
@@ -67,33 +67,33 @@ To build a Xamarin project add a specific xamarin (and xandroid) extension confi
       platform = 'xamarin'
 
       xamarin {
-        // Configuration for all environments
+        // General configuration
         automaticConfiguration = false
         solutionFile = file('App.sln')
-        projectBaseName = 'App'
+        projectFile = file('App.iOS/App.iOS.csproj')
         projectName = 'App.iOS'
-        assemblyName = 'AppiOS'
 
         // A list of environments mapped to targets
-        environment name:'DEV', configuration:'Ad-Hoc|iPhone', outputPath:file('App.iOS/bin/iPhone/Ad-Hoc')
-        environment name: 'TRAIN', configuration:'Ad-Hoc|iPhone', outputPath:file('App.iOS/bin/iPhone/Ad-Hoc')
+        environment name:'DEV', configuration:'Release', platform:'iPhone'
+        environment name:'UAT', configuration:'Release', platform:'iPhone'
 
         // A list of profiling actions for environments
-        profile environment:'TRAIN', target:'Info.plist', sources:'../Profiles/Info-TRAIN.plist'
+        profile environment:'UAT', target:'Info.plist', source:'Profiles/Info-UAT.plist'
       }
 
       xandroid { // Optional
+        // General configuration
+        automaticConfiguration = false
         solutionFile = file('App.sln')
         projectFile = file('App.Android/App.Android.csproj')
         projectName = 'App.Android'
-        assemblyName = 'AppAndroid'
 
         // A list of environments mapped to targets
-        environment name:'DEV', configuration:'Release', outputPath:file('App.Android/bin/Release')
-        environment name:'TRAIN', configuration:'Release', outputPath:file('App.Android/bin/Release')
+        environment name:'DEV', configuration:'Release'
+        environment name:'UAT', configuration:'Release'
 
         // A list of profiling actions for environments
-        profile environment:'TRAIN', sources: '../Profiles/TRAIN.groovy'
+        profile environment:'UAT', source: 'Profiles/TRAIN.groovy'
       }
 
     }
