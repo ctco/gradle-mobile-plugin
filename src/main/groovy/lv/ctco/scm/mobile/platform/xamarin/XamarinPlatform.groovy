@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.mobile.platform.xamarin
 
+import lv.ctco.scm.mobile.core.objects.TaskGroup
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
@@ -93,7 +94,7 @@ class XamarinPlatform {
             } else {
                 setupProjectInfoTask(releaseVersionIos)
             }
-            XamarinTasks.getOrCreateIncrementVersionTask(project, extXios, csprojXios)
+            getOrCreateIncrementVersionTask(project, extXios.getSolutionFile(), csprojXios)
         } else {
             logger.info("Defined solution file was not found! Will not configure build tasks...")
             logger.info(extXios.toString())
@@ -132,7 +133,7 @@ class XamarinPlatform {
 
         for (Environment _env : extXios.getEnvironments()) {
             Task envTask = XamarinTasks.getOrCreateBuildIosEnvTask(project, _env, extXios)
-            Task profilingTask = XamarinTasks.getOrCreateProfileIosEnvTask(project, _env, extXios)
+            Task profilingTask = getOrCreateProfileIosEnvTask(project, _env, extXios)
             Task updateVersionTask = XamarinTasks.getOrCreateUpdateVersionIosEnvTask(project, _env, extXios, releaseVersionIos)
             envTask.dependsOn(dependencyRestoreIosTask)
             if (extXios.skipUpdateVersionForAppstoreConfiguration && "AppStore".equals(_env.getConfiguration())) {
@@ -141,13 +142,13 @@ class XamarinPlatform {
                 envTask.dependsOn(updateVersionTask)
             }
             envTask.dependsOn(profilingTask)
-            envTask.finalizedBy(XamarinTasks.getOrCreateCleanupBuildTask(project, envTask.getName()))
+            envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, getCamelCase(_env.getName())))
             buildIosTask.dependsOn(envTask)
             profilingTask.mustRunAfter(dependencyRestoreIosTask)
             updateVersionTask.mustRunAfter(profilingTask)
         }
 
-        Task unitTestTask = XamarinTasks.getOrCreateUnitTestTask(project, extXios.unitTestProject)
+        Task unitTestTask = XamarinTasks.getOrCreateRunUnitTestsTask(project, extXios.unitTestProject)
         unitTestTask.dependsOn(dependencyRestoreTask)
 
         if (extXand.isValid()) {
@@ -169,7 +170,7 @@ class XamarinPlatform {
                 }
                 Task profilingTask = project.task type: ProfilingTask, "applyProfileAndroid"+getCamelCase(_env.getName()), {
                     description = "Profiles files for Android "+_env.getName()+" environment"
-                    projectDir = new File(extXios.projectName)
+                    projectDir = new File(extXand.projectName)
                     profiles = extXand.getSpecificProfiles(_env.getName(), "build")
                 }
                 Task versionUpdateTask = XamarinTasks.getOrCreateUpdateVersionAndroidTask(project, _env, extXand, releaseVersionAndroid)
@@ -177,7 +178,7 @@ class XamarinPlatform {
                 envTask.dependsOn(dependencyRestoreAndroidTask)
                 envTask.dependsOn(versionUpdateTask)
                 envTask.dependsOn(profilingTask)
-                envTask.finalizedBy(XamarinTasks.getOrCreateCleanupBuildTask(project, envTask.getName()))
+                envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, "Android"+getCamelCase(_env.getName())))
                 buildAndroidTask.dependsOn(envTask)
                 profilingTask.mustRunAfter(dependencyRestoreAndroidTask)
                 versionUpdateTask.mustRunAfter(profilingTask)
@@ -205,6 +206,35 @@ class XamarinPlatform {
 
     private static String getCamelCase(String string) {
         return StringUtils.capitalize(string.toLowerCase())
+    }
+
+    private static Task getOrCreateProfileIosEnvTask(Project project, Environment _env, XamarinConfiguration extXios) {
+        String taskName = "applyProfile"+getCamelCase(_env.getName())
+        Task existingTask = project.getTasks().findByName(taskName)
+        if (existingTask == null) {
+            ProfilingTask newTask = project.getTasks().create(taskName, ProfilingTask)
+            newTask.setDescription("Profiles files for iOS "+ _env.getName()+" environment")
+            newTask.setProjectDir(new File(extXios.projectName))
+            newTask.setProfiles(extXios.getSpecificProfiles(_env.getName(), "build"))
+            return newTask
+        } else {
+            return existingTask
+        }
+    }
+
+    private static Task getOrCreateIncrementVersionTask(Project project, File sln, Csproj csproj) {
+        String taskName = "incrementProjectVersion"
+        Task existingTask = project.getTasks().findByName(taskName)
+        if (existingTask == null) {
+            IncrementProjectVersionTask newTask = project.getTasks().create(taskName, IncrementProjectVersionTask.class)
+            newTask.setGroup(TaskGroup.UTILITY.getLabel())
+            newTask.setDescription("Increments version in .sln and .csproj files")
+            newTask.setSolutionFile(sln)
+            newTask.setCsproj(csproj)
+            return newTask
+        } else {
+            return existingTask
+        }
     }
 
 }

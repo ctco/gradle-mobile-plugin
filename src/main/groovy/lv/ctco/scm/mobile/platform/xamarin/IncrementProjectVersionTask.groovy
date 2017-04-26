@@ -22,8 +22,16 @@ public class IncrementProjectVersionTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(IncrementProjectVersionTask.class)
 
-    public File solutionFile
-    public Csproj csproj
+    private File solutionFile
+    private Csproj csproj
+
+    void setSolutionFile(File solutionFile) {
+        this.solutionFile = solutionFile
+    }
+
+    void setCsproj(Csproj csproj) {
+        this.csproj = csproj
+    }
 
     @TaskAction
     public void doTaskAction() {

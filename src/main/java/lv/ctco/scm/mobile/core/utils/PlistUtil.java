@@ -61,7 +61,7 @@ public final class PlistUtil {
             logger.info("  Adding key '{}' with value '{}'", keyName, keyValue);
             baseDict.put(keyName, keyValue);
         }
-        PropertyListParser.saveAsXML(baseDict, plistFile);
+        PropertyListParser.saveAsXML(baseDict, plistFile.getAbsoluteFile());
         logger.info("  current md5={}", CommonUtil.getMD5Hex(plistFile));
     }
 
@@ -75,11 +75,11 @@ public final class PlistUtil {
     }
 
     public static void resaveAsBinaryPlist(File plist) throws IOException {
-        PropertyListParser.saveAsBinary(getRootDictionary(plist), plist);
+        PropertyListParser.saveAsBinary(getRootDictionary(plist), plist.getAbsoluteFile());
     }
 
     public static void resaveAsXmlPlist(File plist) throws IOException {
-        PropertyListParser.saveAsXML(getRootDictionary(plist), plist);
+        PropertyListParser.saveAsXML(getRootDictionary(plist), plist.getAbsoluteFile());
     }
 
     public static NSDictionary getRootDictionary(File plist) throws IOException {

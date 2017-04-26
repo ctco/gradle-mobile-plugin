@@ -6,13 +6,13 @@
 
 package lv.ctco.scm.mobile.platform.xcode;
 
+import lv.ctco.scm.mobile.core.objects.TaskGroup;
+
 import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.Project;
 import org.gradle.api.Task;
-
-import lv.ctco.scm.mobile.core.objects.TaskGroup;
 
 final class XcodeTasks {
 
@@ -24,7 +24,7 @@ final class XcodeTasks {
         if (existingTask == null) {
             CleanTask newTask = project.getTasks().create(taskName, CleanTask.class);
             newTask.setGroup(TaskGroup.UTILITY.getLabel());
-            newTask.setDescription("Cleans up (restores profiled files and deletes known build directories)");
+            newTask.setDescription("Reverts applied profiling and deletes known build directories");
             return newTask;
         } else {
             return existingTask;
@@ -99,6 +99,19 @@ final class XcodeTasks {
         }
     }
 
+    static Task getOrCreateRevertProfileTask(Project project, String envName) {
+        String taskName = "cleanupBuild"+StringUtils.capitalize(envName.toLowerCase());
+        Task existingTask = project.getTasks().findByName(taskName);
+        if (existingTask == null) {
+            RevertProfileTask newTask = project.getTasks().create(taskName, RevertProfileTask.class);
+            newTask.setGroup(TaskGroup.UTILITY.getLabel());
+            newTask.setDescription("Reverts applied profiling");
+            return newTask;
+        } else {
+            return existingTask;
+        }
+    }
+
     static Task getOrCreateArchiveLibrariesTask(Project project) {
         String taskName = "archiveLibraries";
         Task existingTask = project.getTasks().findByName(taskName);
@@ -126,7 +139,7 @@ final class XcodeTasks {
     }
 
     static Task getOrCreateRunUnitTestsTask(Project project, String schemeName) {
-        String taskName = "publishLibraries";
+        String taskName = "runUnitTests";
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             UnitTestingTask newTask = project.getTasks().create(taskName, UnitTestingTask.class);

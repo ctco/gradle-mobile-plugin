@@ -65,7 +65,7 @@ public final class ProfilingUtil {
                 }
             }
         }
-        PropertyListParser.saveAsXML(rsltDict, targetFile);
+        PropertyListParser.saveAsXML(rsltDict, targetFile.getAbsoluteFile());
         logger.info("  current md5={}", CommonUtil.getMD5Hex(targetFile));
     }
 
@@ -89,7 +89,7 @@ public final class ProfilingUtil {
             }
         }
         if (plistModified) {
-            PropertyListParser.saveAsXML(rootDict, plistFile);
+            PropertyListParser.saveAsXML(rootDict, plistFile.getAbsoluteFile());
             logger.info("  current md5={}", CommonUtil.getMD5Hex(plistFile));
         }
     }
@@ -131,7 +131,7 @@ public final class ProfilingUtil {
         NSDictionary rootDict  = PlistUtil.getRootDictionary(rootPlist);
         NSObject value = getNSObjectFromArray(list.toArray());
         rootDict.put("PreferenceSpecifiers", value);
-        PropertyListParser.saveAsXML(rootDict, rootPlist);
+        PropertyListParser.saveAsXML(rootDict, rootPlist.getAbsoluteFile());
     }
 
     private static NSObject getNSObjectFromArray(Object[] object) {

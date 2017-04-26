@@ -65,15 +65,15 @@ class XcodePlatform {
         for (Environment env : configuration.getEnvironments()) {
             Task buildEnvTask = XcodeTasks.getOrCreateBuildEnvTask(project, env)
             Task buildEnvUpdateVersionTask = XcodeTasks.getOrCreateUpdateVersionTask(project, env)
-            Task buildEnvProfileTask = getOrCreateProfilingTask(project, env, configuration)
+            Task buildEnvApplyProfileTask = getOrCreateProfilingTask(project, env, configuration)
 
             buildEnvTask.dependsOn(dependencyRestoreTask)
-            buildEnvTask.dependsOn(buildEnvProfileTask)
+            buildEnvTask.dependsOn(buildEnvApplyProfileTask)
             buildEnvTask.dependsOn(buildEnvUpdateVersionTask)
-            buildEnvTask.finalizedBy(XcodeTasks.getOrCreateCleanTask(project))
+            buildEnvTask.finalizedBy(XcodeTasks.getOrCreateRevertProfileTask(project, env.getName()))
 
-            buildEnvProfileTask.mustRunAfter(dependencyRestoreTask)
-            buildEnvUpdateVersionTask.mustRunAfter(buildEnvProfileTask)
+            buildEnvApplyProfileTask.mustRunAfter(dependencyRestoreTask)
+            buildEnvUpdateVersionTask.mustRunAfter(buildEnvApplyProfileTask)
 
             buildAllTask.dependsOn(buildEnvTask)
         }
