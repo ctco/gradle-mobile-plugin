@@ -22,7 +22,7 @@ class XandroidExtension {
     String signingCertificateAlias
     String androidVersionCode
 
-    public void environment(Closure closure) {
+    void environment(Closure closure) {
         Environment env = new Environment()
         closure.setDelegate(env)
         closure.setResolveStrategy(Closure.DELEGATE_FIRST)
@@ -30,15 +30,17 @@ class XandroidExtension {
         configuration.addEnvironment(env)
     }
 
-    public void environment(HashMap<String, String> params) {
+    void environment(HashMap<String, String> params) {
         Environment env = new Environment()
         env.setName(params.name)
-        env.setConfiguration(params.configuration)
+        if (params.configuration != null) {
+            env.setConfiguration(params.configuration)
+        }
         env.setPlatform(params.platform)
         configuration.addEnvironment(env)
     }
 
-    public void profile(Closure closure) {
+    void profile(Closure closure) {
         Profile prof = new Profile()
         closure.setDelegate(prof)
         closure.setResolveStrategy(Closure.DELEGATE_FIRST)
@@ -46,7 +48,7 @@ class XandroidExtension {
         configuration.addProfile(prof)
     }
 
-    public void profile(HashMap<String, String> params) {
+    void profile(HashMap<String, String> params) {
         Profile profile = new Profile()
         profile.setEnvironment(params.environment)
         profile.setTarget(params.target)
