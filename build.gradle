@@ -52,6 +52,13 @@ processResources {
                     pluginVersion:project.getVersion()])
 }
 
+processTestResources {
+    filter(org.apache.tools.ant.filters.ReplaceTokens,
+            tokens:[pluginGroup:project.getGroup(),
+                    pluginName:archivesBaseName,
+                    pluginVersion:project.getVersion()])
+}
+
 // Custom functionality for Teamcity integration
 
 task projectInfo << {
