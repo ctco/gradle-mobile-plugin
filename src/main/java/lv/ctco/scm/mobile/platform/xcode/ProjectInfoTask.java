@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.platform.xcode;
 
 import lv.ctco.scm.mobile.core.utils.ErrorUtil;
-import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.PlistUtil;
 import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
@@ -60,26 +59,14 @@ public class ProjectInfoTask extends DefaultTask {
                 }
                 printReleaseVersion(releaseVersion);
                 if (libraryVersion != null) {
-                    if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
-                        logger.lifecycle("Stripping -SNAPSHOT marking");
-                        releaseVersionLibrary = libraryVersion.substring(0, libraryVersion.length()-9);
-                        printLibraryVersion(releaseVersionLibrary);
-                    } else {
-                        releaseVersionLibrary = libraryVersion;
-                        printLibraryVersion(releaseVersionLibrary);
-                    }
+                    releaseVersionLibrary = StringUtils.removeEndIgnoreCase(libraryVersion, "-SNAPSHOT");
+                    printLibraryVersion(releaseVersionLibrary);
                 }
             } else {
                 if (libraryVersion != null) {
                     logger.info("Setting library release version as defined in ctcoMobile.xcode.libraryVersion");
-                    if (libraryVersion.toUpperCase().endsWith("-SNAPSHOT")) {
-                        logger.lifecycle("Stripping -SNAPSHOT marking");
-                        releaseVersion = libraryVersion.substring(0, libraryVersion.length()-9);
-                        releaseVersionLibrary = releaseVersion;
-                    } else {
-                        releaseVersion = libraryVersion;
-                        releaseVersionLibrary = releaseVersion;
-                    }
+                    releaseVersion = StringUtils.removeEndIgnoreCase(libraryVersion, "-SNAPSHOT");
+                    releaseVersionLibrary = releaseVersion;
                     printReleaseVersion(releaseVersion);
                     printLibraryVersion(releaseVersion);
                 } else {
@@ -102,7 +89,6 @@ public class ProjectInfoTask extends DefaultTask {
             printTcVersionLibrary(releaseVersionLibrary, revision);
             LibraryUtil.printLibrariesPublicationsInfo(getProject());
 
-            GitUtil.generateCommitInfo(getProject());
         } catch (IOException e) {
             ErrorUtil.errorInTask(this.getName(), e);
         }

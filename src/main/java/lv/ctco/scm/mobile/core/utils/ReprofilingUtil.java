@@ -74,7 +74,7 @@ public final class ReprofilingUtil {
             throw new IOException("Resign environment '"+targetIpa.getAbsolutePath()+"' has profiles incompatible with artifact resigning");
         }
         CommonUtil.unpackIpaPayload(targetIpa, payloadDir);
-        File appDir = CommonUtil.getIpaPayloadApp(payloadDir);
+        File appDir = getIpaPayloadApp(payloadDir);
         for (Profile profile : profiles) {
             File targetFile = new File(appDir, profile.getTarget());
             File profileFile = new File(profile.getSource());
@@ -121,6 +121,19 @@ public final class ReprofilingUtil {
             resultIpa = new File(targetIpa.getName().substring(0, targetIpa.getName().indexOf(".ipa"))+' '+targetEnv+".ipa");
         }
         CommonUtil.repackIpaPayload(payloadDir, resultIpa);
+    }
+
+    private static File getIpaPayloadApp(File dir) {
+        File payloadDir = new File(dir, "Payload");
+        File[] files = payloadDir.listFiles();
+        if (files != null) {
+            for (File file : files) {
+                if (file.getName().toLowerCase().endsWith(".app")) {
+                    return file;
+                }
+            }
+        }
+        return null;
     }
 
 }

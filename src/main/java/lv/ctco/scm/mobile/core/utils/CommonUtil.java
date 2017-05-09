@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.core.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.TrueFileFilter;
@@ -18,6 +17,7 @@ import org.gradle.api.logging.Logging;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,15 +32,15 @@ public final class CommonUtil {
     public static void replaceInFile(File file, Pattern patternToFind, String replaceWith) throws IOException {
         BackupUtil.backupFile(file);
         logger.info("Replacing requested pattern in file '{}'", file.getAbsolutePath());
-        String content = FileUtils.readFileToString(file, Charsets.UTF_8);
+        String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         content = content.replaceAll(patternToFind.pattern(), replaceWith);
-        FileUtils.writeStringToFile(file, content, Charsets.UTF_8, false);
+        FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8, false);
         logger.info("  current md5={}", getMD5Hex(file));
     }
 
     public static void addNewlineAtEndOfFile(File file) throws IOException {
         BackupUtil.backupFile(file);
-        FileUtils.write(file, System.lineSeparator(), Charsets.UTF_8, true);
+        FileUtils.write(file, System.lineSeparator(), StandardCharsets.UTF_8, true);
     }
 
     public static List<File> findIosDsymsinDirectory(File dir) {
@@ -100,19 +100,6 @@ public final class CommonUtil {
         String md5hex = DigestUtils.md5Hex(fis);
         fis.close();
         return md5hex;
-    }
-
-    static File getIpaPayloadApp(File dir) {
-        File payloadDir = new File(dir, "Payload");
-        File[] files = payloadDir.listFiles();
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().toLowerCase().endsWith(".app")) {
-                    return file;
-                }
-            }
-        }
-        return null;
     }
 
     static File unpackIpaPayload(File targetIpa, File payloadDir) throws IOException {

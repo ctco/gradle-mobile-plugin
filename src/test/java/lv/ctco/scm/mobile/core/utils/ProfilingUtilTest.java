@@ -9,7 +9,6 @@ package lv.ctco.scm.mobile.core.utils;
 import com.dd.plist.NSDictionary;
 import com.dd.plist.NSObject;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.io.FileUtils;
 
 import org.junit.After;
@@ -22,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -41,7 +41,7 @@ public class ProfilingUtilTest {
     }
 
     private String getTrimmedFileContent(File file) throws IOException {
-        return FileUtils.readFileToString(file, Charsets.UTF_8).trim();
+        return FileUtils.readFileToString(file, StandardCharsets.UTF_8).trim();
     }
 
     private File initTemporaryFileFromResource(String resourceName) throws IOException, URISyntaxException {

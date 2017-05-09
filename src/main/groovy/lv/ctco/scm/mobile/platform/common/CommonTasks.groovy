@@ -15,11 +15,11 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.UnknownTaskException
 
-public class CommonTasks {
+class CommonTasks {
 
     private CommonTasks() {}
 
-    public static Task getOrCreateCreateTagTask(Project project) {
+    static Task getOrCreateCreateTagTask(Project project) {
         Task task = getTaskByName(project, "createTag")
         if (task != null) {
             return task
@@ -31,7 +31,7 @@ public class CommonTasks {
         }
     }
 
-    public static Task getOrCreateKnappsackUploadTask(Project project) {
+    static Task getOrCreateKnappsackUploadTask(Project project) {
         Task task = getTaskByName(project, "knappsackUpload")
         if (task != null) {
             return task
@@ -44,7 +44,7 @@ public class CommonTasks {
         }
     }
 
-    public static Task getOrCreateIpaReprofilingTask(Project project) {
+    static Task getOrCreateIpaReprofilingTask(Project project) {
         Task task = getTaskByName(project, "reprofileIpa")
         if (task != null) {
             return task
@@ -52,7 +52,18 @@ public class CommonTasks {
             return project.task("reprofileIpa", type: ReprofileIpaTask) {
                 group = TaskGroup.UTILITY.getLabel()
                 description = "Re-profiles and re-signs an IPA file to other environment"
+            }
+        }
+    }
 
+    static Task getOrCreateReportGitCommitInfoTask(Project project) {
+        Task task = getTaskByName(project, "reportGitCommitInfo")
+        if (task != null) {
+            return task
+        } else {
+            return project.task("reportGitCommitInfo", type: ReportGitCommitInfoTask) {
+                group = TaskGroup.UTILITY.getLabel()
+                description = "Creates a HTML report about the commit"
             }
         }
     }

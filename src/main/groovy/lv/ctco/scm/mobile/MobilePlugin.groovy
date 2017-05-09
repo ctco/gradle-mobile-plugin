@@ -35,7 +35,8 @@ class MobilePlugin implements Plugin<Project> {
     void apply(Project project) {
         try {
             if (project.state.getFailure() == null) {
-                String plugin = MobilePluginUtil.getPluginInfo(this.getClass().getClassLoader().getResourceAsStream("plugin-info.properties"))
+                String plugin = MobilePluginUtil.getPluginInfo(
+                        this.getClass().getClassLoader().getResourceAsStream("META-INF/gradle-plugins/ctco-mobile.properties"))
                 logger.info("Applying '"+plugin+"' to '"+project.getName()+"' project")
                 checkMinimumGradleVersion()
             }
@@ -49,7 +50,6 @@ class MobilePlugin implements Plugin<Project> {
             }
         } catch (IOException e) {
             ErrorUtil.errorInTask("applyPlugin", e)
-            //throw new GradleException(e.getMessage(), e)
         }
     }
 
@@ -123,6 +123,7 @@ class MobilePlugin implements Plugin<Project> {
         CommonTasks.getOrCreateCreateTagTask(project)
         CommonTasks.getOrCreateIpaReprofilingTask(project)
         CommonTasks.getOrCreateKnappsackUploadTask(project)
+        CommonTasks.getOrCreateReportGitCommitInfoTask(project)
         project.getPlugins().apply(PublishingTaskRules.class)
     }
 

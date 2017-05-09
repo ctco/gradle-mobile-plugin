@@ -49,13 +49,11 @@ public class Environment {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("environment");
-        sb.append(" name:'").append(name).append('\'');
-        sb.append(", target:'").append(target).append('\'');
-        sb.append(", configuration:'").append(configuration).append('\'');
-        sb.append(", sdk:'").append(sdk).append('\'');
-        return sb.toString();
+        return "environment" +
+                " name:'" + name + '\'' +
+                ", target:'" + target + '\'' +
+                ", configuration:'" + configuration + '\'' +
+                ", sdk:'" + sdk + '\'';
     }
 
     @Override

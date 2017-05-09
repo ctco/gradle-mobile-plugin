@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.platform.android;
 
 import lv.ctco.scm.mobile.core.objects.TaskGroup;
-import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
 import org.gradle.api.DefaultTask;
@@ -28,7 +27,7 @@ public final class AndroidPlatform {
 
     public void configure(Project project) throws IOException {
         revision = RevisionUtil.getRevision(project);
-        GitUtil.generateCommitInfo(project);
+        //GitUtil.generateCommitInfo(project);
 
         AndroidTasks.getOrCreateProjectInfoTask(project, releaseVersion, revision);
 

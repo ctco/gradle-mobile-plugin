@@ -16,7 +16,7 @@ public enum TaskGroup {
 
     private String label;
 
-    private TaskGroup(String label) {
+    TaskGroup(String label) {
         this.label = label;
     }
 

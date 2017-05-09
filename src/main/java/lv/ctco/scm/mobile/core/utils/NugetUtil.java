@@ -10,6 +10,7 @@ import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 final class NugetUtil {
 
@@ -19,7 +20,7 @@ final class NugetUtil {
         boolean result = false;
         File nugetConfig = new File(projectFile.getParentFile(), "nuget.config");
         if (nugetConfig.exists()) {
-            for (String line : FileUtils.readLines(nugetConfig)) {
+            for (String line : FileUtils.readLines(nugetConfig, StandardCharsets.UTF_8)) {
                 if (line.trim().startsWith("<add key=\"repositoryPath\"")) {
                     result = true;
                 }
@@ -32,7 +33,7 @@ final class NugetUtil {
         File nugetConfig = new File(projectFile.getParentFile(), "nuget.config");
         File resultingCacheDir = PathUtil.getDefaultNugetCacheDir();
         if (nugetConfig.exists()) {
-            for (String line : FileUtils.readLines(nugetConfig)) {
+            for (String line : FileUtils.readLines(nugetConfig, StandardCharsets.UTF_8)) {
                 if (line.trim().startsWith("<add key=\"repositoryPath\"")) {
                     resultingCacheDir = new File(line.substring(line.indexOf("value=")+7, line.indexOf("\" />")));
                 }

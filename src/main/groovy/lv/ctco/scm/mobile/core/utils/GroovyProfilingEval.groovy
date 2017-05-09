@@ -20,7 +20,7 @@ class GroovyProfilingEval {
     def copyFile(String sourceFilePath, String targetFilePath) {
         File targetFile = new File(targetFilePath)
         File sourceFile = new File(sourceFilePath)
-        logger.info("Replacing requested file '{}'", targetFile.getAbsolutePath());
+        logger.info("Replacing requested file '{}'", targetFile.getAbsolutePath())
         BackupUtil.backupFile(targetFile)
         FileUtils.copyFile(sourceFile, targetFile)
         logger.info("  current md5={}", CommonUtil.getMD5Hex(targetFile))

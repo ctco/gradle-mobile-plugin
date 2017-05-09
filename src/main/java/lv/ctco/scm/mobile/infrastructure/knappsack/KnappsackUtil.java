@@ -15,6 +15,7 @@ import org.gradle.api.Project;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 public final class KnappsackUtil {
 
@@ -100,7 +101,7 @@ public final class KnappsackUtil {
                 throw new IOException("What's new file "+whatsNewFile.getAbsolutePath()+" is not a regular file");
             }
             try {
-                ext.setWhatsNew(FileUtils.readFileToString(whatsNewFile, "UTF-8"));
+                ext.setWhatsNew(FileUtils.readFileToString(whatsNewFile, StandardCharsets.UTF_8));
             } catch (IOException e) {
                 throw new IOException("Unable to read what's new file "+whatsNewFile.getAbsolutePath(), e);
             }

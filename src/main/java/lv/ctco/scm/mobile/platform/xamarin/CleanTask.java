@@ -14,16 +14,12 @@ import lv.ctco.scm.mobile.core.utils.ExecUtil;
 import org.apache.commons.exec.CommandLine;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.File;
 import java.io.IOException;
 
 public class CleanTask extends DefaultTask {
-
-    private static final Logger logger = Logging.getLogger(CleanTask.class);
 
     private File solutionFile;
 
@@ -38,18 +34,14 @@ public class CleanTask extends DefaultTask {
         } catch (IOException e) {
             ErrorUtil.errorInTask(this.getName(), e);
         }
-        try {
-            cleanConfiguration("Debug");
-            cleanConfiguration("Release");
-            cleanConfiguration("Ad-Hoc");
-            cleanConfiguration("AppStore");
-            cleanConfiguration("UITests");
-        } catch (IOException ignore) {
-            logger.debug(ignore.getMessage(), ignore);
-        }
+        cleanConfiguration("Debug");
+        cleanConfiguration("Release");
+        cleanConfiguration("Ad-Hoc");
+        cleanConfiguration("AppStore");
+        cleanConfiguration("UITests");
     }
 
-    private void cleanConfiguration(String configuration) throws IOException {
+    private void cleanConfiguration(String configuration) {
         CommandLine commandLine = new CommandLine("xbuild");
         commandLine.addArgument("/t:Clean");
         commandLine.addArgument("/p:XcodeConfiguration="+configuration);

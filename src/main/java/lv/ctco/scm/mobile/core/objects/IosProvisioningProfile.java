@@ -64,7 +64,7 @@ public class IosProvisioningProfile {
 
     @Override
     public String toString() {
-        return uuid+"|"+profileName+"|"+teamName+"|"+DateFormatUtils.ISO_DATETIME_FORMAT.format(expirationDate);
+        return uuid+"|"+profileName+"|"+teamName+"|"+DateFormatUtils.ISO_8601_EXTENDED_DATETIME_FORMAT.format(expirationDate);
     }
 
 }

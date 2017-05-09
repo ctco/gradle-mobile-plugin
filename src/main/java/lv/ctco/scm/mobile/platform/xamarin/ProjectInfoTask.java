@@ -7,7 +7,6 @@
 package lv.ctco.scm.mobile.platform.xamarin;
 
 import lv.ctco.scm.mobile.core.utils.ErrorUtil;
-import lv.ctco.scm.mobile.core.utils.GitUtil;
 import lv.ctco.scm.mobile.core.utils.PropertyUtil;
 import lv.ctco.scm.mobile.core.utils.RevisionUtil;
 
@@ -47,7 +46,7 @@ public class ProjectInfoTask extends DefaultTask {
                 StampUtil.updateStamp(PropertyUtil.getProjectProperty(getProject(), "stamp"), releaseVersion);
             }
 
-            GitUtil.generateCommitInfo(getProject());
+            //GitUtil.generateCommitInfo(getProject());
         } catch (IOException e) {
             ErrorUtil.errorInTask(this.getName(), e);
         }
