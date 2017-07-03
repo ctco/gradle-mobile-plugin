@@ -1,0 +1,75 @@
+box: java:7
+
+test:
+  steps:
+    - script:
+        name: gradle test
+        code: |
+          ./gradlew test
+
+build:
+  steps:
+    - script:
+        name: gradle build
+        code: |
+          ./gradlew --info build -x test
+
+publish-snapshot:
+  steps:
+    - install-packages:
+        packages: secure-delete
+    - script:
+        name: import gradle.properties
+        code: |
+          ./gradlew init
+          shopt -s xpg_echo
+          echo $gradle_properties > ~/.gradle/gradle.properties
+    - script:
+        name: import gpg keys
+        code: |
+          shopt -s xpg_echo
+          echo $mygpgkey_pub > ~/mygpgkey_pub.gpg;
+          gpg --import  ~/mygpgkey_pub.gpg
+          echo $mygpgkey_sec > ~/mygpgkey_sec.gpg;
+          gpg --import ~/mygpgkey_sec.gpg
+          srm -vz ~/mygpgkey_sec.gpg ~/mygpgkey_pub.gpg
+    - script:
+        name: deploy snapshot
+        code: |
+          ./gradlew uploadArchives
+
+publish-release:
+  steps:
+    - install-packages:
+        packages: secure-delete
+    - add-ssh-key:
+        keyname: GITHUB_KEY
+    - add-to-known_hosts:
+        hostname: github.com
+        fingerprint: 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48
+        type: rsa
+        local: true
+    - script:
+        name: import gradle.properties
+        code: |
+          ./gradlew init
+          shopt -s xpg_echo
+          echo $gradle_properties > ~/.gradle/gradle.properties
+    - script:
+        name: import gpg keys
+        code: |
+          shopt -s xpg_echo
+          echo $mygpgkey_pub > ~/mygpgkey_pub.gpg
+          gpg --import  ~/mygpgkey_pub.gpg
+          echo $mygpgkey_sec > ~/mygpgkey_sec.gpg
+          gpg --import ~/mygpgkey_sec.gpg
+          srm -vz ~/mygpgkey_sec.gpg ~/mygpgkey_pub.gpg
+    - script:
+        name: run release
+        code: |
+          git checkout $WERCKER_GIT_BRANCH
+          git reset --hard $WERCKER_GIT_COMMIT
+          git remote -v
+          git config --global user.email "cscm@ctco.lv"
+          git config --global user.name "CSCM"
+          ./gradlew release closeAndPromoteRepository -Prelease.useAutomaticVersion=true --info
