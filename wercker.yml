@@ -23,7 +23,7 @@ publish-snapshot:
         code: |
           ./gradlew --refresh-dependencies
           shopt -s xpg_echo
-          echo $gradle_properties > ~/.gradle/gradle.properties
+          echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
     - script:
         name: import gpg keys
         code: |
