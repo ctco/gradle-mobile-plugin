@@ -1,4 +1,4 @@
-box: java:7
+box: oracle/openjdk:7
 
 test:
   steps:

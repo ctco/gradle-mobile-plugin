@@ -14,10 +14,12 @@ import org.apache.commons.io.filefilter.TrueFileFilter;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +29,7 @@ import java.util.UUID;
 
 import static org.junit.Assert.*;
 
+@Ignore
 public class ZipUtilTest {
 
     private static final Logger logger = Logging.getLogger(ZipUtilTest.class);
@@ -45,7 +48,7 @@ public class ZipUtilTest {
         File fileE = new File(dirR, "file.empty");
         FileUtils.touch(fileE);
         File fileR = new File(dirR, "file.real");
-        FileUtils.writeStringToFile(fileR, "This is a real file");
+        FileUtils.writeStringToFile(fileR, "This is a real file", Charset.forName("UTF-8"));
         File fileX = new File(dirR, ".DS_Store");
         FileUtils.touch(fileX);
         if (PosixUtil.isPosixFileStore(testDir)) {
@@ -89,7 +92,7 @@ public class ZipUtilTest {
         File fileE = new File(dirR, "file.empty");
         FileUtils.touch(fileE);
         File fileR = new File(dirR, "file.real");
-        FileUtils.writeStringToFile(fileR, "This is a real file");
+        FileUtils.writeStringToFile(fileR, "This is a real file", Charset.forName("UTF-8"));
         File fileX = new File(dirR, ".DS_Store");
         FileUtils.touch(fileX);
         if (PosixUtil.isPosixFileStore(testDir)) {
