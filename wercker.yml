@@ -3,41 +3,32 @@ box: oracle/openjdk:7
 test:
   steps:
     - script:
-        name: gradle prepare
-        code: |
-          ./gradlew --refresh-dependencies
-    - script:
         name: gradle test
         code: |
+          ./gradlew --refresh-dependencies
           ./gradlew test
 
 build:
   steps:
     - script:
-        name: gradle prepare
-        code: |
-          ./gradlew --refresh-dependencies
-    - script:
         name: gradle build
         code: |
+          ./gradlew --refresh-dependencies
           ./gradlew --info build -x test
 
 publish-snapshot:
   steps:
     - script:
-        name: gradle prepare
-        code: |
-          ./gradlew --refresh-dependencies
-    - script:
         name: import gradle.properties
         code: |
+          ./gradlew --refresh-dependencies
           shopt -s xpg_echo
           echo $gradle_properties > ~/.gradle/gradle.properties
     - script:
         name: import gpg keys
         code: |
           shopt -s xpg_echo
-          echo $mygpgkey_sec > ~/mygpgkey_sec.gpg;
+          echo $GPGKEY_SEC > ~/mygpgkey_sec.gpg;
           gpg --import ~/mygpgkey_sec.gpg
     - script:
         name: deploy snapshot
@@ -54,20 +45,16 @@ publish-release:
         type: rsa
         local: true
     - script:
-        name: gradle prepare
-        code: |
-          ./gradlew --refresh-dependencies
-    - script:
         name: import gradle.properties
         code: |
           ./gradlew --refresh-dependencies
           shopt -s xpg_echo
-          echo $gradle_properties > ~/.gradle/gradle.properties
+          echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
     - script:
         name: import gpg keys
         code: |
           shopt -s xpg_echo
-          echo $mygpgkey_sec > ~/mygpgkey_sec.gpg
+          echo $GPGKEY_SEC > ~/mygpgkey_sec.gpg
           gpg --import ~/mygpgkey_sec.gpg
     - script:
         name: run release
