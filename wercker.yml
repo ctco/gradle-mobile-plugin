@@ -6,7 +6,7 @@ test:
         name: gradle test
         code: |
           ./gradlew --refresh-dependencies
-          ./gradlew test
+          ./gradlew --info test
 
 build:
   steps:
@@ -33,7 +33,7 @@ publish-snapshot:
     - script:
         name: deploy snapshot
         code: |
-          ./gradlew uploadArchives
+          ./gradlew --info uploadArchives
 
 publish-release:
   steps:
@@ -64,4 +64,4 @@ publish-release:
           git remote -v
           git config --global user.email "cscm@ctco.lv"
           git config --global user.name "CSCM"
-          ./gradlew release closeAndPromoteRepository -Prelease.useAutomaticVersion=true --info
+          ./gradlew --info release closeAndPromoteRepository -Prelease.useAutomaticVersion=true
