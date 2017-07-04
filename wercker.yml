@@ -5,7 +5,7 @@ test:
     - script:
         name: gradle test
         code: |
-          ./gradlew --refresh-dependencies
+          ./gradlew --refresh-dependencies -version
           ./gradlew --info test
 
 build:
@@ -13,7 +13,7 @@ build:
     - script:
         name: gradle build
         code: |
-          ./gradlew --refresh-dependencies
+          ./gradlew --refresh-dependencies -version
           ./gradlew --info build -x test
 
 publish-snapshot:
@@ -21,7 +21,7 @@ publish-snapshot:
     - script:
         name: import gradle.properties
         code: |
-          ./gradlew --refresh-dependencies
+          ./gradlew --refresh-dependencies -version
           shopt -s xpg_echo
           echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
     - script:
@@ -47,7 +47,7 @@ publish-release:
     - script:
         name: import gradle.properties
         code: |
-          ./gradlew --refresh-dependencies
+          ./gradlew --refresh-dependencies -version
           shopt -s xpg_echo
           echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
     - script:
