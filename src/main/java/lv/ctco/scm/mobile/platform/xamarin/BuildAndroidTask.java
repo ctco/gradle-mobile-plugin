@@ -113,7 +113,7 @@ public class BuildAndroidTask extends DefaultTask {
         commandLine.addArgument("-digestalg");
         commandLine.addArgument("SHA1");
         commandLine.addArgument("-sigalg");
-        commandLine.addArgument("MD5withRSA");
+        commandLine.addArgument("SHA1withRSA");
         commandLine.addArgument("-keystore");
         commandLine.addArgument(signingKeystore, false);
         commandLine.addArgument("-storepass");
