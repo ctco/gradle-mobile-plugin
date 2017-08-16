@@ -79,12 +79,24 @@ public class BuildAndroidTask extends DefaultTask {
     }
 
     private void buildArtifact() throws IOException {
-        CommandLine commandLine = new CommandLine("xbuild");
-        commandLine.addArgument("/t:SignAndroidPackage");
-        if (StringUtils.isNotBlank(env.getConfiguration())) {
-             commandLine.addArgument("/p:Configuration="+env.getConfiguration());
+        File execMdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
+        CommandLine commandLine;
+        if (execMdtool.exists()) {
+            commandLine = new CommandLine("xbuild");
+            commandLine.addArgument("/t:SignAndroidPackage");
+            if (StringUtils.isNotBlank(env.getConfiguration())) {
+                commandLine.addArgument("/p:Configuration="+env.getConfiguration());
+            }
+            commandLine.addArgument(projectFile.getAbsolutePath(), false);
+        } else {
+            commandLine = new CommandLine("msbuild");
+            commandLine.addArgument("/property:Configuration="+env.getConfiguration());
+            if (env.getPlatform() != null) {
+                commandLine.addArgument("/property:Platform="+env.getPlatform());
+            }
+            commandLine.addArgument("/target:SignAndroidPackage");
+            commandLine.addArgument(projectFile.getAbsolutePath(), false);
         }
-        commandLine.addArgument(projectFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
         FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
         if (!execResult.isSuccess()) {

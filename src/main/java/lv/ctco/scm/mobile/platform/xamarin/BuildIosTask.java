@@ -65,16 +65,28 @@ public class BuildIosTask extends DefaultTask {
     }
 
     private void buildArtifacts() throws IOException {
-        CommandLine commandLine = new CommandLine("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
-        commandLine.addArgument("build");
-        commandLine.addArgument("-t:Build");
-        if (StringUtils.isNotBlank(projectName)) {
-            commandLine.addArgument("-p:"+projectName);
+        File execMdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
+        CommandLine commandLine;
+        if (execMdtool.exists()) {
+            commandLine = new CommandLine(execMdtool.getAbsolutePath());
+            commandLine.addArgument("build");
+            commandLine.addArgument("-t:Build");
+            if (StringUtils.isNotBlank(projectName)) {
+                commandLine.addArgument("-p:"+projectName);
+            }
+            if (StringUtils.isNotBlank(env.getConfiguration())) {
+                commandLine.addArgument("-c:"+env.getConfiguration()+"|"+env.getPlatform());
+            }
+            commandLine.addArgument(solutionFile.getAbsolutePath(), false);
+        } else {
+            commandLine = new CommandLine("msbuild");
+            commandLine.addArgument("/property:Configuration="+env.getConfiguration());
+            if (env.getPlatform() != null) {
+                commandLine.addArgument("/property:Platform="+env.getPlatform());
+            }
+            commandLine.addArgument("/target:Build");
+            commandLine.addArgument(solutionFile.getAbsolutePath(), false);
         }
-        if (StringUtils.isNotBlank(env.getConfiguration())) {
-            commandLine.addArgument("-c:"+env.getConfiguration()+"|"+env.getPlatform());
-        }
-        commandLine.addArgument(solutionFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
         FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
         if (!execResult.isSuccess()) {
