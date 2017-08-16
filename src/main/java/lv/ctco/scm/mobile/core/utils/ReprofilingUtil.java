@@ -82,7 +82,11 @@ public final class ReprofilingUtil {
                 throw new IOException("Profile file was not found");
             }
             if (PLIST_ENTS.equalsIgnoreCase(targetFile.getName())) {
-                ProfilingUtil.profileFirstLevelPlistEntries(targetFile, profileFile, ProfilingUtilMode.UPDATE_AND_ADD);
+                if (targetFile.exists()) {
+                    ProfilingUtil.profileFirstLevelPlistEntries(targetFile, profileFile, ProfilingUtilMode.UPDATE_AND_ADD);
+                } else {
+                    FileUtils.copyFile(profileFile, targetFile);
+                }
             } else if (PLIST_ROOT.equalsIgnoreCase(profile.getTarget()) && profile.getLevel() == 2) {
                 ProfilingUtil.profilePreferenceSpecifiersPlistEntries(targetFile, profileFile);
             } else {
