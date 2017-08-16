@@ -65,8 +65,7 @@ public final class ReprofilingUtil {
     public static void reprofileIpa(Project project, File targetIpa, String targetEnv, List<Profile> profiles, boolean cleanReleaseVersionForPROD) throws IOException {
         logger.info("Reprofiling IPA '{}' to environment '{}'", targetIpa.getAbsolutePath(), targetEnv);
         logProfiles(profiles);
-        File workingDir = targetIpa.getParentFile();
-        File payloadDir = new File(workingDir, "temp_ipa_payload");
+        File payloadDir = new File(PathUtil.getTempDir(), targetIpa.getName());
         if (!targetIpa.exists()) {
             throw new IOException("Resign target '"+targetIpa.getAbsolutePath()+"' was not found");
         }
@@ -125,6 +124,7 @@ public final class ReprofilingUtil {
             resultIpa = new File(targetIpa.getName().substring(0, targetIpa.getName().indexOf(".ipa"))+' '+targetEnv+".ipa");
         }
         CommonUtil.repackIpaPayload(payloadDir, resultIpa);
+        FileUtils.deleteDirectory(payloadDir);
     }
 
     private static File getIpaPayloadApp(File dir) {
