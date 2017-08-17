@@ -37,6 +37,10 @@ publish-snapshot:
 
 publish-release:
   steps:
+    - script:
+        name: install openssh-clients
+        code: |
+          yum -y install openssh-clients
     - add-ssh-key:
         keyname: GITHUB_KEY
     - add-to-known_hosts:
