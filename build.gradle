@@ -158,8 +158,8 @@ release {
     failOnUnversionedFiles = false
     failOnUpdateNeeded = true
     revertOnFail = true
-    preTagCommitMessage = '[Gradle Release Plugin] [skip ci] - pre tag commit: '
-    newVersionCommitMessage = '[Gradle Release Plugin] [skip ci] - new version commit: '
+    preTagCommitMessage = '[Release] [skip ci] - pre tag commit: '
+    newVersionCommitMessage = '[Release] [skip ci] - new version commit: '
     tagTemplate = '${version}'
     versionPropertyFile = 'gradle.properties'
     versionProperties = []
