@@ -172,3 +172,4 @@ nexusStaging {
 }
 
 afterReleaseBuild.dependsOn uploadArchives
+
