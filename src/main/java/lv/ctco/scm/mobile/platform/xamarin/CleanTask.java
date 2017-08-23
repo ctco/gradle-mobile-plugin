@@ -42,9 +42,11 @@ public class CleanTask extends DefaultTask {
     }
 
     private void cleanConfiguration(String configuration) {
-        CommandLine commandLine = new CommandLine("xbuild");
-        commandLine.addArgument("/t:Clean");
-        commandLine.addArgument("/p:XcodeConfiguration="+configuration);
+        File mdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
+        String buildTool = mdtool.exists() ? "xbuild" : "msbuild";
+        CommandLine commandLine = new CommandLine(buildTool);
+        commandLine.addArgument("/property:Configuration="+configuration);
+        commandLine.addArgument("/target:Clean");
         commandLine.addArgument(solutionFile.getAbsolutePath(), false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {

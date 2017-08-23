@@ -46,10 +46,12 @@ public class UnitTestingTask extends DefaultTask {
     }
 
     private void buildProject() {
-        CommandLine commandLine = new CommandLine("xbuild");
+        File mdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
+        String buildTool = mdtool.exists() ? "xbuild" : "msbuild";
+        CommandLine commandLine = new CommandLine(buildTool);
+        commandLine.addArgument("/property:Configuration=Debug");
+        commandLine.addArgument("/target:Build");
         commandLine.addArgument(unitTestProject, false);
-        commandLine.addArgument("/p:XcodeConfiguration=Debug");
-        commandLine.addArgument("/t:Build");
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
         if (!execResult.isSuccess()) {
             ErrorUtil.errorInTask(this.getName(), execResult.getException());
@@ -59,6 +61,7 @@ public class UnitTestingTask extends DefaultTask {
     private void testProject() throws IOException {
         File reportFile = new File(PathUtil.getReportUnitDir(), "UnitTestResult.xml");
         CommandLine commandLine = new CommandLine("nunit-console");
+        commandLine.addArgument("-labels");
         commandLine.addArgument("-output="+reportFile.getAbsolutePath(), false);
         commandLine.addArgument(unitTestProject, false);
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
