@@ -6,8 +6,8 @@
 
 package lv.ctco.scm.utils.git;
 
-import lv.ctco.scm.mobile.core.utils.ExecResult;
-import lv.ctco.scm.mobile.core.utils.ExecUtil;
+import lv.ctco.scm.mobile.utils.ExecResult;
+import lv.ctco.scm.mobile.utils.ExecUtil;
 
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.lang3.StringUtils;

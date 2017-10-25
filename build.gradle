@@ -27,7 +27,7 @@ dependencies {
 	compile group: 'commons-io', name: 'commons-io', version:'2.5'
 	compile group: 'org.apache.commons', name:'commons-compress', version:'1.10'
 	compile group: 'org.apache.commons', name:'commons-exec', version:'1.3'
-	compile group: 'org.apache.commons', name:'commons-lang3', version:'3.5'
+	compile group: 'org.apache.commons', name:'commons-lang3', version:'3.6'
 
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.3'
 	compile group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.3'
@@ -45,18 +45,15 @@ test {
 	useJUnit()
 }
 
-processResources {
-    filter(org.apache.tools.ant.filters.ReplaceTokens,
-            tokens:[pluginGroup:project.getGroup(),
-                    pluginName:archivesBaseName,
-                    pluginVersion:project.getVersion()])
-}
-
-processTestResources {
-    filter(org.apache.tools.ant.filters.ReplaceTokens,
-            tokens:[pluginGroup:project.getGroup(),
-                    pluginName:archivesBaseName,
-                    pluginVersion:project.getVersion()])
+jar {
+    manifest {
+        attributes ("Specification-Vendor": "C.T.Co, Ltd.",
+                "Specification-Title": "Gradle Mobile Plugin",
+                "Specification-Version": project.getVersion().minus('-SNAPSHOT'),
+                "Implementation-Vendor": "C.T.Co, Ltd.",
+                "Implementation-Title": "gradle-mobile-plugin",
+                "Implementation-Version": project.getVersion())
+    }
 }
 
 // Custom functionality for Teamcity integration

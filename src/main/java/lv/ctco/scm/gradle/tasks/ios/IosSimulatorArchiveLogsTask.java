@@ -1,9 +1,9 @@
 package lv.ctco.scm.gradle.tasks.ios;
 
-import lv.ctco.scm.mobile.core.utils.ZipUtil;
-import lv.ctco.scm.mobile.ios.IosSimulator;
-import lv.ctco.scm.mobile.ios.IosSimulatorCLP;
-import lv.ctco.scm.mobile.ios.IosSimulatorUtil;
+import lv.ctco.scm.mobile.utils.ZipUtil;
+import lv.ctco.scm.mobile.utils.IosSimulator;
+import lv.ctco.scm.mobile.utils.IosSimulatorCLP;
+import lv.ctco.scm.mobile.utils.IosSimulatorUtil;
 
 import org.apache.commons.io.FileUtils;
 

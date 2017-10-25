@@ -1,8 +1,8 @@
 package lv.ctco.scm.gradle.tasks.ios;
 
-import lv.ctco.scm.mobile.ios.IosSimulator;
-import lv.ctco.scm.mobile.ios.IosSimulatorCLP;
-import lv.ctco.scm.mobile.ios.IosSimulatorUtil;
+import lv.ctco.scm.mobile.utils.IosSimulator;
+import lv.ctco.scm.mobile.utils.IosSimulatorCLP;
+import lv.ctco.scm.mobile.utils.IosSimulatorUtil;
 import lv.ctco.scm.utils.exec.ExecResult;
 
 import org.gradle.api.DefaultTask;
