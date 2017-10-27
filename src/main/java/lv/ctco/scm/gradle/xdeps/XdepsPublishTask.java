@@ -9,23 +9,27 @@ package lv.ctco.scm.gradle.xdeps;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.tasks.TaskAction;
 
 public class XdepsPublishTask extends DefaultTask {
 
-    private static final String ERR_NO_PUBLICATIONS = "No xdeps publication definitions have been found";
-    private static final String ERR_NO_REPOSITORIES = "No xdeps publication repositories have been found";
+    private String repoName;
+
+    public String getRepoName() {
+        return repoName;
+    }
+
+    public void setRepoName(String repoName) {
+        this.repoName = repoName;
+    }
 
     @TaskAction
     public void doTaskAction() {
-        if (XdepsUtil.getMavenPublications(getProject()).isEmpty()) {
-            ErrorUtil.errorInTask(getName(), ERR_NO_PUBLICATIONS);
-            throw new GradleException(ERR_NO_PUBLICATIONS);
+        if (!XdepsUtil.hasMavenPublications(getProject())) {
+            ErrorUtil.errorInTask(getName(), "Missing Maven publication definitions");
         }
-        if (XdepsUtil.getMavenRepositories(getProject()).isEmpty()) {
-            ErrorUtil.errorInTask(getName(), ERR_NO_REPOSITORIES);
-            throw new GradleException(ERR_NO_REPOSITORIES);
+        if (!XdepsUtil.hasMavenRepository(getProject(), repoName)) {
+            ErrorUtil.errorInTask(getName(), "Missing '"+repoName+"' repository definition");
         }
     }
 

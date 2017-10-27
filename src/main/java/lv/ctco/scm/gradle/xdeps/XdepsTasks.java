@@ -29,17 +29,32 @@ public class XdepsTasks {
         }
     }
 
-    public static Task getOrCreatePublishXdepsTask(Project project) {
-        String taskName = "publishXdeps";
+    public static Task getOrCreatePublishXdepsSnapshotsTask(Project project) {
+        String taskName = "publishXdepsSnapshots";
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
-            XdepsPublishTask newTask = project.getTasks().create(taskName, XdepsPublishTask.class);
-            newTask.setGroup(TaskGroup.XDEPS.getLabel());
-            newTask.setDescription("Publishes Xdeps publications to a Maven repository");
-            return newTask;
+            return createPublishXdepsTask(project, taskName, "MavenMobileSnapshots");
         } else {
             return existingTask;
         }
+    }
+
+    public static Task getOrCreatePublishXdepsReleasesTask(Project project) {
+        String taskName = "publishXdepsReleases";
+        Task existingTask = project.getTasks().findByName(taskName);
+        if (existingTask == null) {
+            return createPublishXdepsTask(project, taskName, "MavenMobileReleases");
+        } else {
+            return existingTask;
+        }
+    }
+
+    private static Task createPublishXdepsTask(Project project, String taskName, String repoName) {
+        XdepsPublishTask newTask = project.getTasks().create(taskName, XdepsPublishTask.class);
+        newTask.setGroup(TaskGroup.XDEPS.getLabel());
+        newTask.setDescription("Publishes Xdeps publications to '" + repoName + "' repository");
+        newTask.setRepoName(repoName);
+        return newTask;
     }
 
 }

@@ -20,6 +20,7 @@ import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.IOException;
+import java.util.List;
 
 public class XdepsDisplayInfoTask extends DefaultTask {
 
@@ -64,13 +65,15 @@ public class XdepsDisplayInfoTask extends DefaultTask {
             TeamcityUtil.setProjectXdepsBuildVersion(buildVersion);
         }
 
-        logger.info("Detected defined xdeps publication repositories:");
-        for (DefaultMavenArtifactRepository repository : XdepsUtil.getMavenRepositories(getProject())) {
+        List<DefaultMavenArtifactRepository> repositories = XdepsUtil.getMavenRepositories(getProject());
+        logger.info("Detected {} defined Maven publication repositories", repositories.size());
+        for (DefaultMavenArtifactRepository repository : repositories) {
             logger.info(" - '"+repository.getName()+"' "+repository.getUrl());
         }
-        logger.info("Detected defined xdeps publication definitions:");
-        for (DefaultMavenPublication library : XdepsUtil.getMavenPublications(getProject())) {
-            logger.info(" - '"+library.getName()+"' '"+library.getCoordinates()+"'");
+        List<DefaultMavenPublication> publications = XdepsUtil.getMavenPublications(getProject());
+        logger.info("Detected {} defined Maven publication definitions", publications.size());
+        for (DefaultMavenPublication publication : publications) {
+            logger.info(" - '"+publication.getName()+"' '"+publication.getCoordinates()+"'");
         }
     }
 

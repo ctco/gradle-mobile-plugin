@@ -16,9 +16,15 @@ public class XdepsPublishRules extends RuleSource {
 
     @Mutate
     public static void linkPublishingTasks(ModelMap<Task> tasks) {
-        for (Task task : tasks.withType(PublishToMavenRepository.class)) {
-            tasks.withType(XdepsPublishTask.class).iterator().next().dependsOn(task);
-            task.setGroup(null);
+        Task defaultPublishTask = tasks.get("publish");
+        for (XdepsPublishTask xdepsPublishTask : tasks.withType(XdepsPublishTask.class)) {
+            for (Task publishTask : tasks.withType(PublishToMavenRepository.class)) {
+                if (publishTask.getName().endsWith("PublicationTo" + xdepsPublishTask.getRepoName() + "Repository")) {
+                    defaultPublishTask.getDependsOn().remove(publishTask.getName());
+                    xdepsPublishTask.dependsOn(publishTask);
+                    publishTask.setGroup(null);
+                }
+            }
         }
     }
 

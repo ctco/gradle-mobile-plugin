@@ -8,12 +8,8 @@ import lv.ctco.scm.gradle.xdeps.XdepsUtil
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 
 public class XdepsPublishingPlugin implements Plugin<Project> {
-
-    private static final Logger logger = Logging.getLogger(XdepsPublishingPlugin.class)
 
     private static final String pluginName = "lv.ctco.scm.xdeps-publishing";
 
@@ -22,22 +18,19 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
         try {
             MobilePluginUtil.announcePlugin(pluginName, project.getName())
             MobilePluginUtil.checkMinimumGradleVersion()
-
             project.extensions.create("xdeps", XdepsExtension)
-
             project.afterEvaluate {
-                overrideExtensionProperties(project)
+                checkXdepsVersionOverride(project)
                 XdepsConfiguration xdepsConfiguration = project.xdeps.getXdepsConfiguration()
-                if (XdepsUtil.isValidXdepsConfiguration(xdepsConfiguration) && !XdepsUtil.getMavenPublications(project).isEmpty()) {
-                    logger.info("Configuring Xdeps tasks...")
-                    XdepsTasks.getOrCreatePublishXdepsTask(project)
+                if (XdepsUtil.isValidXdepsConfiguration(project, xdepsConfiguration)) {
                     XdepsUtil.applyMavenPublishPlugin(project)
-                    XdepsUtil.enforceRequiredMavenRepository(project, XdepsUtil.getRequiredMavenRepositoryName(xdepsConfiguration.getVersion()))
-                    XdepsUtil.enforceRequiredXdepsConfiguration(project, xdepsConfiguration)
+                    XdepsTasks.getOrCreatePublishXdepsSnapshotsTask(project)
+                    XdepsTasks.getOrCreatePublishXdepsReleasesTask(project)
                     XdepsUtil.applyXdepsPublishRules(project)
+                    XdepsUtil.enforceRequiredXdepsConfiguration(project, xdepsConfiguration)
                     XdepsTasks.getOrCreateXdepsInfoTask(project, xdepsConfiguration)
                 } else {
-                    throw new IOException("Valid Xdeps configuration was not found")
+                    throw new IOException("Missing configuration for Xdeps publishing")
                 }
             }
         } catch (IOException e) {
@@ -45,7 +38,7 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
         }
     }
 
-    private static void overrideExtensionProperties(Project project) {
+    private static void checkXdepsVersionOverride(Project project) {
         if (project.hasProperty("xdeps.version")) {
             project.xdeps.version = project["xdeps.version"]
         }

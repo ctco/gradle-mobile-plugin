@@ -10,7 +10,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.UnknownRepositoryException;
 import org.gradle.api.artifacts.dsl.RepositoryHandler;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
@@ -20,7 +19,6 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +35,8 @@ public final class XdepsUtil {
         return xdepsConfiguration == null ? Collections.<File>emptySet() : xdepsConfiguration.getFiles();
     }
 
-    public static boolean isValidXdepsConfiguration(XdepsConfiguration xdeps) {
-        return !StringUtils.isEmpty(xdeps.getGroupId()) && !StringUtils.isEmpty(xdeps.getVersion());
+    public static boolean isValidXdepsConfiguration(Project project, XdepsConfiguration xdeps) {
+        return !StringUtils.isEmpty(xdeps.getGroupId()) && !StringUtils.isEmpty(xdeps.getVersion()) && XdepsUtil.hasMavenPublications(project);
     }
 
     private static boolean isMavenPublishPluginApplied(Project project) {
@@ -68,6 +66,10 @@ public final class XdepsUtil {
         return xdeps;
     }
 
+    public static boolean hasMavenPublications(Project project) {
+        return !getMavenPublications(project).isEmpty();
+    }
+
     public static List<DefaultMavenArtifactRepository> getMavenRepositories(Project project) {
         List<DefaultMavenArtifactRepository> repos = new ArrayList<>();
         PublishingExtension publishingExtension = getPublishingExtension(project);
@@ -80,18 +82,13 @@ public final class XdepsUtil {
         return repos;
     }
 
-    public static void enforceRequiredMavenRepository(Project project, String repoName) throws IOException {
-        if (getMavenRepositories(project).isEmpty()) {
-            return;
+    public static boolean hasMavenRepository(Project project, String repoName) {
+        for (DefaultMavenArtifactRepository repo : getMavenRepositories(project)) {
+            if (repoName.equals(repo.getName())) {
+                return true;
+            }
         }
-        RepositoryHandler repositoryHandler = getPublishingExtension(project).getRepositories();
-        try {
-            DefaultMavenArtifactRepository repo = (DefaultMavenArtifactRepository)repositoryHandler.getByName(repoName);
-            repositoryHandler.clear();
-            repositoryHandler.add(repo);
-        } catch (UnknownRepositoryException e) {
-            throw new IOException("Repository with name '"+repoName+"' required for Xdeps publishing was not found", e);
-        }
+        return false;
     }
 
     public static void enforceRequiredXdepsConfiguration(Project project, XdepsConfiguration xdepsConfiguration) {
@@ -100,10 +97,6 @@ public final class XdepsUtil {
             publication.setGroupId(xdepsConfiguration.getGroupId());
             publication.setVersion(xdepsConfiguration.getVersion());
         }
-    }
-
-    public static String getRequiredMavenRepositoryName(String version) {
-        return version.toUpperCase().endsWith("-SNAPSHOT") ? "MavenMobileSnapshots" : "MavenMobileReleases";
     }
 
     private static PublishingExtension getPublishingExtension(Project project) {
