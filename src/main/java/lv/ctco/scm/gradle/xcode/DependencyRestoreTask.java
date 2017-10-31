@@ -46,7 +46,7 @@ public class DependencyRestoreTask extends DefaultTask {
         if (!xdepsFiles.isEmpty()) {
             logger.lifecycle("Restoring Xdeps dependencies...");
             File xdepsLibrary = new File(getProject().getProjectDir(), "Libraries");
-            cleanXdepsLibrary(xdepsLibrary);
+            prepareXdepsLibrary(xdepsLibrary);
             for (File xdepsFile : xdepsFiles) {
                 try {
                     restoreXdepsFileToLibrary(xdepsFile, xdepsLibrary);
@@ -72,11 +72,12 @@ public class DependencyRestoreTask extends DefaultTask {
         }
     }
 
-    private void cleanXdepsLibrary(File xdepsLibrary) {
+    private void prepareXdepsLibrary(File xdepsLibrary) {
         try {
+            FileUtils.forceMkdir(xdepsLibrary);
             FileUtils.cleanDirectory(xdepsLibrary);
         } catch (IOException e) {
-            ErrorUtil.errorInTask(this.getName(), "Failed to clean Xdeps Libraries directory");
+            ErrorUtil.errorInTask(this.getName(), "Failed to prepare Xdeps Libraries directory");
         }
     }
 
