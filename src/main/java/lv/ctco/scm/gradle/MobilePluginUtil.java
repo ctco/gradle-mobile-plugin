@@ -33,9 +33,14 @@ public class MobilePluginUtil {
         return pluginVersion;
     }
 
-    static void announcePlugin(String pluginName, String projectName) {
+    static void announcePluginApply(String pluginName, String projectName) {
         String pluginVersion = MobilePluginUtil.getPluginVersion();
         logger.info("Applying '{}:{}' to '{}' project", pluginName, pluginVersion, projectName);
+    }
+
+    static void announcePluginIgnore(String pluginName, String projectName) {
+        String pluginVersion = MobilePluginUtil.getPluginVersion();
+        logger.warn("Ignoring '{}:{}' on '{}' project", pluginName, pluginVersion, projectName);
     }
 
     static void checkMinimumGradleVersion() throws IOException {

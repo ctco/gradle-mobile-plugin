@@ -35,7 +35,7 @@ class MobilePlugin implements Plugin<Project> {
     void apply(Project project) {
         try {
             if (project.state.getFailure() == null) {
-                MobilePluginUtil.announcePlugin(MobilePluginUtil.getPluginName(), project.getName())
+                MobilePluginUtil.announcePluginApply(MobilePluginUtil.getPluginName(), project.getName())
                 MobilePluginUtil.checkMinimumGradleVersion()
             }
 

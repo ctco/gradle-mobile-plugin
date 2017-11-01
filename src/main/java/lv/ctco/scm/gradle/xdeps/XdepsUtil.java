@@ -19,6 +19,7 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -35,8 +36,10 @@ public final class XdepsUtil {
         return xdepsConfiguration == null ? Collections.<File>emptySet() : xdepsConfiguration.getFiles();
     }
 
-    public static boolean isValidXdepsConfiguration(Project project, XdepsConfiguration xdeps) {
-        return !StringUtils.isEmpty(xdeps.getGroupId()) && !StringUtils.isEmpty(xdeps.getVersion()) && XdepsUtil.hasMavenPublications(project);
+    public static void checkXdepsConfiguration(XdepsConfiguration xdeps) throws IOException {
+        if (StringUtils.isEmpty(xdeps.getGroupId()) || StringUtils.isEmpty(xdeps.getVersion())) {
+            throw new IOException("Mandatory properties xdeps.groupId and/or xdeps.version have not been set");
+        }
     }
 
     private static boolean isMavenPublishPluginApplied(Project project) {
@@ -89,14 +92,6 @@ public final class XdepsUtil {
             }
         }
         return false;
-    }
-
-    public static void enforceRequiredXdepsConfiguration(Project project, XdepsConfiguration xdepsConfiguration) {
-        List<DefaultMavenPublication> publications = getMavenPublications(project);
-        for (DefaultMavenPublication publication : publications) {
-            publication.setGroupId(xdepsConfiguration.getGroupId());
-            publication.setVersion(xdepsConfiguration.getVersion());
-        }
     }
 
     private static PublishingExtension getPublishingExtension(Project project) {

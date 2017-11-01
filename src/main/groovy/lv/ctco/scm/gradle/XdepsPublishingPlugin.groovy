@@ -8,6 +8,7 @@ import lv.ctco.scm.gradle.xdeps.XdepsUtil
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.UnknownDomainObjectException
 
 public class XdepsPublishingPlugin implements Plugin<Project> {
 
@@ -15,25 +16,27 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
 
     @Override
     void apply(Project project) {
+        // Can and must be applied only to root project because of maven-publish plugin's peculiarities
+        if (!project.equals(project.getRootProject())) {
+            MobilePluginUtil.announcePluginIgnore(pluginName, project.getName())
+            return
+        }
         try {
-            MobilePluginUtil.announcePlugin(pluginName, project.getName())
+            MobilePluginUtil.announcePluginApply(pluginName, project.getName())
             MobilePluginUtil.checkMinimumGradleVersion()
-            project.extensions.create("xdeps", XdepsExtension)
+            project.getExtensions().create("xdeps", XdepsExtension)
             project.afterEvaluate {
                 checkXdepsVersionOverride(project)
-                XdepsConfiguration xdepsConfiguration = project.xdeps.getXdepsConfiguration()
-                if (XdepsUtil.isValidXdepsConfiguration(project, xdepsConfiguration)) {
-                    XdepsUtil.applyMavenPublishPlugin(project)
-                    XdepsTasks.getOrCreatePublishXdepsSnapshotsTask(project)
-                    XdepsTasks.getOrCreatePublishXdepsReleasesTask(project)
-                    XdepsUtil.applyXdepsPublishRules(project)
-                    XdepsUtil.enforceRequiredXdepsConfiguration(project, xdepsConfiguration)
-                    XdepsTasks.getOrCreateXdepsInfoTask(project, xdepsConfiguration)
-                } else {
-                    throw new IOException("Missing configuration for Xdeps publishing")
-                }
+                XdepsExtension xdepsExtension = (XdepsExtension) project.getExtensions().getByName("xdeps")
+                XdepsConfiguration xdepsConfiguration = xdepsExtension.getXdepsConfiguration()
+                XdepsUtil.checkXdepsConfiguration(xdepsConfiguration)
+                XdepsTasks.getOrCreatePublishXdepsSnapshotsTask(project)
+                XdepsTasks.getOrCreatePublishXdepsReleasesTask(project)
+                XdepsUtil.applyMavenPublishPlugin(project)
+                XdepsUtil.applyXdepsPublishRules(project)
+                XdepsTasks.getOrCreateXdepsInfoTask(project, xdepsConfiguration)
             }
-        } catch (IOException e) {
+        } catch (IOException|UnknownDomainObjectException e) {
             ErrorUtil.errorInTask("applyPlugin", e)
         }
     }
