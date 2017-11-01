@@ -31,6 +31,10 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
             MobilePluginUtil.announcePluginApply(pluginName, project.getName())
             MobilePluginUtil.checkMinimumGradleVersion()
             project.getExtensions().create("xdeps", XdepsExtension)
+            // As this must be the root project - create xdeps for all child projects
+            for (Project child : project.getAllprojects()) {
+                child.getConfigurations().create("xdeps")
+            }
             XdepsUtil.applyMavenPublishPlugin(project)
             project.afterEvaluate {
                 checkXdepsVersionOverride(project)
