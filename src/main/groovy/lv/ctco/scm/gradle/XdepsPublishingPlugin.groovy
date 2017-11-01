@@ -1,3 +1,9 @@
+/*
+ * @(#)XdepsPublishingPlugin.groovy
+ *
+ * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
+ */
+
 package lv.ctco.scm.gradle
 
 import lv.ctco.scm.gradle.utils.ErrorUtil
@@ -25,16 +31,16 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
             MobilePluginUtil.announcePluginApply(pluginName, project.getName())
             MobilePluginUtil.checkMinimumGradleVersion()
             project.getExtensions().create("xdeps", XdepsExtension)
+            XdepsUtil.applyMavenPublishPlugin(project)
             project.afterEvaluate {
                 checkXdepsVersionOverride(project)
                 XdepsExtension xdepsExtension = (XdepsExtension) project.getExtensions().getByName("xdeps")
                 XdepsConfiguration xdepsConfiguration = xdepsExtension.getXdepsConfiguration()
                 XdepsUtil.checkXdepsConfiguration(xdepsConfiguration)
-                XdepsTasks.getOrCreatePublishXdepsSnapshotsTask(project)
-                XdepsTasks.getOrCreatePublishXdepsReleasesTask(project)
-                XdepsUtil.applyMavenPublishPlugin(project)
+                XdepsTasks.getOrCreateXdepsPublishSnapshotsTask(project)
+                XdepsTasks.getOrCreateXdepsPublishReleasesTask(project)
+                XdepsTasks.getOrCreateXdepsDisplayInfoTask(project, xdepsConfiguration)
                 XdepsUtil.applyXdepsPublishRules(project)
-                XdepsTasks.getOrCreateXdepsInfoTask(project, xdepsConfiguration)
             }
         } catch (IOException|UnknownDomainObjectException e) {
             ErrorUtil.errorInTask("applyPlugin", e)
