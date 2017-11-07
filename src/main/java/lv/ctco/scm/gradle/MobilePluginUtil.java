@@ -7,11 +7,14 @@
 package lv.ctco.scm.gradle;
 
 import org.gradle.api.Project;
+import org.gradle.api.artifacts.Configuration;
+import org.gradle.api.artifacts.UnknownConfigurationException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.util.GradleVersion;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class MobilePluginUtil {
 
@@ -58,6 +61,17 @@ public class MobilePluginUtil {
 
     public static boolean isAndroidLibraryPluginApplied(Project project) {
         return project.getPluginManager().hasPlugin(ANDROID_LIB_PLUGIN_ID);
+    }
+
+    public static void createXdepsDependencyConfiguration(Project project) {
+        Configuration xdeps;
+        try {
+            xdeps = project.getConfigurations().getByName("xdeps");
+        } catch (UnknownConfigurationException e) {
+            xdeps = project.getConfigurations().create("xdeps");
+        }
+        // https://docs.gradle.org/current/userguide/dependency_management.html#sub:dynamic_versions_and_changing_modules
+        xdeps.getResolutionStrategy().cacheChangingModulesFor(0, TimeUnit.SECONDS);
     }
 
 }

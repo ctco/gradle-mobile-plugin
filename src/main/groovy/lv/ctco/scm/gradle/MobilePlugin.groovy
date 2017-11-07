@@ -25,8 +25,6 @@ import org.gradle.api.Project
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 
-import java.util.concurrent.TimeUnit
-
 class MobilePlugin implements Plugin<Project> {
 
     private static final Logger logger = Logging.getLogger(MobilePlugin.class)
@@ -38,11 +36,7 @@ class MobilePlugin implements Plugin<Project> {
                 MobilePluginUtil.announcePluginApply(MobilePluginUtil.getPluginName(), project.getName())
                 MobilePluginUtil.checkMinimumGradleVersion()
             }
-
-            // https://docs.gradle.org/current/userguide/dependency_management.html#sub:dynamic_versions_and_changing_modules
-            project.getConfigurations().create("xdeps")
-            project.getConfigurations().findByName("xdeps").getResolutionStrategy().cacheChangingModulesFor(0, TimeUnit.SECONDS)
-
+            MobilePluginUtil.createXdepsDependencyConfiguration(project)
             createExtensions(project)
             if (project.state.executed) {
                 detectAndConfigurePlatform(project)
