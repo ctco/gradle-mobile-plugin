@@ -11,6 +11,7 @@ import lv.ctco.scm.gradle.xdeps.XdepsConfiguration
 import lv.ctco.scm.gradle.xdeps.XdepsExtension
 import lv.ctco.scm.gradle.xdeps.XdepsTasks
 import lv.ctco.scm.gradle.xdeps.XdepsUtil
+import lv.ctco.scm.mobile.utils.VersionUtil
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -38,6 +39,7 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
             project.getExtensions().create("xdeps", XdepsExtension)
             XdepsUtil.applyMavenPublishPlugin(project)
             project.afterEvaluate {
+                checkXdepsVersion(project)
                 checkXdepsVersionOverride(project)
                 XdepsExtension xdepsExtension = (XdepsExtension)project.getExtensions().getByName("xdeps")
                 XdepsConfiguration xdepsConfiguration = xdepsExtension.getXdepsConfiguration()
@@ -52,10 +54,29 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
         }
     }
 
-    private static void checkXdepsVersionOverride(Project project) {
-        if (project.hasProperty("xdeps.version")) {
-            project.xdeps.version = project["xdeps.version"]
+    private static void checkXdepsVersion(Project project) {
+        String version = project.xdeps.version.toString().minus("-SNAPSHOT")
+        if (!VersionUtil.isMajorMinorPatchVersion(version)) {
+            ErrorUtil.errorInTask(this.getName(), "Xdeps version must be in form of major.minor.patch[-SNAPSHOT]")
         }
+    }
+
+    private static void checkXdepsVersionOverride(Project project) {
+        if (!project.hasProperty("xdeps.version")) {
+            return
+        }
+        String override = project["xdeps.version"].toString()
+        if (VersionUtil.isSnapshotVersion(override)) {
+            ErrorUtil.errorInTask(this.getName(), "Xdeps version override must not be a snapshot")
+        }
+        if (!VersionUtil.isValidVersionString(override)) {
+            ErrorUtil.errorInTask(this.getName(), "Xdeps version override must be a valid version string")
+        }
+        String version = project.xdeps.version.toString().minus("-SNAPSHOT")
+        if (!(override.equals(version) || override.startsWith(version+'.'))) {
+            ErrorUtil.errorInTask(this.getName(), "Xdeps version override must match existing major.minor.patch base version")
+        }
+        project.xdeps.version = override
     }
 
 }

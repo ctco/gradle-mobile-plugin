@@ -1,5 +1,5 @@
 /*
- * @(#)XdepsInfoTask.java
+ * @(#)XdepsDisplayInfoTask.java
  *
  * Copyright C.T.Co Ltd, 15/25 Jurkalnes Street, Riga LV-1046, Latvia. All rights reserved.
  */
@@ -9,6 +9,7 @@ package lv.ctco.scm.gradle.xdeps;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.utils.RevisionUtil;
+import lv.ctco.scm.mobile.utils.VersionUtil;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -26,36 +27,33 @@ public class XdepsDisplayInfoTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(XdepsDisplayInfoTask.class);
 
-    private String releaseVersion;
-    private String revision;
-
     private XdepsConfiguration xdepsConfiguration;
 
     public void setXdepsConfiguration(XdepsConfiguration xdepsConfiguration) {
         this.xdepsConfiguration = xdepsConfiguration;
     }
 
-    public void setReleaseVersion(String releaseVersion) {
-        this.releaseVersion = releaseVersion;
-    }
-
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
-
     @TaskAction
     public void doTaskAction() {
-        try {
-            revision = RevisionUtil.getRevision(getProject());
-        } catch (IOException e) {
-            ErrorUtil.errorInTask(this.getName(), e);
+        String releaseVersion = null;
+        String buildVersion = null;
+        if (getProject().hasProperty("xdeps.version")) {
+            buildVersion = getProject().getProperties().get("xdeps.version").toString();
+            try {
+                releaseVersion = VersionUtil.normalizeToMajorMinorPatchVersion(buildVersion);
+            } catch (IOException e) {
+                ErrorUtil.errorInTask(this.getName(), e);
+            }
+        } else {
+            releaseVersion = StringUtils.removeEndIgnoreCase(xdepsConfiguration.getVersion(), "-SNAPSHOT");
+            try {
+                buildVersion = releaseVersion + '.' + RevisionUtil.getRevision(getProject());
+            } catch (IOException e) {
+                ErrorUtil.errorInTask(this.getName(), e);
+            }
         }
 
-        releaseVersion = StringUtils.removeEndIgnoreCase(xdepsConfiguration.getVersion(), "-SNAPSHOT");
-        String buildVersion = releaseVersion + '.' + revision;
-
         logger.lifecycle("Project's release version is '{}'", releaseVersion);
-        logger.lifecycle("Project's revision is '{}'", revision);
         logger.lifecycle("Project's build version is '{}'", buildVersion);
 
         if (TeamcityUtil.isTeamcityEnvironment()) {
