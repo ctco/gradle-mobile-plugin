@@ -74,6 +74,10 @@ public final class PlistUtil {
         }
     }
 
+    public static void saveAsBinaryPlist(NSDictionary data, File plist) throws IOException {
+        PropertyListParser.saveAsBinary(data, plist.getAbsoluteFile());
+    }
+
     public static void resaveAsBinaryPlist(File plist) throws IOException {
         PropertyListParser.saveAsBinary(getRootDictionary(plist), plist.getAbsoluteFile());
     }

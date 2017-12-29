@@ -4,8 +4,7 @@ public enum IosSimulatorCLP {
 
     UDID("ios.simulator.udid"),
     TYPE("ios.simulator.type"),
-    RUNTIME("ios.simulator.runtime"),
-    SCALE("ios.simulator.scale");
+    RUNTIME("ios.simulator.runtime");
 
     private String name;
 

@@ -1,5 +1,6 @@
 package lv.ctco.scm.gradle.tasks.ios;
 
+import lv.ctco.scm.gradle.MobilePluginTask;
 import lv.ctco.scm.mobile.utils.ZipUtil;
 import lv.ctco.scm.mobile.utils.IosSimulator;
 import lv.ctco.scm.mobile.utils.IosSimulatorCLP;
@@ -7,26 +8,17 @@ import lv.ctco.scm.mobile.utils.IosSimulatorUtil;
 
 import org.apache.commons.io.FileUtils;
 
-import org.gradle.api.DefaultTask;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
-import org.gradle.api.tasks.TaskAction;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.Collection;
 
-public class IosSimulatorArchiveLogsTask extends DefaultTask {
-
-    private final Logger logger = Logging.getLogger(this.getClass());
+public class IosSimulatorArchiveLogsTask extends MobilePluginTask {
 
     public IosSimulatorArchiveLogsTask() {
         this.setGroup("iOS Simulator");
         this.setDescription("Archives logs of a specific iOS simulator");
     }
 
-    @TaskAction
-    public void doTaskAction() throws IOException {
+    public void doTaskAction() throws Exception {
         IosSimulator iosSimulator = IosSimulatorUtil.findSimulator(
                 getProject().getProperties().get(IosSimulatorCLP.UDID.getName()),
                 getProject().getProperties().get(IosSimulatorCLP.TYPE.getName()),

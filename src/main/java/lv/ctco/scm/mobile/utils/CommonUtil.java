@@ -74,7 +74,7 @@ public final class CommonUtil {
         Collection<File> files = FileUtils.listFilesAndDirs(dir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
         if (!files.isEmpty()) {
             for (File file : files) {
-                if ("ipa".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
+                if (file.isFile() && "ipa".equalsIgnoreCase(FilenameUtils.getExtension(file.getName()))) {
                     results.add(file);
                 }
             }

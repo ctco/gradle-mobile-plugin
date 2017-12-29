@@ -18,6 +18,7 @@ public final class ExecUtil {
 
     private ExecUtil() {}
 
+    @Deprecated
     public static ExecResult execCommand(CommandLine commandLine, File workDir, int[] exitValues, boolean routeToCapture, boolean routeToStdout) {
         Executor executor = new DefaultExecutor();
         if (workDir != null) {

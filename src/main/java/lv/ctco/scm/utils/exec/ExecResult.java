@@ -15,12 +15,12 @@ public final class ExecResult {
     private List<String> output;
     private IOException exception;
 
-    ExecResult(List<String> output) {
+    public ExecResult(List<String> output) {
         this.output = output;
         this.success = true;
     }
 
-    ExecResult(List<String> output, IOException exception) {
+    public ExecResult(List<String> output, IOException exception) {
         this.output = output;
         this.exception = exception;
         this.success = false;
@@ -28,6 +28,10 @@ public final class ExecResult {
 
     public boolean isSuccess() {
         return success;
+    }
+
+    public boolean isFailure() {
+        return !success;
     }
 
     public List<String> getOutput() {

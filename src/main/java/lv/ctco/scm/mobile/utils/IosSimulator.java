@@ -3,17 +3,23 @@ package lv.ctco.scm.mobile.utils;
 public final class IosSimulator {
 
     private String udid;
+    private String name;
     private String type;
     private String runtime;
 
-    public IosSimulator(String udid, String name, String runtime) {
+    IosSimulator(String udid, String name, String type, String runtime) {
         this.udid = udid;
-        this.type = convertToIdentifier(name);
-        this.runtime = convertToIdentifier(runtime);
+        this.name = name;
+        this.type = type.replace("com.apple.CoreSimulator.SimDeviceType.", "");
+        this.runtime = runtime.replace("com.apple.CoreSimulator.SimRuntime.", "");
     }
 
     public String getUdid() {
         return udid;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getType() {
@@ -24,6 +30,10 @@ public final class IosSimulator {
         return runtime;
     }
 
+    public String getSdkVersion() {
+        return runtime.replace("iOS-", "").replace('-', '.');
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("iOS simulator {");
@@ -32,14 +42,6 @@ public final class IosSimulator {
         sb.append(", type:'").append(type).append('\'');
         sb.append(" }");
         return sb.toString();
-    }
-
-    private String convertToIdentifier(String identifier) {
-        return identifier.replace(" - ", "-")
-                .replace(' ', '-')
-                .replace('.', '-')
-                .replace('(', '-')
-                .replace(')', '-');
     }
 
 }

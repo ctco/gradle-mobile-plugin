@@ -7,10 +7,11 @@
 package lv.ctco.scm.mobile.utils;
 
 import lv.ctco.scm.gradle.utils.PropertyUtil;
+import lv.ctco.scm.utils.exec.ExecResult;
+
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.Project;
-
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
@@ -112,7 +113,7 @@ public final class ReprofilingUtil {
         for (File dsStore : fileCollection) {
             FileUtils.forceDelete(dsStore);
         }
-        IosCodesigningUtil.signApp(project, appDir);
+        signApp(project, appDir);
         IosApp iosApp = new IosApp(appDir);
         BuildReportUtil.addIosAppInfo(iosApp);
         File resultIpa;
@@ -136,6 +137,53 @@ public final class ReprofilingUtil {
             }
         }
         return null;
+    }
+
+    private static void signApp(Project project, File appDir) throws IOException {
+        //
+        IosProvisioningProfile provisioning = null;
+        String identity = null;
+        if (PropertyUtil.hasProjectProperty(project, "signing.identity")) {
+            identity = PropertyUtil.getProjectProperty(project, "signing.identity");
+            logger.info("Will use provided identity '{}'...", identity);
+        }
+        if (identity == null || identity.isEmpty()) {
+            throw new IOException("Signing identity to use is undefined!");
+        }
+        //
+        ExecResult sign;
+        if (identity.equals("-")) {
+            logger.info("Performing ad-hoc code signing -- no provisioning is needed.");
+            sign = IosCodesigningUtil.signApp(appDir, identity, null);
+        } else {
+            if (PropertyUtil.hasProjectProperty(project, "signing.provisioning")) {
+                String providedProvisioning = PropertyUtil.getProjectProperty(project, "signing.provisioning");
+                logger.info("Will use provided provisioning profile value '{}'", providedProvisioning);
+                if (providedProvisioning.matches("[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}")) {
+                    provisioning = IosProvisioningUtil.getProvisioningProfileByUuid(providedProvisioning);
+                } else {
+                    IosProvisioningUtil.getAvailableProvisioningProfiles();
+                    provisioning = IosProvisioningUtil.getProvisioningProfileByProfileName(providedProvisioning);
+                }
+            } else {
+                logger.info("Will use automatically detected provisioning profile...");
+                throw new IOException("Functionality is not yet supported! Please explicitly provide signing provisioning to use.");
+            }
+            if (provisioning == null) {
+                throw new IOException("Provisioning profile to use for signing was not found!");
+            } else if (provisioning.isExpired()) {
+                throw new IOException("Provisioning profile to use for signing is expired!");
+            } else {
+                logger.info("Will use found provisioning profile '{}'", provisioning);
+            }
+            sign = IosCodesigningUtil.signApp(appDir, identity, new File(provisioning.getLocation()));
+        }
+        for (String line : sign.getOutput()) {
+            logger.info(line);
+        }
+        if (sign.isFailure()) {
+            throw new IOException(sign.getException());
+        }
     }
 
 }
