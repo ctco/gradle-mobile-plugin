@@ -54,7 +54,7 @@ public class ProfilingTask extends DefaultTask {
                 checkWhetherFileExists(target)
                 logger.info("Profiling file " + source.getAbsolutePath() + " to " + target.getAbsolutePath())
                 PlistUtil.validatePlist(source)
-                if ("Settings.bundle/Root.plist".equals(profile.getTarget()) && profile.getLevel() == 2) {
+                if (profile.getTarget().endsWith("Settings.bundle/Root.plist") && profile.getLevel() == 2) {
                     ProfilingUtil.profilePreferenceSpecifiersPlistEntries(target, source)
                 } else {
                     ProfilingUtil.profileFirstLevelPlistEntries(target, source)
