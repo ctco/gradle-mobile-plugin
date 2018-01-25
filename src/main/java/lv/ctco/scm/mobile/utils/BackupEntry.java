@@ -21,7 +21,7 @@ class BackupEntry implements Serializable {
     private long originalTime;
 
     BackupEntry(File file) throws IOException {
-        this.originalFile = file.getAbsoluteFile();
+        this.originalFile = file.getCanonicalFile();
         if (file.exists()) {
             this.originalTime = Files.getLastModifiedTime(file.toPath(), LinkOption.NOFOLLOW_LINKS).toMillis();
         } else {

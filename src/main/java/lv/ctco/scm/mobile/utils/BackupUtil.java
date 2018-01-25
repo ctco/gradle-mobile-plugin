@@ -52,8 +52,8 @@ public final class BackupUtil {
         return instance;
     }
 
-    public static boolean isBackuped(File targetFile) {
-        return getBackupEntry(targetFile) != null;
+    public static boolean isBackuped(File file) throws IOException {
+        return getBackupEntry(file.getCanonicalFile()) != null;
     }
 
     private static void saveBackupData() throws IOException {
@@ -84,6 +84,7 @@ public final class BackupUtil {
     }
 
     public static void backupFile(File file) throws IOException {
+        file = file.getCanonicalFile();
         if (!isBackuped(file)) {
             BackupEntry newEntry = new BackupEntry(file);
             if  (newEntry.hadOriginalExisted()) {
@@ -128,28 +129,29 @@ public final class BackupUtil {
         }
     }
 
-    private static void restoreFile(File path, boolean removeFromList) throws IOException {
-        BackupEntry backupEntry = getBackupEntry(path);
+    private static void restoreFile(File file, boolean removeFromList) throws IOException {
+        file = file.getCanonicalFile();
+        BackupEntry backupEntry = getBackupEntry(file);
         if (backupEntry == null) {
             throw new IOException("Restorable file not in index");
         }
-        logger.info("  Restoring '{}'", path);
-        logger.info("    current md5={}", CommonUtil.getMD5Hex(path));
+        logger.info("  Restoring '{}'", file);
+        logger.info("    current md5={}", CommonUtil.getMD5Hex(file));
         if (backupEntry.hadOriginalExisted()) {
             FileUtils.copyFile(backupEntry.getBackupedFile(), backupEntry.getOriginalFile());
             Files.setLastModifiedTime(backupEntry.getOriginalFile().toPath(), FileTime.fromMillis(backupEntry.getOriginalTime()));
             FileUtils.forceDelete(backupEntry.getBackupedFile());
         }
-        logger.info("    initial md5={}", CommonUtil.getMD5Hex(path));
+        logger.info("    initial md5={}", CommonUtil.getMD5Hex(file));
         if (removeFromList) {
             backupEntries.remove(backupEntry);
             saveBackupData();
         }
     }
 
-    private static BackupEntry getBackupEntry(File path) {
+    private static BackupEntry getBackupEntry(File path) throws IOException {
         for (BackupEntry backupEntry : backupEntries) {
-            if (backupEntry.getOriginalFile().getAbsoluteFile().equals(path.getAbsoluteFile())) {
+            if (backupEntry.getOriginalFile().getCanonicalFile().equals(path.getCanonicalFile())) {
                 return backupEntry;
             }
         }
