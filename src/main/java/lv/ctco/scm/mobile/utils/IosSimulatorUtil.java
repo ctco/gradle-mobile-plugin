@@ -197,12 +197,20 @@ public final class IosSimulatorUtil {
         List<String> identifiers = new ArrayList<>();
         JsonValue jRoot = Json.parse(json).asObject().get("devices");
         for (IosSimulatorRuntime runtime : runtimes) {
-            JsonValue jRunt = jRoot.asObject().get(runtime.getName());
-            for (JsonValue jSimulator : jRunt.asArray()) {
-                String availability = jSimulator.asObject().getString("availability", "");
-                if (availability.equals("(available)")) {
-                    String identifier = jSimulator.asObject().getString("udid", "");
-                    identifiers.add(identifier);
+            List<String> deviceRuntimes = jRoot.asObject().names();
+            JsonValue jRunt = null;
+            if (deviceRuntimes.contains(runtime.getName())) {
+                jRunt = jRoot.asObject().get(runtime.getName());
+            } else if (deviceRuntimes.contains(runtime.getIdentifier())) {
+                jRunt = jRoot.asObject().get(runtime.getIdentifier());
+            }
+            if (jRunt != null) {
+                for (JsonValue jSimulator : jRunt.asArray()) {
+                    String availability = jSimulator.asObject().getString("availability", "");
+                    if (availability.equals("(available)")) {
+                        String identifier = jSimulator.asObject().getString("udid", "");
+                        identifiers.add(identifier);
+                    }
                 }
             }
         }
