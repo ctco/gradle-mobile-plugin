@@ -60,7 +60,7 @@ public class BuildTask extends DefaultTask {
     private void buildArtifacts() throws IOException {
         CommandLine commandLine = new CommandLine("xcodebuild");
         commandLine.addArgument("-configuration");
-        commandLine.addArgument(env.getConfiguration());
+        commandLine.addArgument(env.getConfiguration(), false);
         commandLine.addArgument("-sdk");
         commandLine.addArgument(env.getSdk());
         commandLine.addArgument("-target");
