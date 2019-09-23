@@ -177,12 +177,19 @@ public final class IosSimulatorUtil {
     static List<IosSimulatorRuntime> getAvailableIosSimulatorRuntimes(String json) {
         List<IosSimulatorRuntime> runtimes = new ArrayList<>();
         for (JsonValue item : Json.parse(json).asObject().get("runtimes").asArray()) {
-            String availability = item.asObject().getString("availability", "");
-            String name = item.asObject().getString("name", "");
-            if (name.startsWith("iOS") && availability.equals("(available)")) {
-                String identifier = item.asObject().getString("identifier", "");
-                IosSimulatorRuntime rt = new IosSimulatorRuntime(identifier, name);
-                runtimes.add(rt);
+            boolean isAvailable;
+            if (item.asObject().getString("availability", "").equals("(available)")) {
+                isAvailable = true;
+            } else {
+                isAvailable = item.asObject().getBoolean("isAvailable", false);
+            }
+            if (isAvailable) {
+                String name = item.asObject().getString("name", "");
+                if (name.startsWith("iOS")) {
+                    String identifier = item.asObject().getString("identifier", "");
+                    IosSimulatorRuntime rt = new IosSimulatorRuntime(identifier, name);
+                    runtimes.add(rt);
+                }
             }
         }
         return runtimes;
@@ -206,8 +213,13 @@ public final class IosSimulatorUtil {
             }
             if (jRunt != null) {
                 for (JsonValue jSimulator : jRunt.asArray()) {
-                    String availability = jSimulator.asObject().getString("availability", "");
-                    if (availability.equals("(available)")) {
+                    boolean isAvailable;
+                    if (jSimulator.asObject().getString("availability", "").equals("(available)")) {
+                        isAvailable = true;
+                    } else {
+                        isAvailable = jSimulator.asObject().getBoolean("isAvailable", false);
+                    }
+                    if (isAvailable) {
                         String identifier = jSimulator.asObject().getString("udid", "");
                         identifiers.add(identifier);
                     }
