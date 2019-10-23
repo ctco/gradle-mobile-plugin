@@ -24,8 +24,11 @@ class ReprofileIpaTask extends DefaultTask {
     @TaskAction
     public void doTaskAction() {
         checkProvidedParameters()
-        String platform = getProject().ctcoMobile.platform
-        List<Profile> profiles
+
+        String platform
+        if (getProject().hasProperty('ctcoMobile')) {
+            platform = getProject().ctcoMobile.platform
+        }
 
         String targetEnvName = PropertyUtil.getProjectProperty(getProject(), "reprofiling.environment")
         File targetIpaFile = new File(PropertyUtil.getProjectProperty(getProject(),"reprofiling.artifact"))
@@ -39,6 +42,7 @@ class ReprofileIpaTask extends DefaultTask {
             throw new GradleException('Reprofiling target artifact has not been found!')
         }
 
+        List<Profile> profiles
         if (platform.equals('xcode')) {
             XcodeConfiguration configuration = getProject().ctcoMobile.xcode.getXcodeConfiguration()
             profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
@@ -46,7 +50,7 @@ class ReprofileIpaTask extends DefaultTask {
             XamarinConfiguration configuration = getProject().ctcoMobile.xamarin.getXamarinConfiguration()
             profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
         } else {
-            throw new GradleException("Unsupported project platform! Plugin supports 'xcode' and 'xamarin'.")
+            profiles = new ArrayList<>()
         }
 
         ReprofilingUtil.reprofileIpa(getProject(), targetIpaFile, targetEnvName, profiles)
