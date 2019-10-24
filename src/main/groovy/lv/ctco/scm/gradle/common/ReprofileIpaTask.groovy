@@ -20,15 +20,11 @@ import org.gradle.api.tasks.TaskAction
 class ReprofileIpaTask extends DefaultTask {
 
     MobileExtension ctcoMobile
+    List<Profile> profiles = new ArrayList<>()
 
     @TaskAction
     public void doTaskAction() {
         checkProvidedParameters()
-
-        String platform
-        if (getProject().hasProperty('ctcoMobile')) {
-            platform = getProject().ctcoMobile.platform
-        }
 
         String targetEnvName = PropertyUtil.getProjectProperty(getProject(), "reprofiling.environment")
         File targetIpaFile = new File(PropertyUtil.getProjectProperty(getProject(),"reprofiling.artifact"))
@@ -42,15 +38,15 @@ class ReprofileIpaTask extends DefaultTask {
             throw new GradleException('Reprofiling target artifact has not been found!')
         }
 
-        List<Profile> profiles
-        if (platform.equals('xcode')) {
-            XcodeConfiguration configuration = getProject().ctcoMobile.xcode.getXcodeConfiguration()
-            profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
-        } else if (platform.equals('xamarin')) {
-            XamarinConfiguration configuration = getProject().ctcoMobile.xamarin.getXamarinConfiguration()
-            profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
-        } else {
-            profiles = new ArrayList<>()
+        if (getProject().hasProperty('ctcoMobile')) {
+            String platform = getProject().ctcoMobile.platform
+            if (platform.equals('xcode')) {
+                XcodeConfiguration configuration = getProject().ctcoMobile.xcode.getXcodeConfiguration()
+                profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
+            } else if (platform.equals('xamarin')) {
+                XamarinConfiguration configuration = getProject().ctcoMobile.xamarin.getXamarinConfiguration()
+                profiles = configuration.getSpecificProfiles(targetEnvName, "artifact")
+            }
         }
 
         ReprofilingUtil.reprofileIpa(getProject(), targetIpaFile, targetEnvName, profiles)
