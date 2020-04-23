@@ -5,7 +5,7 @@ test:
     - script:
         name: gradle test
         code: |
-          ./gradlew --refresh-dependencies -version
+          ./gradlew --version
           ./gradlew --info test
 
 build:
@@ -13,22 +13,19 @@ build:
     - script:
         name: gradle build
         code: |
-          ./gradlew --refresh-dependencies -version
+          ./gradlew --version
           ./gradlew --info build -x test
 
 publish-snapshot:
   steps:
     - script:
-        name: import gradle.properties
+        name: setup gradle.properties
         code: |
-          ./gradlew --refresh-dependencies -version
-          shopt -s xpg_echo
-          echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
+          ./gradlew werckerSetupGradleProperties
     - script:
-        name: import gpg keys
+        name: setup gpg
         code: |
-          shopt -s xpg_echo
-          echo $GPGKEY_SEC > ~/mygpgkey_sec.gpg;
+          ./gradlew werckerSetupGPG
           gpg --import ~/mygpgkey_sec.gpg
     - script:
         name: deploy snapshot
@@ -37,10 +34,6 @@ publish-snapshot:
 
 publish-release:
   steps:
-    - script:
-        name: install required tools
-        code: |
-          yum -y install openssh-clients git
     - add-ssh-key:
         keyname: GITHUB_KEY
     - add-to-known_hosts:
@@ -49,16 +42,13 @@ publish-release:
         type: rsa
         local: true
     - script:
-        name: import gradle.properties
+        name: setup gradle.properties
         code: |
-          ./gradlew --refresh-dependencies -version
-          shopt -s xpg_echo
-          echo $GRADLE_PROPERTIES > ~/.gradle/gradle.properties
+          ./gradlew werckerSetupGradleProperties
     - script:
-        name: import gpg keys
+        name: setup gpg
         code: |
-          shopt -s xpg_echo
-          echo $GPGKEY_SEC > ~/mygpgkey_sec.gpg
+          ./gradlew werckerSetupGPG
           gpg --import ~/mygpgkey_sec.gpg
     - script:
         name: run release

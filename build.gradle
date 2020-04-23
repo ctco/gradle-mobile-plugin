@@ -5,8 +5,8 @@
  */
 
 plugins {
-  id 'io.codearte.nexus-staging' version '0.5.3'
-  id 'net.researchgate.release' version '2.3.5'
+    id 'io.codearte.nexus-staging' version '0.5.3'
+    id 'net.researchgate.release' version '2.3.5'
 }
 
 apply plugin: 'groovy'
@@ -17,7 +17,7 @@ sourceCompatibility = JavaVersion.VERSION_1_7
 targetCompatibility = JavaVersion.VERSION_1_7
 
 repositories {
-  mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
@@ -43,34 +43,33 @@ group = 'lv.ctco.scm'
 archivesBaseName = 'gradle-mobile-plugin'
 
 test {
-  useJUnit()
+    useJUnit()
 }
 
 jar {
-  manifest {
-    attributes ("Specification-Vendor": "C.T.Co, Ltd.",
-                "Specification-Title": "Gradle Mobile Plugin",
-                "Specification-Version": project.getVersion().minus('-SNAPSHOT'),
-                "Implementation-Vendor": "C.T.Co, Ltd.",
-                "Implementation-Title": "gradle-mobile-plugin",
-                "Implementation-Version": project.getVersion())
-  }
+    manifest {
+        attributes ("Specification-Vendor": "C.T.Co, Ltd.",
+                    "Specification-Title": "Gradle Mobile Plugin",
+                    "Specification-Version": project.getVersion().minus('-SNAPSHOT'),
+                    "Implementation-Vendor": "C.T.Co, Ltd.",
+                    "Implementation-Title": "gradle-mobile-plugin",
+                    "Implementation-Version": project.getVersion())
+    }
 }
 
-// Custom functionality for Teamcity integration
+// Custom functionality for TeamCity integration
+import lv.ctco.scm.teamcity.ProjectInfoTask
+task projectInfo (type: ProjectInfoTask)
 
-task projectInfo << {
-	println "Project version: "+project.getVersion()
-	String version_iteration = project.version.minus("-SNAPSHOT")
-	println "Release version: $version_iteration"
-	String vcs_number = "$System.env.BUILD_VCS_NUMBER"
-	if (vcs_number.length() == 40) {
-	    vcs_number = vcs_number.substring(0,7)
-	}
-	println "Project revision: "+vcs_number
-	println "##teamcity[buildNumber \'"+version_iteration+"_"+vcs_number+"\']"
-	println "##teamcity[setParameter name=\'build.number\' value=\'"+version_iteration+"_"+vcs_number+"\']"
-	println "##teamcity[setParameter name=\'project.version.iteration\' value=\'"+version_iteration+"\']"
+// Custom functionality for Wercker integration
+import lv.ctco.scm.wercker.SetupFileTask
+task werckerSetupGradleProperties (type: SetupFileTask) {
+    envVar = 'GRADLE_PROPERTIES'
+    filePath = '~/.gradle/gradle.properties'
+}
+task werckerSetupGPG (type: SetupFileTask) {
+    envVar = 'GPGKEY_SEC'
+    filePath = '~/mygpgkey_sec.gpg'
 }
 
 // Configuration for artifact signing and publishing
@@ -171,4 +170,3 @@ nexusStaging {
 }
 
 afterReleaseBuild.dependsOn uploadArchives
-
