@@ -30,7 +30,7 @@ publish-snapshot:
           gpg --list-secret-keys
           export GPG_TTY=$(tty)
           ls -l ~/.gnupg
-          gpg --export-secret-keys 800D3220C37950FA010EDDE1DB526B87A2FE50F2 --no-tty --batch --yes > ~/.gnupg/secring.gpg
+          gpg --export-secret-keys 800D3220C37950FA010EDDE1DB526B87A2FE50F2 > ~/.gnupg/secring.gpg
           ls -l ~/.gnupg
     - script:
         name: deploy snapshot
