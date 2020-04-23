@@ -34,7 +34,6 @@ class MobilePlugin implements Plugin<Project> {
         try {
             if (project.state.getFailure() == null) {
                 MobilePluginUtil.announcePluginApply(MobilePluginUtil.getPluginName(), project.getName())
-                MobilePluginUtil.checkMinimumGradleVersion()
             }
             MobilePluginUtil.createXdepsDependencyConfiguration(project)
             createExtensions(project)
