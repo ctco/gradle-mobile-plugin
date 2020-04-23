@@ -27,7 +27,8 @@ publish-snapshot:
         code: |
           ./gradlew werckerSetupGPG
           gpg --import --no-tty --batch --yes ~/mygpgkey_sec.gpg
-          gpg --export-secret-keys --no-tty --batch --yes -o ~/.gnupg/secring.gpg
+          gpg --list-keys
+          gpg --export-secret-keys --no-tty --batch --yes --output ~/.gnupg/secring.gpg
     - script:
         name: deploy snapshot
         code: |
@@ -51,7 +52,8 @@ publish-release:
         code: |
           ./gradlew werckerSetupGPG
           gpg --import --no-tty --batch --yes ~/mygpgkey_sec.gpg
-          gpg --export-secret-keys --no-tty --batch --yes -o ~/.gnupg/secring.gpg
+          gpg --list-keys
+          gpg --export-secret-keys --no-tty --batch --yes --output ~/.gnupg/secring.gpg
     - script:
         name: run release
         code: |
