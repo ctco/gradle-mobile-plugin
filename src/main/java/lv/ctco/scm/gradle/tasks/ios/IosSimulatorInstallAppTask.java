@@ -33,7 +33,6 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
         if (IosSimulatorUtil.installApp(iosSimulator, app).isSuccess()) {
             if (System.getenv("TEAMCITY_VERSION") != null) {
                 logger.lifecycle("##teamcity[setParameter name='env.UITEST_BUNDLE_ID' value='{}']", iosApp.getBundleIdentifier());
-                logger.lifecycle("##teamcity[buildNumber '{}']", iosApp.getBundleVersion());
             }
         } else {
             stopWithError("Failed to install app on iosSimulator");
