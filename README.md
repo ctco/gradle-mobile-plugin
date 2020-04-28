@@ -5,11 +5,11 @@ The C.T.Co mobile plugin for Gradle helps you to configure and build Xcode and X
 You can configure a project to build multiple artifacts with profiling for specific environments and build them all with a single or only the ones you specify. You can profile plist file values, regex replace values in any text based file and replace binary files. Plugin also supports uploading artifacts to a Knappsack server.
 
 ## Requirements to build plugin
-- Java 1.7 or greater
-- Gradle 2.14.1 or greater
+- Java 1.8
+- Gradle 5.6.4
 
 ## Requirements to use plugin
-- Java 1.7 or greater
+- Java 1.8 or greater
 - Gradle 2.14.1 or greater
 - Xcode and Xcode command line tools
 - Xamarin Studio, Mono framework, Xamarin.iOS, Xamarin.Android
@@ -37,7 +37,7 @@ To apply plugin to your project add the following configuration to project's bui
          mavenCentral()
       }
       dependencies {
-        classpath group: 'lv.ctco.scm', name: 'gradle-mobile-plugin', version: '0.11.+'
+        classpath group: 'lv.ctco.scm', name: 'gradle-mobile-plugin', version: '0.14.+'
       }
     }
     apply plugin: 'ctco-mobile'
