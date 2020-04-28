@@ -9,6 +9,10 @@ public class ProjectInfoTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(ProjectInfoTask.class);
 
+    public ProjectInfoTask() {
+        this.setGroup("TeamCity");
+    }
+
     @TaskAction
     public void executeTaskAction() {
         logger.lifecycle("Project version is '{}'", getProject().getVersion());

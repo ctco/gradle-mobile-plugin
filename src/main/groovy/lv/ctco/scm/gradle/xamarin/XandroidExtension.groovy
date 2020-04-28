@@ -6,10 +6,11 @@
 
 package lv.ctco.scm.gradle.xamarin
 
-import lv.ctco.scm.mobile.utils.Profile
-import lv.ctco.scm.gradle.xamarin.Environment
-import lv.ctco.scm.gradle.xamarin.XandroidConfiguration
+import groovy.transform.TypeChecked
 
+import lv.ctco.scm.mobile.utils.Profile
+
+@TypeChecked
 class XandroidExtension {
 
     private XandroidConfiguration configuration = new XandroidConfiguration()

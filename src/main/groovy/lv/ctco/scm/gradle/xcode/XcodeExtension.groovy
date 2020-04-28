@@ -6,8 +6,11 @@
 
 package lv.ctco.scm.gradle.xcode
 
+import groovy.transform.TypeChecked
+
 import lv.ctco.scm.mobile.utils.Profile
 
+@TypeChecked
 class XcodeExtension {
 
     private XcodeConfiguration configuration = new XcodeConfiguration()

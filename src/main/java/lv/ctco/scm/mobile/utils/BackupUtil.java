@@ -136,13 +136,13 @@ public final class BackupUtil {
             throw new IOException("Restorable file not in index");
         }
         logger.info("  Restoring '{}'", file);
-        logger.info("    current md5={}", CommonUtil.getMD5Hex(file));
+        logger.debug("    current md5={}", CommonUtil.getMD5Hex(file));
         if (backupEntry.hadOriginalExisted()) {
             FileUtils.copyFile(backupEntry.getBackupedFile(), backupEntry.getOriginalFile());
             Files.setLastModifiedTime(backupEntry.getOriginalFile().toPath(), FileTime.fromMillis(backupEntry.getOriginalTime()));
             FileUtils.forceDelete(backupEntry.getBackupedFile());
         }
-        logger.info("    initial md5={}", CommonUtil.getMD5Hex(file));
+        logger.debug("    initial md5={}", CommonUtil.getMD5Hex(file));
         if (removeFromList) {
             backupEntries.remove(backupEntry);
             saveBackupData();

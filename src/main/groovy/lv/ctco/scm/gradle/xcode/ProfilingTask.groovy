@@ -6,17 +6,21 @@
 
 package lv.ctco.scm.gradle.xcode
 
+import groovy.transform.TypeChecked
+
 import lv.ctco.scm.mobile.utils.Profile
 import lv.ctco.scm.gradle.utils.ErrorUtil
 import lv.ctco.scm.mobile.utils.GroovyProfilingUtil
 import lv.ctco.scm.mobile.utils.PlistUtil
 import lv.ctco.scm.mobile.utils.ProfilingUtil
+import lv.ctco.scm.mobile.utils.XcconfigUtil
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
+@TypeChecked
 public class ProfilingTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(ProfilingTask.class)
@@ -38,18 +42,25 @@ public class ProfilingTask extends DefaultTask {
 
         for (Profile profile : profiles) {
             File source = new File(profile.getSource())
-            checkWhetherFileExists(source)
+            verifyFileExists(source)
             String profileSourceName = source.getName().toLowerCase()
 
             if (profileSourceName.endsWith(".groovy")) {
 
                 GroovyProfilingUtil.profileUsingGroovyEval(source)
 
+            } else if (profileSourceName.endsWith(".xcconfig")) {
+
+                File target = new File(projectDir, profile.getTarget())
+                verifyFileExists(target)
+                logger.info("Profiling file '{}' to '{}'", source.getAbsolutePath(), target.getAbsolutePath())
+                XcconfigUtil.applyProfile(source, target);
+
             } else if (profileSourceName.endsWith(".plist")) {
 
                 File target = new File(projectDir, profile.getTarget())
-                checkWhetherFileExists(target)
-                logger.info("Profiling file " + source.getAbsolutePath() + " to " + target.getAbsolutePath())
+                verifyFileExists(target)
+                logger.info("Profiling file '{}' to '{}'", source.getAbsolutePath(), target.getAbsolutePath())
                 PlistUtil.validatePlist(source)
                 if (profile.getTarget().endsWith("Settings.bundle/Root.plist") && profile.getLevel() == 2) {
                     ProfilingUtil.profilePreferenceSpecifiersPlistEntries(target, source)
@@ -59,7 +70,7 @@ public class ProfilingTask extends DefaultTask {
                 PlistUtil.validatePlist(target)
 
             } else {
-                stopWithException("Unknown profiling source configuration - '"+profileSourceName+"'")
+                stopWithException("Unknown profiling source configuration - '" + profileSourceName + "'")
             }
 
         }
@@ -69,17 +80,17 @@ public class ProfilingTask extends DefaultTask {
         ErrorUtil.errorInTask(this.getName(), message)
     }
 
-    private void checkWhetherFileExists(File file) {
+    private void verifyFileExists(File file) {
         if (!file.exists()) {
-            throw stopWithException("Referenced file '"+file.toString()+"' " + " does not exist")
+            stopWithException("Referenced file '" + file.toString() + "' does not exist")
         }
     }
 
     private void logProfiles() {
         if (!profiles.isEmpty()) {
-            logger.info("Profiles filtered for target environment: "+profiles.size())
+            logger.info("Profiles filtered for target environment: {}", profiles.size())
             for (Profile profile : profiles) {
-                logger.info("  "+profile.toString())
+                logger.info("  {}", profile.toString())
             }
         }
     }

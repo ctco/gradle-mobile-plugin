@@ -43,15 +43,15 @@ public final class ProfilingUtil {
     }
 
     public static void profileFirstLevelPlistEntries(File targetFile, File profileFile, ProfilingUtilMode mode) throws IOException {
-        logger.info("Profiling '"+targetFile.getAbsolutePath()+"'...");
-        logger.info("  initial md5={}", CommonUtil.getMD5Hex(targetFile));
+        logger.info("Profiling '{}'...", targetFile.getAbsolutePath());
+        logger.debug("  initial md5={}", CommonUtil.getMD5Hex(targetFile));
         BackupUtil.backupFile(targetFile);
         NSDictionary baseDict  = PlistUtil.getRootDictionary(targetFile);
         NSDictionary profDict  = PlistUtil.getRootDictionary(profileFile);
         NSDictionary rsltDict = new NSDictionary();
         for (Map.Entry<String, NSObject> baseEntry : baseDict.entrySet()) {
             if (profDict.containsKey(baseEntry.getKey())) {
-                logger.info("  Replacing key '"+baseEntry.getKey()+"' with value '"+profDict.get(baseEntry.getKey())+"'");
+                logger.info("  Replacing key '{}'", baseEntry.getKey());
                 rsltDict.put(baseEntry.getKey(), profDict.get(baseEntry.getKey()));
             } else {
                 rsltDict.put(baseEntry.getKey(), baseEntry.getValue());
@@ -60,13 +60,13 @@ public final class ProfilingUtil {
         if (mode == ProfilingUtilMode.UPDATE_AND_ADD) {
             for (Map.Entry<String, NSObject> profEntry : profDict.entrySet()) {
                 if (!rsltDict.containsKey(profEntry.getKey())) {
-                    logger.info("  Adding key '"+profEntry.getKey()+"' with value '"+profDict.get(profEntry.getKey())+"'");
+                    logger.info("  Adding key '{}'", profEntry.getKey());
                     rsltDict.put(profEntry.getKey(), profEntry.getValue());
                 }
             }
         }
         PropertyListParser.saveAsXML(rsltDict, targetFile.getAbsoluteFile());
-        logger.info("  current md5={}", CommonUtil.getMD5Hex(targetFile));
+        logger.debug("  current md5={}", CommonUtil.getMD5Hex(targetFile));
     }
 
     public static void updateRootPlistPreferenceSpecifiersKeyDefaultValue(File plistFile, String keyToUpdate, String valueToSet) throws IOException {
@@ -90,7 +90,7 @@ public final class ProfilingUtil {
         }
         if (plistModified) {
             PropertyListParser.saveAsXML(rootDict, plistFile.getAbsoluteFile());
-            logger.info("  current md5={}", CommonUtil.getMD5Hex(plistFile));
+            logger.debug("  current md5={}", CommonUtil.getMD5Hex(plistFile));
         }
     }
 
@@ -104,7 +104,7 @@ public final class ProfilingUtil {
                     NSDictionary profileDict = (NSDictionary) profileObject;
                     if (originalDict.get("Key").equals(profileDict.get("Key"))) {
                         targetProfiled = true;
-                        logger.info("  Replacing PreferenceSpecifiers key '"+profileDict.get("Key")+"'");
+                        logger.info("  Replacing PreferenceSpecifiers key '{}'", profileDict.get("Key"));
                         resultArray.add(profileObject);
                         break;
                     }
@@ -145,14 +145,14 @@ public final class ProfilingUtil {
     }
 
     public static void profilePreferenceSpecifiersPlistEntries(File target, File source) throws IOException {
-        logger.info("Profiling '"+target.getAbsolutePath()+"'...");
-        logger.info("  initial md5={}", CommonUtil.getMD5Hex(target));
+        logger.info("Profiling '{}'...", target.getAbsolutePath());
+        logger.debug("  initial md5={}", CommonUtil.getMD5Hex(target));
         BackupUtil.backupFile(target);
         List<NSObject> targetArray = getPreferenceSpecifiersObjectArray(target);
         List<NSObject> sourceArray = getPreferenceSpecifiersObjectArray(source);
         List<NSObject> resultArray = getProfiledPreferenceSpecifiersObjectArray(targetArray, sourceArray);
         updatePreferenceSpecifiersObjectArray(target, resultArray);
-        logger.info("  current md5={}", CommonUtil.getMD5Hex(target));
+        logger.debug("  current md5={}", CommonUtil.getMD5Hex(target));
     }
 
 }

@@ -6,19 +6,18 @@
 
 package lv.ctco.scm.gradle.xcode
 
+import groovy.transform.TypeChecked
+
 import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.StringUtils
 
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.logging.Logger
-import org.gradle.api.logging.Logging
 
+@TypeChecked
 class XcodePlatform {
 
-    final Logger logger = Logging.getLogger(XcodePlatform.class)
-
-    public void configure(Project project, XcodeConfiguration configuration) {
+    void configure(Project project, XcodeConfiguration configuration) {
         if (XcodeUtil.getXcodeprojCount(project.projectDir) != 1) {
             return
         }

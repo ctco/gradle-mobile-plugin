@@ -6,6 +6,8 @@
 
 package lv.ctco.scm.gradle.xamarin
 
+import groovy.transform.TypeChecked
+
 import lv.ctco.scm.mobile.utils.BackupUtil
 import lv.ctco.scm.mobile.utils.CommonUtil
 import lv.ctco.scm.gradle.utils.ErrorUtil
@@ -18,6 +20,7 @@ import org.gradle.api.tasks.TaskAction
 
 import java.util.regex.Pattern
 
+@TypeChecked
 public class IncrementProjectVersionTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(IncrementProjectVersionTask.class)

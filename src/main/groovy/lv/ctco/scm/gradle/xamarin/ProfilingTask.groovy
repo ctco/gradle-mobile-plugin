@@ -6,6 +6,8 @@
 
 package lv.ctco.scm.gradle.xamarin
 
+import groovy.transform.TypeChecked
+
 import lv.ctco.scm.mobile.utils.Profile
 import lv.ctco.scm.mobile.utils.BackupUtil
 import lv.ctco.scm.mobile.utils.CommonUtil
@@ -20,6 +22,7 @@ import org.gradle.api.logging.Logger
 import org.gradle.api.logging.Logging
 import org.gradle.api.tasks.TaskAction
 
+@TypeChecked
 public class ProfilingTask extends DefaultTask {
 
     private static final Logger logger = Logging.getLogger(ProfilingTask.class)
@@ -88,7 +91,7 @@ public class ProfilingTask extends DefaultTask {
 
     private void checkWhetherFileExists(File file) {
         if (!file.exists()) {
-            throw stopWithException("Referenced file '"+file.toString()+"' " + " does not exist")
+            stopWithException("Referenced file '"+file.toString()+"' " + " does not exist")
         }
     }
 

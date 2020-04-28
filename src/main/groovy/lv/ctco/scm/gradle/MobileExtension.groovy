@@ -6,9 +6,11 @@
 
 package lv.ctco.scm.gradle
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 class MobileExtension {
 
-    /** What mobile platform to use. Allowed values are: xcode, xamarin, android. */
     String platform
 
 }

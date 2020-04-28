@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.mobile.knappsack;
 
+import lv.ctco.scm.gradle.TaskGroup;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 
 import org.gradle.api.DefaultTask;
@@ -16,6 +17,11 @@ import java.io.IOException;
 public class KnappsackUploadTask extends DefaultTask {
 
     private KnappsackExtension extension;
+
+    public KnappsackUploadTask() {
+        this.setGroup(TaskGroup.UPLOAD.getLabel());
+        this.setDescription("Upload an artifact to a Knappsack server");
+    }
 
     public void setExtension(KnappsackExtension extension) {
         this.extension = extension;

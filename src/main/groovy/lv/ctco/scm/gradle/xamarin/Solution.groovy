@@ -6,9 +6,12 @@
 
 package lv.ctco.scm.gradle.xamarin
 
+import groovy.transform.TypeChecked
+
 /**
  * MS VisualStudio solution file representation. Contains information from project and global sections.
  */
+@TypeChecked
 class Solution {
 
     protected List<SlnProjectSection> projectSections

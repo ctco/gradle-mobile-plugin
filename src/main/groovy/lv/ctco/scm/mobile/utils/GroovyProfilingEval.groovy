@@ -23,7 +23,7 @@ class GroovyProfilingEval {
         logger.info("Replacing requested file '{}'", targetFile.getAbsolutePath())
         BackupUtil.backupFile(targetFile)
         FileUtils.copyFile(sourceFile, targetFile)
-        logger.info("  current md5={}", CommonUtil.getMD5Hex(targetFile))
+        logger.debug("  current md5={}", CommonUtil.getMD5Hex(targetFile))
     }
 
     def replaceInFile(String targetFilePath, String toFind, String replaceWith) {

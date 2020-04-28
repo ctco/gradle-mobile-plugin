@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.gradle.common;
 
+import lv.ctco.scm.gradle.TaskGroup;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.utils.exec.ExecCommand;
 import lv.ctco.scm.utils.exec.ExecOutputStream;
@@ -36,6 +37,11 @@ public class ReportGitCommitInfoTask extends DefaultTask {
     private static final Logger logger = Logging.getLogger(ReportGitCommitInfoTask.class);
 
     private static final String PROP_VCS_ROOT_DIR = "vcs.root.dir";
+
+    public ReportGitCommitInfoTask() {
+        this.setGroup(TaskGroup.UTILITY.getLabel());
+        this.setDescription("Creates a HTML report about the commit");
+    }
 
     @TaskAction
     public void doTaskAction() {

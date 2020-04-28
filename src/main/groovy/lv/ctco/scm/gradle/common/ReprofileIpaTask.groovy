@@ -7,6 +7,7 @@
 package lv.ctco.scm.gradle.common
 
 import lv.ctco.scm.gradle.MobileExtension
+import lv.ctco.scm.gradle.TaskGroup
 import lv.ctco.scm.mobile.utils.Profile
 import lv.ctco.scm.gradle.utils.PropertyUtil
 import lv.ctco.scm.mobile.utils.ReprofilingUtil
@@ -21,6 +22,11 @@ class ReprofileIpaTask extends DefaultTask {
 
     MobileExtension ctcoMobile
     List<Profile> profiles = new ArrayList<>()
+
+    public ReprofileIpaTask() {
+        this.setGroup(TaskGroup.UTILITY.getLabel())
+        this.setDescription("Re-profiles and re-signs an IPA file to other environment")
+    }
 
     @TaskAction
     public void doTaskAction() {

@@ -20,8 +20,6 @@ class XamarinPlatform {
 
     private static final Logger logger = Logging.getLogger(XamarinPlatform.class)
 
-    public static final String NAME = "xamarin"
-
     protected Project project
 
     private String releaseVersionIos

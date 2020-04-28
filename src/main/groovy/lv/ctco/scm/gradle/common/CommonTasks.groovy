@@ -6,8 +6,6 @@
 
 package lv.ctco.scm.gradle.common
 
-import lv.ctco.scm.gradle.TaskGroup
-
 import lv.ctco.scm.mobile.knappsack.KnappsackUploadTask
 import lv.ctco.scm.mobile.knappsack.KnappsackUtil
 
@@ -25,8 +23,6 @@ class CommonTasks {
             return task
         } else {
             return project.task("knappsackUpload", type: KnappsackUploadTask) {
-                group = TaskGroup.UPLOAD.getLabel()
-                description = "Upload an artifact to a Knappsack server"
                 extension = KnappsackUtil.setupKnappsackExtension(project)
             }
         }
@@ -37,10 +33,7 @@ class CommonTasks {
         if (task != null) {
             return task
         } else {
-            return project.task("reprofileIpa", type: ReprofileIpaTask) {
-                group = TaskGroup.UTILITY.getLabel()
-                description = "Re-profiles and re-signs an IPA file to other environment"
-            }
+            return project.task("reprofileIpa", type: ReprofileIpaTask)
         }
     }
 
@@ -49,10 +42,7 @@ class CommonTasks {
         if (task != null) {
             return task
         } else {
-            return project.task("reportGitCommitInfo", type: ReportGitCommitInfoTask) {
-                group = TaskGroup.UTILITY.getLabel()
-                description = "Creates a HTML report about the commit"
-            }
+            return project.task("reportGitCommitInfo", type: ReportGitCommitInfoTask)
         }
     }
 

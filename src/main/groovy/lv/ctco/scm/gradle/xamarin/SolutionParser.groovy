@@ -95,7 +95,6 @@ public class SolutionParser {
         Pattern pattern = Patterns.regex('[^=&&[^\\r\\n\\f]]+')
         Parser<String> identifierParser = Scanners.pattern(pattern, 'identifier').source().map(
                 new org.codehaus.jparsec.functors.Map<String, String>() {
-
                     String map(String from) {
                         return from.trim()
                     }

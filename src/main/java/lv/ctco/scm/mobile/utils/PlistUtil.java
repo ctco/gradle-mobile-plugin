@@ -62,7 +62,7 @@ public final class PlistUtil {
             baseDict.put(keyName, keyValue);
         }
         PropertyListParser.saveAsXML(baseDict, plistFile.getAbsoluteFile());
-        logger.info("  current md5={}", CommonUtil.getMD5Hex(plistFile));
+        logger.debug("  current md5={}", CommonUtil.getMD5Hex(plistFile));
     }
 
     public static void validatePlist(File plistFile) throws IOException {

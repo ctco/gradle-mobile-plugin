@@ -9,13 +9,18 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Base64;
 
-public class SetupFileTask extends DefaultTask {
+public class SetupConfigFileTask extends DefaultTask {
 
-    private static final Logger logger = Logging.getLogger(SetupFileTask.class);
+    private static final Logger logger = Logging.getLogger(SetupConfigFileTask.class);
 
     private String envVar;
     private String filePath;
+
+    public SetupConfigFileTask() {
+        this.setGroup("Wercker");
+    }
 
     public void setEnvVar(String envVar) {
         this.envVar = envVar;
@@ -37,14 +42,14 @@ public class SetupFileTask extends DefaultTask {
         if (filePath == null) {
             throw new GradleException("The file path (filePath) was not defined");
         }
-        String providedProperties = System.getenv().get(envVar);
-        if (providedProperties == null) {
+        String encodedValue = System.getenv().get(envVar);
+        if (encodedValue == null) {
             throw new GradleException("The required environment variable was not provided");
         }
-        String processedProperties = providedProperties.replace("\\n", "\n");
+        String decodedValue = new String(Base64.getDecoder().decode(encodedValue));
         logger.lifecycle("Setting up content of '${}' to '{}'", envVar, filePath);
         try (FileWriter fileWriter = new FileWriter(new File(filePath))) {
-            fileWriter.append(processedProperties);
+            fileWriter.append(decodedValue);
         } catch (IOException e) {
             throw new GradleException("Could not write to the required file path", e);
         }

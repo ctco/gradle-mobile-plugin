@@ -35,7 +35,7 @@ public final class CommonUtil {
         String content = FileUtils.readFileToString(file, StandardCharsets.UTF_8);
         content = content.replaceAll(patternToFind.pattern(), replaceWith);
         FileUtils.writeStringToFile(file, content, StandardCharsets.UTF_8, false);
-        logger.info("  current md5={}", getMD5Hex(file));
+        logger.debug("  current md5={}", getMD5Hex(file));
     }
 
     public static void addNewlineAtEndOfFile(File file) throws IOException {

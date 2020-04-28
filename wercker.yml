@@ -23,16 +23,6 @@ publish-snapshot:
         code: |
           ./gradlew werckerSetupGradleProperties
     - script:
-        name: setup gpg
-        code: |
-          ./gradlew werckerSetupGPG
-          gpg --import --no-tty --batch --yes ~/mygpgkey_sec.gpg
-          gpg --list-secret-keys
-          export GPG_TTY=$(tty)
-          gpg --export-secret-keys cscm@ctco.lv > ~/.gnupg/secring.out || true
-          mv ~/.gnupg/secring.out ~/.gnupg/secring.gpg
-          ls -l ~/.gnupg
-    - script:
         name: deploy snapshot
         code: |
           ./gradlew --info uploadArchives
@@ -51,14 +41,7 @@ publish-release:
         code: |
           ./gradlew werckerSetupGradleProperties
     - script:
-        name: setup gpg
-        code: |
-          ./gradlew werckerSetupGPG
-          gpg --import --no-tty --batch --yes ~/mygpgkey_sec.gpg
-          gpg --list-secret-keys
-          gpg --export-secret-keys cscm@ctco.lv > ~/.gnupg/secring.gpg
-    - script:
-        name: run release
+        name: perform release
         code: |
           git checkout $WERCKER_GIT_BRANCH
           git reset --hard $WERCKER_GIT_COMMIT

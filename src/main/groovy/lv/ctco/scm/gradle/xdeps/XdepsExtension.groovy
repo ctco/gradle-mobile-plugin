@@ -6,6 +6,9 @@
 
 package lv.ctco.scm.gradle.xdeps
 
+import groovy.transform.TypeChecked
+
+@TypeChecked
 class XdepsExtension {
 
     String groupId
