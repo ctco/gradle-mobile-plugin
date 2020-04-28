@@ -11,6 +11,10 @@ test:
 build:
   steps:
     - script:
+        name: setup gradle.properties
+        code: |
+          ./gradlew werckerSetupGradleProperties
+    - script:
         name: gradle build
         code: |
           ./gradlew --version
