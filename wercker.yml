@@ -52,4 +52,4 @@ publish-release:
           git remote -v
           git config --global user.email "cscm@ctco.lv"
           git config --global user.name "CSCM"
-          ./gradlew --info clean release closeAndPromoteRepository -Prelease.useAutomaticVersion=true
+          ./gradlew --info clean release closeAndReleaseRepository -Prelease.useAutomaticVersion=true
