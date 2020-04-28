@@ -115,7 +115,7 @@ class XamarinPlatform {
                 envTask.dependsOn(updateVersionTask)
             }
             envTask.dependsOn(profilingTask)
-            envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, getCamelCase(_env.getName())))
+            envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, StringUtils.capitalize(_env.getName())))
             buildIosTask.dependsOn(envTask)
             profilingTask.mustRunAfter(dependencyRestoreIosTask)
             updateVersionTask.mustRunAfter(profilingTask)
@@ -132,7 +132,7 @@ class XamarinPlatform {
             dependencyRestoreTask.dependsOn(dependencyRestoreAndroidTask)
 
             for (Environment _env : extXand.getEnvironments()) {
-                Task envTask = project.task type: BuildAndroidTask, "buildAndroid"+getCamelCase(_env.getName()), {
+                Task envTask = project.task type: BuildAndroidTask, "buildAndroid"+StringUtils.capitalize(_env.getName()), {
                     group = 'Mobile Build'
                     description = "Builds Android "+_env.getName()+" environment with "+_env.getConfiguration()+" configuration"
                     env = _env
@@ -140,7 +140,7 @@ class XamarinPlatform {
                     signingKeystore = extXand.signingKeystore
                     signingCertificateAlias = extXand.signingCertificateAlias
                 }
-                Task profilingTask = project.task type: ProfilingTask, "applyProfileAndroid"+getCamelCase(_env.getName()), {
+                Task profilingTask = project.task type: ProfilingTask, "applyProfileAndroid"+StringUtils.capitalize(_env.getName()), {
                     description = "Profiles files for Android "+_env.getName()+" environment"
                     projectDir = extXand.getProjectFile().getParentFile()
                     profiles = extXand.getSpecificProfiles(_env.getName(), "build")
@@ -150,7 +150,7 @@ class XamarinPlatform {
                 envTask.dependsOn(dependencyRestoreAndroidTask)
                 envTask.dependsOn(versionUpdateTask)
                 envTask.dependsOn(profilingTask)
-                envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, "Android"+getCamelCase(_env.getName())))
+                envTask.finalizedBy(XamarinTasks.getOrCreateRevertProfileTask(project, "Android"+StringUtils.capitalize(_env.getName())))
                 buildAndroidTask.dependsOn(envTask)
                 profilingTask.mustRunAfter(dependencyRestoreAndroidTask)
                 versionUpdateTask.mustRunAfter(profilingTask)
@@ -176,12 +176,8 @@ class XamarinPlatform {
         }
     }
 
-    private static String getCamelCase(String string) {
-        return StringUtils.capitalize(string.toLowerCase())
-    }
-
     private static Task getOrCreateProfileIosEnvTask(Project project, Environment _env, XamarinConfiguration extXios) {
-        String taskName = "applyProfile"+getCamelCase(_env.getName())
+        String taskName = "applyProfile"+StringUtils.capitalize(_env.getName())
         Task existingTask = project.getTasks().findByName(taskName)
         if (existingTask == null) {
             ProfilingTask newTask = project.getTasks().create(taskName, ProfilingTask)

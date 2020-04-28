@@ -32,7 +32,7 @@ final class AndroidTasks {
     }
 
     static Task getOrCreateUpdateVersionAndroidTask(Project project, Environment env) {
-        String taskNamePostfix = StringUtils.capitalize(env.getName().toLowerCase());
+        String taskNamePostfix = StringUtils.capitalize(env.getName());
         Task existingTask = getTaskByName(project, "updateVersion"+taskNamePostfix);
         if (existingTask == null) {
             UpdateVersionAndroidTask newTask = project.getTasks().create("updateVersion"+taskNamePostfix, UpdateVersionAndroidTask.class);
@@ -45,7 +45,7 @@ final class AndroidTasks {
     }
 
     static Task getOrCreateArchiveArtifactTask(Project project, Environment env) {
-        String taskNamePostfix = StringUtils.capitalize(env.getName().toLowerCase());
+        String taskNamePostfix = StringUtils.capitalize(env.getName());
         Task existingTask = getTaskByName(project, "archiveArtifact"+taskNamePostfix);
         if (existingTask == null) {
             ArchiveArtifactTask newTask = project.getTasks().create("archiveArtifact"+taskNamePostfix, ArchiveArtifactTask.class);

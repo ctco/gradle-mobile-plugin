@@ -78,7 +78,7 @@ final class XamarinTasks {
     }
 
     static Task getOrCreateRevertProfileTask(Project project, String envName) {
-        String taskName = "cleanupBuild"+StringUtils.capitalize(envName.toLowerCase());
+        String taskName = "revertProfile"+StringUtils.capitalize(envName);
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             RevertProfileTask newTask = project.getTasks().create(taskName, RevertProfileTask.class);
@@ -169,7 +169,7 @@ final class XamarinTasks {
     }
 
     static Task getOrCreateBuildIosEnvTask(Project project, Environment env, XamarinConfiguration iosConf) {
-        String taskName = "build"+StringUtils.capitalize(env.getName().toLowerCase());
+        String taskName = "build"+StringUtils.capitalize(env.getName());
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             BuildIosTask newTask = project.getTasks().create(taskName, BuildIosTask.class);
@@ -185,7 +185,7 @@ final class XamarinTasks {
     }
 
     static Task getOrCreateUpdateVersionIosEnvTask(Project project, Environment env, XamarinConfiguration extXios, String releaseVersion) {
-        String taskName = "updateVersion"+StringUtils.capitalize(env.getName().toLowerCase());
+        String taskName = "updateVersion"+StringUtils.capitalize(env.getName());
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             UpdateVersionIosTask newTask = project.getTasks().create(taskName, UpdateVersionIosTask.class);
@@ -202,7 +202,7 @@ final class XamarinTasks {
     }
 
     static Task getOrCreateUpdateVersionAndroidTask(Project project, Environment env, XandroidConfiguration extXand, String releaseVersion) {
-        String taskName = "updateVersionAndroid"+StringUtils.capitalize(env.getName().toLowerCase());
+        String taskName = "updateVersionAndroid"+StringUtils.capitalize(env.getName());
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             UpdateVersionAndroidTask newTask = project.getTasks().create(taskName, UpdateVersionAndroidTask.class);

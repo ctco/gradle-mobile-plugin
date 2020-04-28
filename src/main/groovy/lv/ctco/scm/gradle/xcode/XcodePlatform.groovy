@@ -84,7 +84,7 @@ class XcodePlatform {
     }
 
     private Task getOrCreateProfilingTask(Project project, Environment env, XcodeConfiguration configuration) {
-        String taskName = "applyProfile"+StringUtils.capitalize(env.getName().toLowerCase())
+        String taskName = "applyProfile"+StringUtils.capitalize(env.getName())
         Task existingTask = project.getTasks().findByName(taskName)
         if (existingTask == null) {
             ProfilingTask newTask = project.getTasks().create(taskName, ProfilingTask.class)

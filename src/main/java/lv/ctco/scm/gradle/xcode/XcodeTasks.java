@@ -72,7 +72,7 @@ public final class XcodeTasks {
     }
 
     static Task getOrCreateBuildEnvTask(Project project, Environment env) {
-        String taskName = "build"+ StringUtils.capitalize(env.getName().toLowerCase());
+        String taskName = "build"+ StringUtils.capitalize(env.getName());
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             BuildTask newTask = project.getTasks().create(taskName, BuildTask.class);
@@ -86,7 +86,7 @@ public final class XcodeTasks {
     }
 
     static Task getOrCreateUpdateVersionTask(Project project, Environment env) {
-        String taskName = "updateVersion"+StringUtils.capitalize(env.getName().toLowerCase());
+        String taskName = "updateVersion"+StringUtils.capitalize(env.getName());
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             UpdateVersionIosTask newTask = project.getTasks().create(taskName, UpdateVersionIosTask.class);
@@ -100,7 +100,7 @@ public final class XcodeTasks {
     }
 
     static Task getOrCreateRevertProfileTask(Project project, String envName) {
-        String taskName = "cleanupBuild"+StringUtils.capitalize(envName.toLowerCase());
+        String taskName = "revertProfile"+StringUtils.capitalize(envName);
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             RevertProfileTask newTask = project.getTasks().create(taskName, RevertProfileTask.class);
