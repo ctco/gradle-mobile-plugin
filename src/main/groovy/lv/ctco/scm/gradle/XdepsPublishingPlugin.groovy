@@ -19,7 +19,7 @@ import org.gradle.api.UnknownDomainObjectException
 
 public class XdepsPublishingPlugin implements Plugin<Project> {
 
-    private static final String pluginName = "lv.ctco.scm.xdeps-publishing";
+    private static final String pluginName = "lv.ctco.scm.xdeps-publishing"
 
     @Override
     void apply(Project project) {

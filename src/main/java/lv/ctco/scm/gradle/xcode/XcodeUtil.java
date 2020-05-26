@@ -214,7 +214,7 @@ public final class XcodeUtil {
             }
         } else {
             Environment env = new Environment();
-            env.setName("DEFAULT");
+            env.setName("Default");
             env.setTarget(defaultTarget);
             environments.add(env);
         }

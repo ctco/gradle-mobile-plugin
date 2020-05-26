@@ -163,7 +163,7 @@ class XamarinPlatform {
         if (extXios.getEnvironments().size() == 0) {
             // Use Ad-Hoc or Release configuration when there are no specified environment configurations
             Environment defaultEnv = new Environment()
-            defaultEnv.setName("DEFAULT")
+            defaultEnv.setName("Default")
             defaultEnv.setPlatform("iPhone")
             if (solutionConfigurations.contains('Ad-Hoc|iPhone')) {
                 defaultEnv.setConfiguration("Ad-Hoc")

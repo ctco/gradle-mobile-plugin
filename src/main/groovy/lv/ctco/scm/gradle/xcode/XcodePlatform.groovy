@@ -15,7 +15,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 
 @TypeChecked
-class XcodePlatform {
+public class XcodePlatform {
 
     void configure(Project project, XcodeConfiguration configuration) {
         if (XcodeUtil.getXcodeprojCount(project.projectDir) != 1) {
