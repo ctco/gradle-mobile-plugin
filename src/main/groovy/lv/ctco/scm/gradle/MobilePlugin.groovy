@@ -33,7 +33,7 @@ class MobilePlugin implements Plugin<Project> {
     void apply(Project project) {
         try {
             if (project.state.getFailure() == null) {
-                MobilePluginUtil.announcePluginApply(MobilePluginUtil.getPluginName(), project.getName())
+                MobilePluginUtil.announcePluginApply(MobilePluginUtil.getPackageTitle(), project.getName())
             }
             MobilePluginUtil.createXdepsDependencyConfiguration(project)
             createExtensions(project)

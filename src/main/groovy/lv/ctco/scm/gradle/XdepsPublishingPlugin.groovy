@@ -30,7 +30,6 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
         }
         try {
             MobilePluginUtil.announcePluginApply(pluginName, project.getName())
-            MobilePluginUtil.checkMinimumGradleVersion()
             MobilePluginUtil.createXdepsDependencyConfiguration(project)
             // As this must be the root project - create xdeps for all child projects
             for (Project child : project.getAllprojects()) {
