@@ -34,6 +34,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -48,6 +49,17 @@ public final class ZipUtil {
     private static final List<String> DEFAULT_EXCLUDES = Collections.singletonList(".DS_Store");
 
     private ZipUtil() {}
+
+    public static List<String> getEntryNames(File sourceZip) throws IOException {
+        List<String> entryNames = new ArrayList<>();
+        try (ZipFile zipFile = new ZipFile(sourceZip)) {
+            List<ZipArchiveEntry> zipArchiveEntries = Collections.list(zipFile.getEntries());
+            for (ZipArchiveEntry zipArchiveEntry : zipArchiveEntries) {
+                entryNames.add(zipArchiveEntry.getName());
+            }
+        }
+        return entryNames;
+    }
 
     public static void extractAll(File sourceZip, File outputDir) throws IOException {
         try (ZipFile zipFile = new ZipFile(sourceZip)) {
