@@ -116,6 +116,7 @@ public final class ZipUtil {
         if (!rootDir.isDirectory()) {
             throw new IOException("Provided file is not a directory");
         }
+        FileUtils.touch(output);
         try (OutputStream archiveStream = new FileOutputStream(output);
              ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {
             String rootName = "";
