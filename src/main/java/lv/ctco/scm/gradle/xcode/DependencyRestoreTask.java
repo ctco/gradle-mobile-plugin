@@ -33,18 +33,18 @@ public class DependencyRestoreTask extends DefaultTask {
         File cartfile = new File(getProject().getProjectDir(), "Cartfile");
         File cartfileResolved = new File(getProject().getProjectDir(), "Cartfile.resolved");
         if (cartfile.exists() || cartfileResolved.exists()) {
-            logger.lifecycle("Restoring Carthage dependencies...");
+            logger.info("Restoring Carthage dependencies...");
             if (cartfileResolved.exists()) {
                 bootstrapCarthage(cartfileResolved);
             } else {
                 updateCarthage(cartfile);
             }
-            logger.lifecycle("Restoring Carthage dependencies - done.");
+            logger.info("Restoring Carthage dependencies - done.");
         }
         //
         Set<File> xdepsFiles = XdepsUtil.getXdepsDependencyFiles(getProject());
         if (!xdepsFiles.isEmpty()) {
-            logger.lifecycle("Restoring Xdeps dependencies...");
+            logger.info("Restoring Xdeps dependencies...");
             File xdepsLibrary = new File(getProject().getProjectDir(), "Libraries");
             prepareXdepsLibrary(xdepsLibrary);
             for (File xdepsFile : xdepsFiles) {
@@ -54,7 +54,7 @@ public class DependencyRestoreTask extends DefaultTask {
                     ErrorUtil.errorInTask(this.getName(), "Failed to restore Xdeps dependencies");
                 }
             }
-            logger.lifecycle("Restoring Xdeps dependencies - done.");
+            logger.info("Restoring Xdeps dependencies - done.");
         }
     }
 
