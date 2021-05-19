@@ -7,7 +7,7 @@
 package lv.ctco.scm.gradle.common
 
 import lv.ctco.scm.mobile.knappsack.KnappsackUploadTask
-import lv.ctco.scm.mobile.knappsack.KnappsackUtil
+import lv.ctco.scm.mobile.knappsack.KnappsackUploadTaskConfigureAction
 
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -17,32 +17,24 @@ class CommonTasks {
 
     private CommonTasks() {}
 
-    static Task getOrCreateKnappsackUploadTask(Project project) {
+    static void registerKnappsackUploadTask(Project project) {
         Task task = getTaskByName(project, "knappsackUpload")
-        if (task != null) {
-            return task
-        } else {
-            return project.task("knappsackUpload", type: KnappsackUploadTask) {
-                extension = KnappsackUtil.setupKnappsackExtension(project)
-            }
+        if (task == null) {
+            project.getTasks().register("knappsackUpload", KnappsackUploadTask.class, new KnappsackUploadTaskConfigureAction())
         }
     }
 
-    static Task getOrCreateIpaReprofilingTask(Project project) {
+    static void registerReprofileIpaTask(Project project) {
         Task task = getTaskByName(project, "reprofileIpa")
-        if (task != null) {
-            return task
-        } else {
-            return project.task("reprofileIpa", type: ReprofileIpaTask)
+        if (task == null) {
+            project.getTasks().register("reprofileIpa", ReprofileIpaTask.class)
         }
     }
 
-    static Task getOrCreateReportGitCommitInfoTask(Project project) {
+    static void registerReportGitCommitInfoTask(Project project) {
         Task task = getTaskByName(project, "reportGitCommitInfo")
-        if (task != null) {
-            return task
-        } else {
-            return project.task("reportGitCommitInfo", type: ReportGitCommitInfoTask)
+        if (task == null) {
+            project.getTasks().register("reportGitCommitInfo", ReportGitCommitInfoTask.class)
         }
     }
 

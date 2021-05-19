@@ -17,7 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public final class KnappsackUtil {
+final class KnappsackUtil {
 
     private static final String PROP_URL = "knappsack.url";
     private static final String PROP_USER_NAME = "knappsack.user.name";

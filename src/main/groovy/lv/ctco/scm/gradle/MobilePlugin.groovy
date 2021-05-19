@@ -122,9 +122,9 @@ class MobilePlugin implements Plugin<Project> {
     }
 
     private static void configureCommonTasks(Project project) throws IOException {
-        CommonTasks.getOrCreateIpaReprofilingTask(project)
-        CommonTasks.getOrCreateKnappsackUploadTask(project)
-        CommonTasks.getOrCreateReportGitCommitInfoTask(project)
+        CommonTasks.registerReprofileIpaTask(project)
+        CommonTasks.registerKnappsackUploadTask(project)
+        CommonTasks.registerReportGitCommitInfoTask(project)
     }
 
     private static void overrideExtensionProperties(Project project) {
