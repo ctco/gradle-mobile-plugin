@@ -1,4 +1,8 @@
-box: openjdk:8-jdk
+box:
+  id: openjdk
+  tag: 8-jdk
+  username: $DOCKER_USERNAME
+  password: $DOCKER_ACCESS_TOKEN
 
 test:
   steps:
