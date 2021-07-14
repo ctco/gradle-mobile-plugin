@@ -18,25 +18,33 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class ExecOutputStream extends LogOutputStream {
+public class ExecOutputStream extends LogOutputStream {
 
-    private final Logger logger = LoggerFactory.getLogger(getClass());
+    private Logger logger;
 
-    private ExecOutputFilter outputFilter;
-    private ExecOutputFilter loggerFilter;
+    private ExecOutputFilter outputFilter = new NullOutputFilter();
+    private ExecOutputFilter loggerFilter = new NullOutputFilter();
+
+    @Deprecated
     private ExecOutputFilter fileFilter = new NullOutputFilter();
 
     private List<String> output = new ArrayList<>();
+
+    @Deprecated
     private File logFile;
 
     public ExecOutputStream() {
-        this.outputFilter = new NullOutputFilter();
-        this.loggerFilter = new NullOutputFilter();
+        this.logger = LoggerFactory.getLogger(getClass());
     }
 
     public ExecOutputStream(ExecOutputFilter outputFilter, ExecOutputFilter loggerFilter) {
+        this.logger = LoggerFactory.getLogger(getClass());
         this.outputFilter = outputFilter;
         this.loggerFilter = loggerFilter;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 
     public ExecOutputFilter getOutputFilter() {
@@ -55,10 +63,12 @@ public final class ExecOutputStream extends LogOutputStream {
         this.loggerFilter = loggerFilter;
     }
 
+    @Deprecated
     public ExecOutputFilter getFileFilter() {
         return fileFilter;
     }
 
+    @Deprecated
     public void setFileFilter(ExecOutputFilter fileFilter) {
         this.fileFilter = fileFilter;
     }
@@ -67,10 +77,12 @@ public final class ExecOutputStream extends LogOutputStream {
         return output;
     }
 
+    @Deprecated
     public File getLogFile() {
         return logFile;
     }
 
+    @Deprecated
     public void setLogFile(File logFile) throws IOException {
         if (logFile == null) {
             this.logFile = null;
