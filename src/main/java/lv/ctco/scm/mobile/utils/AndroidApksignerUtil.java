@@ -1,16 +1,19 @@
 package lv.ctco.scm.mobile.utils;
 
+import lv.ctco.scm.utils.exec.CapturingOutputStream;
 import lv.ctco.scm.utils.exec.ExecCommand;
-import lv.ctco.scm.utils.exec.ExecOutputStream;
 import lv.ctco.scm.utils.exec.ExecResult;
 import lv.ctco.scm.utils.exec.ExecUtil;
-import lv.ctco.scm.utils.exec.FullOutputFilter;
-import lv.ctco.scm.utils.exec.NullOutputFilter;
+
+import org.gradle.api.logging.Logger;
+import org.gradle.api.logging.Logging;
 
 import java.io.File;
 import java.io.IOException;
 
 public class AndroidApksignerUtil {
+
+    private static final Logger logger = Logging.getLogger(AndroidApksignerUtil.class);
 
     private static final String EXECUTABLE_APKSIGNER = "apksigner";
 
@@ -31,35 +34,31 @@ public class AndroidApksignerUtil {
         return new File(AndroidSDKUtil.getBuildToolsPath(), EXECUTABLE_APKSIGNER);
     }
 
-    public static void sign(File apkFile, File keystoreFile, String keystorePass, String keyAlias, String keyPass) throws IOException {
-        ExecCommand command = new ExecCommand(getCodesignExecutable().getCanonicalPath());
-        command.addArgument(COMMAND_SIGN);
-        command.addArgument(OPTION_VERBOSE);
-        command.addArgument(OPTION_KEYSTORE_FILE);
-        command.addArgument(keystoreFile.getCanonicalPath(), false);
-        command.addArgument(OPTION_KEYSTORE_PASS);
-        command.addArgument("pass:"+keystorePass);
-        command.addArgument(OPTION_KEY_ALIAS);
-        command.addArgument(keyAlias);
-        command.addArgument(OPTION_KEY_PASS);
-        command.addArgument("pass:"+keyPass);
-        command.addArgument(apkFile.getCanonicalPath(), false);
-        ExecResult execResult = ExecUtil.executeCommand(command, new ExecOutputStream(new FullOutputFilter(), new NullOutputFilter()));
-        if (execResult.isFailure()) {
-            throw new IOException("Signing failed for apk file", execResult.getException());
-        }
+    public static ExecResult sign(File apkFile, File keystoreFile, String keystorePass, String keyAlias, String keyPass) throws IOException {
+        ExecCommand execCommand = new ExecCommand(getCodesignExecutable().getCanonicalPath());
+        execCommand.addArgument(COMMAND_SIGN);
+        execCommand.addArgument(OPTION_VERBOSE);
+        execCommand.addArgument(OPTION_KEYSTORE_FILE);
+        execCommand.addArgument(keystoreFile.getCanonicalPath(), false);
+        execCommand.addArgument(OPTION_KEYSTORE_PASS);
+        execCommand.addArgument("pass:"+keystorePass);
+        execCommand.addArgument(OPTION_KEY_ALIAS);
+        execCommand.addArgument(keyAlias);
+        execCommand.addArgument(OPTION_KEY_PASS);
+        execCommand.addArgument("pass:"+keyPass);
+        execCommand.addArgument(apkFile.getCanonicalPath(), false);
+        logger.debug("{}", execCommand);
+        return ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
     }
 
-    public static void verify(File apkFile) throws IOException {
-        ExecCommand command = new ExecCommand(getCodesignExecutable().getCanonicalPath());
-        command.addArgument(COMMAND_VERIFY);
-        command.addArgument(OPTION_VERBOSE);
-        command.addArgument(OPTION_PRINT_CERTS);
-        command.addArgument(apkFile.getCanonicalPath(), false);
-        ExecResult execResult = ExecUtil.executeCommand(command, new ExecOutputStream(new FullOutputFilter(), new NullOutputFilter()));
-        if (execResult.isFailure()) {
-            throw new IOException("Signature verification failed for apk file", execResult.getException());
-        }
+    public static ExecResult verify(File apkFile) throws IOException {
+        ExecCommand execCommand = new ExecCommand(getCodesignExecutable().getCanonicalPath());
+        execCommand.addArgument(COMMAND_VERIFY);
+        execCommand.addArgument(OPTION_VERBOSE);
+        execCommand.addArgument(OPTION_PRINT_CERTS);
+        execCommand.addArgument(apkFile.getCanonicalPath(), false);
+        logger.debug("{}", execCommand);
+        return ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
     }
 
 }

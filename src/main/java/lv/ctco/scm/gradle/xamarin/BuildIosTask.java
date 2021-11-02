@@ -10,12 +10,13 @@ import lv.ctco.scm.mobile.utils.IosApp;
 import lv.ctco.scm.mobile.utils.BuildReportUtil;
 import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
-import lv.ctco.scm.mobile.utils.ExecResult;
-import lv.ctco.scm.mobile.utils.ExecUtil;
 import lv.ctco.scm.mobile.utils.PathUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
+import lv.ctco.scm.utils.exec.ExecCommand;
+import lv.ctco.scm.utils.exec.ExecResult;
+import lv.ctco.scm.utils.exec.ExecUtil;
+import lv.ctco.scm.utils.exec.LoggerOutputStream;
 
-import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,9 +37,7 @@ public class BuildIosTask extends DefaultTask {
 
     private Environment env;
     private File solutionFile;
-    private String projectName;
-
-    private String configurationBinPath;
+    private File projectFile;
 
     public void setEnv(Environment env) {
         this.env = env;
@@ -49,13 +48,20 @@ public class BuildIosTask extends DefaultTask {
     }
 
     public void setProjectFile(File projectFile) {
-        this.projectName = projectFile.getParentFile().getName();
+        this.projectFile = projectFile;
+    }
+
+    private String getProjectName() {
+        return projectFile.getParentFile().getName();
+    }
+
+    private File getConfigurationBinDir() {
+        return new File(getProjectName()+"/bin/"+env.getPlatform()+"/"+env.getConfiguration());
     }
 
     @TaskAction
     public void doTaskAction() {
         try {
-            configurationBinPath = projectName+"/bin/"+env.getPlatform()+"/"+env.getConfiguration();
             buildArtifacts();
             checkArtifacts();
             moveArtifactsToDistDir();
@@ -65,30 +71,16 @@ public class BuildIosTask extends DefaultTask {
     }
 
     private void buildArtifacts() throws IOException {
-        File execMdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
-        CommandLine commandLine;
-        if (execMdtool.exists()) {
-            commandLine = new CommandLine(execMdtool.getAbsolutePath());
-            commandLine.addArgument("build");
-            commandLine.addArgument("-t:Build");
-            if (StringUtils.isNotBlank(projectName)) {
-                commandLine.addArgument("-p:"+projectName);
-            }
-            if (StringUtils.isNotBlank(env.getConfiguration())) {
-                commandLine.addArgument("-c:"+env.getConfiguration()+"|"+env.getPlatform());
-            }
-            commandLine.addArgument(solutionFile.getAbsolutePath(), false);
-        } else {
-            commandLine = new CommandLine("msbuild");
-            commandLine.addArgument("/property:Configuration="+env.getConfiguration());
-            if (env.getPlatform() != null) {
-                commandLine.addArgument("/property:Platform="+env.getPlatform());
-            }
-            commandLine.addArgument("/target:Build");
-            commandLine.addArgument(solutionFile.getAbsolutePath(), false);
+        ExecCommand execCommand = new ExecCommand("msbuild");
+        execCommand.addArgument("/property:Configuration="+env.getConfiguration());
+        if (env.getPlatform() != null) {
+            execCommand.addArgument("/property:Platform="+env.getPlatform());
         }
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
-        FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
+        execCommand.addArgument("/target:Build");
+        execCommand.addArgument(solutionFile.getAbsolutePath(), false);
+        execCommand.addArgument("/consoleLoggerParameters:NoSummary");
+        logger.debug("{}", execCommand);
+        ExecResult execResult = ExecUtil.executeCommand(execCommand, new LoggerOutputStream());
         if (!execResult.isSuccess()) {
             ErrorUtil.errorInTask(this.getName(), execResult.getException());
         }
@@ -96,7 +88,7 @@ public class BuildIosTask extends DefaultTask {
 
     private void checkArtifacts() throws IOException {
         File appDir;
-        List<File> apps = CommonUtil.findIosAppsInDirectory(new File(configurationBinPath));
+        List<File> apps = CommonUtil.findIosAppsInDirectory(getConfigurationBinDir());
         if (apps.size() == 1) {
             appDir = apps.get(0);
         } else {
@@ -112,7 +104,7 @@ public class BuildIosTask extends DefaultTask {
 
     private void moveArtifactsToDistDir() throws IOException {
         File ipa;
-        List<File> ipas = CommonUtil.findIosIpasInDirectory(new File(configurationBinPath));
+        List<File> ipas = CommonUtil.findIosIpasInDirectory(getConfigurationBinDir());
         if (ipas.size() == 1) {
             ipa = ipas.get(0);
         } else {
@@ -120,15 +112,16 @@ public class BuildIosTask extends DefaultTask {
         }
         String ipaName = FilenameUtils.getBaseName(ipa.getName());
         if (!StringUtils.endsWithIgnoreCase(ipaName, env.getName().toUpperCase())) {
-            ipaName = projectName+" "+env.getName().toUpperCase();
+            ipaName = getProjectName()+" "+env.getName().toUpperCase();
         }
         FileUtils.copyFile(ipa, new File(PathUtil.getIpaDistDir(), ipaName+".ipa"));
         FileUtils.forceDelete(ipa);
         //
-        List<File> dsyms = CommonUtil.findIosDsymsinDirectory(new File(configurationBinPath));
+        List<File> dsyms = CommonUtil.findIosDsymsinDirectory(getConfigurationBinDir());
         if (dsyms.size() == 1 ) {
             File dsymDir = dsyms.get(0);
-            ZipUtil.compressDirectory(dsymDir, true, new File(PathUtil.getDsymDistDir(), "dSYM."+env.getName()+".zip"));
+            File dsymDistDir = new File(getProject().getBuildDir(), "dsymdist");
+            ZipUtil.compressDirectory(dsymDir, true, new File(dsymDistDir, getProjectName()+" "+env.getName()+".dSYM.zip"));
             FileUtils.deleteDirectory(dsymDir);
         } else {
             logger.warn("None or multiple DSYMs found! Not moving to distribution folder.");

@@ -23,10 +23,10 @@ dependencies {
     implementation group: 'com.googlecode.plist', name: 'dd-plist', version: '1.23'
     implementation group: 'com.eclipsesource.minimal-json', name: 'minimal-json', version: '0.9.5'
 
-    implementation group: 'commons-io', name: 'commons-io', version:'2.8.0'
-    implementation group: 'org.apache.commons', name:'commons-compress', version:'1.20'
+    implementation group: 'commons-io', name: 'commons-io', version:'2.11.0'
+    implementation group: 'org.apache.commons', name:'commons-compress', version:'1.21'
     implementation group: 'org.apache.commons', name:'commons-exec', version:'1.3'
-    implementation group: 'org.apache.commons', name:'commons-lang3', version:'3.11'
+    implementation group: 'org.apache.commons', name:'commons-lang3', version:'3.12.0'
 
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
     implementation group: 'org.apache.httpcomponents', name: 'httpmime', version: '4.5.13'
@@ -34,7 +34,7 @@ dependencies {
     compile gradleApi()
     compile localGroovy()
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13.1'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 group = 'lv.ctco.scm'
@@ -97,7 +97,7 @@ artifacts {
 
 publishing {
     publications {
-        plugin(MavenPublication) {
+        plugin (MavenPublication) {
             from components.java
         }
     }
@@ -131,7 +131,7 @@ uploadArchives {
                 licenses {
                     license {
                         name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
 

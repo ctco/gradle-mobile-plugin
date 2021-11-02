@@ -6,18 +6,20 @@
 
 package lv.ctco.scm.gradle.xamarin;
 
+import lv.ctco.scm.gradle.utils.PropertyUtil;
+import lv.ctco.scm.mobile.utils.AndroidApksignerUtil;
 import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
-import lv.ctco.scm.mobile.utils.ExecResult;
-import lv.ctco.scm.mobile.utils.ExecUtil;
 import lv.ctco.scm.mobile.utils.PathUtil;
-import lv.ctco.scm.gradle.utils.PropertyUtil;
+import lv.ctco.scm.mobile.utils.ZipUtil;
+import lv.ctco.scm.utils.exec.ExecCommand;
+import lv.ctco.scm.utils.exec.ExecResult;
+import lv.ctco.scm.utils.exec.ExecUtil;
+import lv.ctco.scm.utils.exec.LoggerOutputStream;
 
-import org.apache.commons.exec.CommandLine;
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.GradleException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
@@ -25,7 +27,10 @@ import org.gradle.api.tasks.TaskAction;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BuildAndroidTask extends DefaultTask {
 
@@ -34,12 +39,9 @@ public class BuildAndroidTask extends DefaultTask {
     private Environment env;
 
     private File projectFile;
-    private String projectName;
 
     private String signingKeystore;
     private String signingCertificateAlias;
-
-    private String configurationBinPath;
 
     public void setEnv(Environment env) {
         this.env = env;
@@ -47,7 +49,6 @@ public class BuildAndroidTask extends DefaultTask {
 
     public void setProjectFile(File projectFile) {
         this.projectFile = projectFile;
-        this.projectName = projectFile.getParentFile().getName();
     }
 
     public void setSigningKeystore(String signingKeystore) {
@@ -58,15 +59,20 @@ public class BuildAndroidTask extends DefaultTask {
         this.signingCertificateAlias = signingCertificateAlias;
     }
 
+    private String getProjectName() {
+        return projectFile.getParentFile().getName();
+    }
+
+    private File getConfigurationBinDir() {
+        return new File(getProjectName()+"/bin/"+env.getConfiguration());
+    }
+
     @TaskAction
     public void doTaskAction() {
         try {
-            configurationBinPath = projectName+"/bin/"+env.getConfiguration();
             buildArtifact();
             if (!"debug".equalsIgnoreCase(env.getConfiguration()) && signingCertificateAlias != null) {
-                signArtifact();
-                verifyArtifact();
-                zipalignArtifact();
+                verifyArtifactSignature();
             }
             moveArtifactToDistDir();
         } catch (IOException e) {
@@ -75,101 +81,58 @@ public class BuildAndroidTask extends DefaultTask {
     }
 
     private void buildArtifact() throws IOException {
-        File mdtool = new File("/Applications/Xamarin Studio.app/Contents/MacOS/mdtool");
-        String buildTool = mdtool.exists() ? "xbuild" : "msbuild";
-        CommandLine commandLine = new CommandLine(buildTool);
-        commandLine.addArgument("/property:Configuration="+env.getConfiguration());
-        commandLine.addArgument("/target:SignAndroidPackage");
-        commandLine.addArgument(projectFile.getAbsolutePath(), false);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
-        FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
+        ExecCommand execCommand = new ExecCommand("msbuild");
+        execCommand.addArgument("/property:Configuration="+env.getConfiguration());
+        if (signingCertificateAlias != null && !signingCertificateAlias.isEmpty()) {
+            String storepass = "";
+            if (PropertyUtil.hasProjectProperty(getProject(), "android.storepass")) {
+                storepass = PropertyUtil.getProjectProperty(getProject(), "android.storepass");
+            } else {
+                throw new IOException("Android signing store pass 'android.storepass' has not been provided");
+            }
+            String keypass = "";
+            if (PropertyUtil.hasProjectProperty(getProject(), "android.keypass")) {
+                keypass = PropertyUtil.getProjectProperty(getProject(), "android.keypass");
+            } else {
+                throw new IOException("Android signing key pass 'android.keypass' has not been provided");
+            }
+            if (signingKeystore == null) {
+                signingKeystore = PathUtil.getAndroidKeystore().getCanonicalPath();
+            } else {
+                signingKeystore = (new File(signingKeystore.replace("~", System.getProperty("user.home")))).getCanonicalPath();
+            }
+            //
+            execCommand.addArgument("/property:AndroidKeyStore=True");
+            execCommand.addArgument("/property:AndroidSigningKeyStore="+signingKeystore);
+            execCommand.addArgument("/property:AndroidSigningStorePass="+storepass);
+            execCommand.addArgument("/property:AndroidSigningKeyAlias="+signingCertificateAlias);
+            execCommand.addArgument("/property:AndroidSigningKeyPass="+keypass);
+        }
+        execCommand.addArgument("/target:SignAndroidPackage");
+        execCommand.addArgument("/consoleLoggerParameters:NoSummary");
+        execCommand.addArgument(projectFile.getAbsolutePath(), false);
+        logger.debug("{}", execCommand);
+        ExecResult execResult = ExecUtil.executeCommand(execCommand, new LoggerOutputStream());
         if (!execResult.isSuccess()) {
             throw new IOException(execResult.getException().getMessage());
         }
     }
 
-    private void signArtifact() throws IOException {
-        logger.info("Codesigning package...");
-        String storepass = "";
-        if (PropertyUtil.hasProjectProperty(getProject(), "android.storepass")) {
-            storepass = PropertyUtil.getProjectProperty(getProject(), "android.storepass");
+    private void verifyArtifactSignature() throws IOException {
+        Path projectDir = getProject().getProjectDir().toPath();
+        Path targetApk = findSignedArtifact().getCanonicalFile().toPath();
+        logger.info("Verifying signature for '{}'...", projectDir.relativize(targetApk));
+        ExecResult execResult = AndroidApksignerUtil.verify(targetApk.toFile());
+        for (String line : execResult.getOutput()) {
+            logger.info(line);
         }
-        String keypass = "";
-        if (PropertyUtil.hasProjectProperty(getProject(), "android.keypass")) {
-            keypass = PropertyUtil.getProjectProperty(getProject(), "android.keypass");
-        }
-        if (signingKeystore == null) {
-            signingKeystore = PathUtil.getAndroidKeystore().getAbsolutePath();
-        } else {
-            signingKeystore = (new File(signingKeystore.replace("~", System.getProperty("user.home")))).getAbsolutePath();
-        }
-        Files.deleteIfExists(getSignedArtifact().toPath());
-        CommandLine commandLine = new CommandLine("jarsigner");
-        commandLine.addArgument("-verbose");
-        commandLine.addArgument("-digestalg");
-        commandLine.addArgument("SHA1");
-        commandLine.addArgument("-sigalg");
-        commandLine.addArgument("SHA1withRSA");
-        commandLine.addArgument("-keystore");
-        commandLine.addArgument(signingKeystore, false);
-        commandLine.addArgument("-storepass");
-        commandLine.addArgument(storepass);
-        commandLine.addArgument("-keypass");
-        commandLine.addArgument(keypass);
-        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath());
-        commandLine.addArgument(signingCertificateAlias);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
         if (!execResult.isSuccess()) {
-            throw new IOException("Signing for "+env.getName().toUpperCase()+" failed");
-        }
-        logger.info("Codesigning done.");
-    }
-
-    private void verifyArtifact() throws IOException {
-        logger.info("Verifying artifact signature...");
-        CommandLine commandLine = new CommandLine("jarsigner");
-        commandLine.addArgument("-verify");
-        commandLine.addArgument("-verbose");
-        commandLine.addArgument(getUnsignedArtifact().getAbsolutePath(), false);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, false);
-        if (!execResult.isSuccess() || !execResult.getOutput().contains("jar verified.")) {
-            throw new IOException("Artifact signature verification failed");
-        } else {
-            logger.info("Artifact signature verification successful.");
+            throw new IOException("Signature verification failed for apk file", execResult.getException());
         }
     }
 
-    private void zipalignArtifact() throws IOException {
-        logger.info("Zipaligning artifact...");
-        File sourceApk = getUnsignedArtifact();
-        File targetApk = new File(sourceApk.getParentFile(), sourceApk.getName().substring(0,sourceApk.getName().length()-4)+"-signed.apk");
-        CommandLine commandLine = new CommandLine("zipalign");
-        commandLine.addArgument("-f");
-        commandLine.addArgument("-v");
-        commandLine.addArgument("4");
-        commandLine.addArgument(sourceApk.getAbsolutePath(), false);
-        commandLine.addArgument(targetApk.getAbsolutePath(), false);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
-        if (!execResult.isSuccess()) {
-            throw new GradleException("Zipaligning failed");
-        }
-        Files.deleteIfExists(sourceApk.toPath());
-        FileUtils.copyFile(targetApk, sourceApk);
-        logger.info("Zipaligning successful");
-    }
-
-    private File getUnsignedArtifact() throws IOException {
-        List<File> files = CommonUtil.findAndroidAppsInDirectory(new File(configurationBinPath));
-        for (File apk : files) {
-            if (!apk.getName().toLowerCase().endsWith("-signed.apk")) {
-                return apk;
-            }
-        }
-        throw new IOException("Expected APK was not found in build directory!");
-    }
-
-    private File getSignedArtifact() throws IOException {
-        List<File> files = CommonUtil.findAndroidAppsInDirectory(new File(configurationBinPath));
+    private File findSignedArtifact() throws IOException {
+        List<File> files = CommonUtil.findAndroidAppsInDirectory(getConfigurationBinDir());
         for (File apk : files) {
             if (apk.getName().toLowerCase().endsWith("-signed.apk")) {
                 return apk;
@@ -179,19 +142,27 @@ public class BuildAndroidTask extends DefaultTask {
     }
 
     private void moveArtifactToDistDir() throws IOException {
-        Files.deleteIfExists(getUnsignedArtifact().toPath());
         File apkDistDir = PathUtil.getApkDistDir();
-        File sourceApk = getSignedArtifact();
-        File targetApk;
-        String apkName;
-        if (projectName == null) {
-            apkName = sourceApk.getName().substring(0, sourceApk.getName().length()-11);
-        } else {
-            apkName = projectName;
-        }
-        targetApk = new File(apkDistDir, apkName+" "+env.getName().toUpperCase()+".apk");
+        File sourceApk = findSignedArtifact();
+        File targetApk = new File(apkDistDir, getProjectName()+" "+env.getName().toUpperCase()+".apk");
         FileUtils.copyFile(sourceApk, targetApk);
         FileUtils.forceDelete(sourceApk);
+        //
+        try (Stream<Path> stream = Files.list(getConfigurationBinDir().toPath())) {
+            List<Path> msyms = stream
+                    .filter(Files::isDirectory)
+                    .filter(dirpath -> dirpath.endsWith(".mSYM"))
+                    .collect(Collectors.toList());
+            msyms.remove(getConfigurationBinDir().toPath());
+            if (msyms.size() == 1) {
+                File msymDir = msyms.get(0).toFile();
+                File msymDistDir = new File(getProject().getBuildDir(), "msymdist");
+                ZipUtil.compressDirectory(msymDir, true, new File(msymDistDir, getProjectName()+" "+env.getName()+".mSYM.zip"));
+                FileUtils.deleteDirectory(msymDir);
+            } else {
+                logger.warn("None or multiple MSYMs found! Not moving to distribution folder.");
+            }
+        }
     }
 
 }
