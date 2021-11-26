@@ -126,6 +126,11 @@ public final class ReprofilingUtil {
         FileUtils.deleteDirectory(payloadDir);
     }
 
+    @Deprecated // (since = "0.15.1.0", forRemoval = true)
+    public static void reprofileIpa(Project project, File targetIpa, String targetEnv, List<Profile> profiles) throws IOException {
+        reprofileIpa(project, targetIpa, targetEnv, profiles, true);
+    }
+
     private static File getIpaPayloadApp(File dir) {
         File payloadDir = new File(dir, "Payload");
         File[] files = payloadDir.listFiles();
