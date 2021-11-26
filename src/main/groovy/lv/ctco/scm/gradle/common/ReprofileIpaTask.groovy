@@ -55,7 +55,13 @@ class ReprofileIpaTask extends DefaultTask {
             }
         }
 
-        ReprofilingUtil.reprofileIpa(getProject(), targetIpaFile, targetEnvName, profiles)
+        boolean verify
+        if (PropertyUtil.hasProjectProperty("reprofiling.verify")) {
+            verify = Boolean.parseBoolean(PropertyUtil.getProjectProperty(getProject(), "reprofiling.verify"))
+        } else {
+            verify = true
+        }
+        ReprofilingUtil.reprofileIpa(getProject(), targetIpaFile, targetEnvName, profiles, verify)
     }
 
     private void checkProvidedParameters() {

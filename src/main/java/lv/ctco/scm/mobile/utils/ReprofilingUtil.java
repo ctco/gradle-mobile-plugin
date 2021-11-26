@@ -61,7 +61,7 @@ public final class ReprofilingUtil {
         }
     }
 
-    public static void reprofileIpa(Project project, File targetIpa, String targetEnv, List<Profile> profiles) throws IOException {
+    public static void reprofileIpa(Project project, File targetIpa, String targetEnv, List<Profile> profiles, boolean verify) throws IOException {
         logger.info("Reprofiling IPA '{}' to environment '{}'", targetIpa.getAbsolutePath(), targetEnv);
         logProfiles(profiles);
         File payloadDir = new File(PathUtil.getTempDir(), targetIpa.getName());
@@ -113,7 +113,7 @@ public final class ReprofilingUtil {
         for (File dsStore : fileCollection) {
             FileUtils.forceDelete(dsStore);
         }
-        signApp(project, appDir);
+        signApp(project, appDir, verify);
         IosApp iosApp = new IosApp(appDir);
         BuildReportUtil.addIosAppInfo(iosApp);
         File resultIpa;
@@ -139,7 +139,7 @@ public final class ReprofilingUtil {
         return null;
     }
 
-    private static void signApp(Project project, File appDir) throws IOException {
+    private static void signApp(Project project, File appDir, boolean verify) throws IOException {
         //
         IosProvisioningProfile provisioning = null;
         String identity = null;
@@ -154,7 +154,7 @@ public final class ReprofilingUtil {
         ExecResult sign;
         if (identity.equals("-")) {
             logger.info("Performing ad-hoc code signing -- no provisioning is needed.");
-            sign = IosCodesigningUtil.signApp(appDir, identity, null);
+            sign = IosCodesigningUtil.signApp(appDir, identity, null, verify);
         } else {
             if (PropertyUtil.hasProjectProperty(project, "signing.provisioning")) {
                 String providedProvisioning = PropertyUtil.getProjectProperty(project, "signing.provisioning");
@@ -176,7 +176,7 @@ public final class ReprofilingUtil {
             } else {
                 logger.info("Will use found provisioning profile '{}'", provisioning);
             }
-            sign = IosCodesigningUtil.signApp(appDir, identity, new File(provisioning.getLocation()));
+            sign = IosCodesigningUtil.signApp(appDir, identity, new File(provisioning.getLocation()), verify);
         }
         for (String line : sign.getOutput()) {
             logger.info(line);

@@ -128,7 +128,7 @@ public final class IosCodesigningUtil {
         }
     }
 
-    public static ExecResult signApp(File appDir, String identity, File provisioning) throws IOException {
+    public static ExecResult signApp(File appDir, String identity, File provisioning, boolean verify) throws IOException {
         List<String> output = new ArrayList<>();
         removeCurrentAppSignature(appDir);
         for (File framework : getFrameworks(appDir)) {
@@ -137,20 +137,34 @@ public final class IosCodesigningUtil {
             if (sign.isFailure()) {
                 return new ExecResult(output, sign.getException());
             }
-            ExecResult verify = verifyFramework(framework);
-            output.addAll(verify.getOutput());
-            if (verify.isFailure()) {
-                return new ExecResult(output, verify.getException());
+            if (verify) {
+                ExecResult verifyFramework = verifyFramework(framework);
+                output.addAll(verifyFramework.getOutput());
+                if (verifyFramework.isFailure()) {
+                    return new ExecResult(output, verifyFramework.getException());
+                }
             }
         }
-        ExecResult sign = signApp(appDir, identity, provisioning, getEntitlements(appDir));
-        output.addAll(sign.getOutput());
-        ExecResult verify = verifyApp(appDir);
-        output.addAll(verify.getOutput());
-        if (verify.isFailure()) {
-            return new ExecResult(output, verify.getException());
+        ExecResult signApp = signApp(appDir, identity, provisioning, getEntitlements(appDir));
+        output.addAll(signApp.getOutput());
+        if (verify) {
+            ExecResult verifyApp = verifyApp(appDir);
+            output.addAll(verifyApp.getOutput());
+            if (verifyApp.isFailure()) {
+                return new ExecResult(output, verifyApp.getException());
+            }
         }
         return new ExecResult(output);
+    }
+
+    /**
+     * Deprecated since 0.15.1.0
+     * Should be removed in 0.16.0.0
+     * Method with the additional explicit boolean verify parameter should be used.
+     */
+    @Deprecated
+    public static ExecResult signApp(File appDir, String identity, File provisioning) throws IOException {
+        return signApp(appDir, identity, provisioning, true);
     }
 
     private static List<File> getFrameworks(File appDir) {
