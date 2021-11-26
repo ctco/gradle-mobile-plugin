@@ -56,7 +56,7 @@ class ReprofileIpaTask extends DefaultTask {
         }
 
         boolean verify
-        if (PropertyUtil.hasProjectProperty("reprofiling.verify")) {
+        if (PropertyUtil.hasProjectProperty(getProject(), "reprofiling.verify")) {
             verify = Boolean.parseBoolean(PropertyUtil.getProjectProperty(getProject(), "reprofiling.verify"))
         } else {
             verify = true
