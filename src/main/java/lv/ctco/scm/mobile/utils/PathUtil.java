@@ -11,6 +11,7 @@ import org.apache.commons.io.FileUtils;
 import java.io.File;
 import java.io.IOException;
 
+@Deprecated // (since = "0.15.1.2", forRemoval = true)
 public final class PathUtil {
 
     private static File userDir = FileUtils.getUserDirectory();

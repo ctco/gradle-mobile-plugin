@@ -17,14 +17,12 @@ import org.apache.commons.compress.archivers.zip.ZipExtraField;
 import org.apache.commons.compress.archivers.zip.ZipFile;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.TrueFileFilter;
 
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
 import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,15 +30,17 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.nio.file.attribute.PosixFilePermission;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ZipUtil {
 
@@ -82,17 +82,17 @@ public final class ZipUtil {
         FileUtils.forceMkdir(extractedFile.getParentFile());
         if (zipArchiveEntry.isUnixSymlink()) {
             if (PosixUtil.isPosixFileStore(outputDir)) {
-                logger.debug("Extracting [l] "+zipArchiveEntry.getName());
+                logger.debug("Extracting [l] [{}]", zipArchiveEntry.getName());
                 String symlinkTarget = zipFile.getUnixSymlink(zipArchiveEntry);
                 Files.createSymbolicLink(extractedFile.toPath(), new File(symlinkTarget).toPath());
             } else {
-                logger.debug("Skipping ! [l] "+zipArchiveEntry.getName());
+                logger.debug("Skipping ! [l] [{}]", zipArchiveEntry.getName());
             }
         } else if (zipArchiveEntry.isDirectory()) {
-            logger.debug("Extracting [d] "+zipArchiveEntry.getName());
+            logger.debug("Extracting [d] [{}]", zipArchiveEntry.getName());
             FileUtils.forceMkdir(extractedFile);
         } else {
-            logger.debug("Extracting [f] "+zipArchiveEntry.getName());
+            logger.debug("Extracting [f] [{}]", zipArchiveEntry.getName());
             try (
                     InputStream in = zipFile.getInputStream(zipArchiveEntry);
                     OutputStream out = new FileOutputStream(extractedFile)
@@ -113,23 +113,30 @@ public final class ZipUtil {
     }
 
     public static void compressDirectory(File rootDir, boolean includeAsRoot, File output) throws IOException {
-        if (!rootDir.isDirectory()) {
+        Path rootPath = rootDir.getCanonicalFile().toPath();
+        logger.debug("ZipUtil.compressDirectory( [{}], [{}], [{}] )", rootPath, includeAsRoot, output);
+        if (!Files.isDirectory(rootPath, LinkOption.NOFOLLOW_LINKS)) {
             throw new IOException("Provided file is not a directory");
         }
         FileUtils.touch(output);
         try (OutputStream archiveStream = new FileOutputStream(output);
              ArchiveOutputStream archive = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, archiveStream)) {
-            String rootName = "";
+            String rootName;
             if (includeAsRoot) {
-                insertDirectory(rootDir, rootDir.getName(), archive);
-                rootName = rootDir.getName()+"/";
+                insertDirectory(rootPath, rootPath.getFileName().toString(), archive);
+                rootName = rootPath.getFileName().toString()+"/";
+            } else {
+                rootName = "";
             }
-            Collection<File> fileCollection = FileUtils.listFilesAndDirs(rootDir, TrueFileFilter.TRUE, TrueFileFilter.TRUE);
-            for (File file : fileCollection) {
-                String relativePath = getRelativePath(rootDir, file);
-                String entryName = rootName+relativePath;
-                if (!relativePath.isEmpty() && !"/".equals(relativePath)) {
-                    insertObject(file, entryName, archive);
+            try (Stream<Path> stream = Files.walk(rootPath)) {
+                List<Path> paths = stream.collect(Collectors.toList());
+                paths.remove(rootPath);
+                for (Path path : paths) {
+                    String relativePath = getRelativePathForEntry(rootPath, path);
+                    String entryName = rootName+relativePath;
+                    if (!relativePath.isEmpty() && !"/".equals(relativePath)) {
+                        insertObject(path, entryName, archive);
+                    }
                 }
             }
             archive.finish();
@@ -138,20 +145,21 @@ public final class ZipUtil {
         }
     }
 
-    private static void insertObject(File file, String entryName, ArchiveOutputStream archive) throws IOException {
-        if (Files.isSymbolicLink(file.toPath())) {
-            insertSymlink(file, entryName, Files.readSymbolicLink(file.toPath()).toString(), archive);
-        } else if (file.isDirectory()) {
-            insertDirectory(file, entryName, archive);
-        } else if (file.isFile()) {
-            insertFile(file, entryName, archive);
+    private static void insertObject(Path path, String entryName, ArchiveOutputStream archive) throws IOException {
+        if (Files.isSymbolicLink(path)) {
+            insertSymlink(path, entryName, Files.readSymbolicLink(path).toString(), archive);
+        } else if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+            insertDirectory(path, entryName, archive);
+        } else if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            insertFile(path, entryName, archive);
         }
     }
 
-    private static void insertSymlink(File file, String entryName, String linkTarget, ArchiveOutputStream archive) throws IOException {
-        if (Files.isSymbolicLink(file.toPath())) {
+    private static void insertSymlink(Path path, String entryName, String linkTarget, ArchiveOutputStream archive) throws IOException {
+        if (Files.isSymbolicLink(path)) {
+            logger.debug("Compressing [l] [{}]", entryName);
             ZipArchiveEntry newEntry = new ZipArchiveEntry(entryName);
-            setExtraFields(file.toPath(), UnixStat.LINK_FLAG, newEntry);
+            setExtraFields(path, UnixStat.LINK_FLAG, newEntry);
             archive.putArchiveEntry(newEntry);
             archive.write(linkTarget.getBytes());
             archive.closeArchiveEntry();
@@ -160,10 +168,11 @@ public final class ZipUtil {
         }
     }
 
-    private static void insertDirectory(File dir, String entryName, ArchiveOutputStream archive) throws IOException {
-        if (dir.isDirectory()) {
+    private static void insertDirectory(Path path, String entryName, ArchiveOutputStream archive) throws IOException {
+        if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
+            logger.debug("Compressing [d] [{}]", entryName);
             ZipArchiveEntry newEntry = new ZipArchiveEntry(entryName+"/");
-            setExtraFields(dir.toPath(), UnixStat.DIR_FLAG, newEntry);
+            setExtraFields(path, UnixStat.DIR_FLAG, newEntry);
             archive.putArchiveEntry(newEntry);
             archive.closeArchiveEntry();
         } else {
@@ -171,16 +180,17 @@ public final class ZipUtil {
         }
     }
 
-    private static void insertFile(File file, String entryName, ArchiveOutputStream archive) throws IOException {
-        if (DEFAULT_EXCLUDES.contains(file.getName())) {
-            logger.debug("Skipping ! [l] {}", entryName);
+    private static void insertFile(Path path, String entryName, ArchiveOutputStream archive) throws IOException {
+        if (DEFAULT_EXCLUDES.contains(path.getFileName().toString())) {
+            logger.debug("Skipping ! [l] [{}]", entryName);
             return;
         }
-        if (file.isFile()) {
+        if (Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) {
+            logger.debug("Compressing [f] [{}]", entryName);
             ZipArchiveEntry newEntry = new ZipArchiveEntry(entryName);
-            setExtraFields(file.toPath(), UnixStat.FILE_FLAG, newEntry);
+            setExtraFields(path, UnixStat.FILE_FLAG, newEntry);
             archive.putArchiveEntry(newEntry);
-            BufferedInputStream input = new BufferedInputStream(new FileInputStream(file));
+            BufferedInputStream input = new BufferedInputStream(Files.newInputStream(path, StandardOpenOption.READ));
             IOUtils.copy(input, archive);
             input.close();
             archive.closeArchiveEntry();
@@ -231,8 +241,8 @@ public final class ZipUtil {
         return Files.readAttributes(path, "unix:*", LinkOption.NOFOLLOW_LINKS);
     }
 
-    private static String getRelativePath(File base, File path) {
-        return base.toPath().relativize(path.toPath()).toString().replace("\\", "/");
+    private static String getRelativePathForEntry(Path base, Path path) {
+        return base.relativize(path).toString().replace("\\", "/");
     }
 
 }

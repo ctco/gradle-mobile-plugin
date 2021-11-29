@@ -64,7 +64,8 @@ public final class ReprofilingUtil {
     public static void reprofileIpa(Project project, File targetIpa, String targetEnv, List<Profile> profiles, boolean verify) throws IOException {
         logger.info("Reprofiling IPA '{}' to environment '{}'", targetIpa.getAbsolutePath(), targetEnv);
         logProfiles(profiles);
-        File payloadDir = new File(PathUtil.getTempDir(), targetIpa.getName());
+        File buildTempDir = new File(project.getBuildDir(), "temp");
+        File payloadDir = new File(buildTempDir, targetIpa.getName());
         if (!targetIpa.exists()) {
             throw new IOException("Resign target '"+targetIpa.getAbsolutePath()+"' was not found");
         }
