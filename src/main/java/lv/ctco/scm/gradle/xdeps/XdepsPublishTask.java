@@ -9,6 +9,7 @@ package lv.ctco.scm.gradle.xdeps;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 
 import org.gradle.api.DefaultTask;
+import org.gradle.api.tasks.Internal;
 import org.gradle.api.tasks.TaskAction;
 
 public class XdepsPublishTask extends DefaultTask {
