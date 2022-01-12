@@ -13,6 +13,7 @@ import org.gradle.api.tasks.TaskAction;
 
 public class XdepsPublishTask extends DefaultTask {
 
+    @Internal
     private String repoName;
 
     public String getRepoName() {
