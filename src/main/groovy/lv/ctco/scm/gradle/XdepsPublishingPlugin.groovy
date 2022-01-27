@@ -9,6 +9,7 @@ package lv.ctco.scm.gradle
 import lv.ctco.scm.gradle.utils.ErrorUtil
 import lv.ctco.scm.gradle.xdeps.XdepsConfiguration
 import lv.ctco.scm.gradle.xdeps.XdepsExtension
+import lv.ctco.scm.gradle.xdeps.XdepsPlugin
 import lv.ctco.scm.gradle.xdeps.XdepsTasks
 import lv.ctco.scm.gradle.xdeps.XdepsUtil
 import lv.ctco.scm.mobile.utils.VersionUtil
@@ -35,12 +36,12 @@ public class XdepsPublishingPlugin implements Plugin<Project> {
             for (Project child : project.getAllprojects()) {
                 MobilePluginUtil.createXdepsDependencyConfiguration(child)
             }
-            project.getExtensions().create("xdeps", XdepsExtension)
+            project.getExtensions().create(XdepsPlugin.XDEPS_EXTENSION_NAME, XdepsExtension)
             XdepsUtil.applyMavenPublishPlugin(project)
             project.afterEvaluate {
                 checkXdepsVersion(project)
                 checkXdepsVersionOverride(project)
-                XdepsExtension xdepsExtension = (XdepsExtension)project.getExtensions().getByName("xdeps")
+                XdepsExtension xdepsExtension = (XdepsExtension)project.getExtensions().getByName(XdepsPlugin.XDEPS_EXTENSION_NAME)
                 XdepsConfiguration xdepsConfiguration = xdepsExtension.getXdepsConfiguration()
                 XdepsUtil.checkXdepsConfiguration(xdepsConfiguration)
                 XdepsTasks.getOrCreateXdepsPublishSnapshotsTask(project)

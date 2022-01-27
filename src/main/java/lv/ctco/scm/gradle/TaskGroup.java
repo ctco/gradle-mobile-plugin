@@ -11,8 +11,7 @@ public enum TaskGroup {
     UTILITY("Utility"),
     BUILD("Build"),
     TESTS("Test"),
-    UPLOAD("Upload"),
-    XDEPS("Xdeps");
+    UPLOAD("Upload");
 
     private String label;
 

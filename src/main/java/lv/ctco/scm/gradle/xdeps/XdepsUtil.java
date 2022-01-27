@@ -32,8 +32,8 @@ public final class XdepsUtil {
     private XdepsUtil() {}
 
     public static Set<File> getXdepsDependencyFiles(Project project) {
-        Configuration xdepsConfiguration = project.getConfigurations().findByName("xdeps");
-        return xdepsConfiguration == null ? Collections.<File>emptySet() : xdepsConfiguration.getFiles();
+        Configuration xdepsConfiguration = project.getConfigurations().findByName(XdepsPlugin.XDEPS_CONFIGURATION_NAME);
+        return xdepsConfiguration == null ? Collections.emptySet() : xdepsConfiguration.getFiles();
     }
 
     public static void checkXdepsConfiguration(XdepsConfiguration xdeps) throws IOException {
@@ -59,12 +59,10 @@ public final class XdepsUtil {
 
     public static List<DefaultMavenPublication> getMavenPublications(Project project) {
         List<DefaultMavenPublication> xdeps = new ArrayList<>();
-        PublishingExtension publishingExtension = getPublishingExtension(project);
-        if (publishingExtension != null) {
-            PublicationContainer publicationContainer = publishingExtension.getPublications();
-            for (Publication publication : publicationContainer) {
-                xdeps.add((DefaultMavenPublication)publication);
-            }
+        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+        PublicationContainer publicationContainer = publishingExtension.getPublications();
+        for (Publication publication : publicationContainer) {
+            xdeps.add((DefaultMavenPublication)publication);
         }
         return xdeps;
     }
@@ -75,12 +73,10 @@ public final class XdepsUtil {
 
     public static List<DefaultMavenArtifactRepository> getMavenRepositories(Project project) {
         List<DefaultMavenArtifactRepository> repos = new ArrayList<>();
-        PublishingExtension publishingExtension = getPublishingExtension(project);
-        if (publishingExtension != null) {
-            RepositoryHandler repositoryHandler = publishingExtension.getRepositories();
-            for (ArtifactRepository repo : repositoryHandler) {
-                repos.add((DefaultMavenArtifactRepository)repo);
-            }
+        PublishingExtension publishingExtension = project.getExtensions().getByType(PublishingExtension.class);
+        RepositoryHandler repositoryHandler = publishingExtension.getRepositories();
+        for (ArtifactRepository repo : repositoryHandler) {
+            repos.add((DefaultMavenArtifactRepository)repo);
         }
         return repos;
     }
@@ -92,10 +88,6 @@ public final class XdepsUtil {
             }
         }
         return false;
-    }
-
-    private static PublishingExtension getPublishingExtension(Project project) {
-        return project.getExtensions().getByType(PublishingExtension.class);
     }
 
 }

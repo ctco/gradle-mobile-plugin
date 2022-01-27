@@ -6,8 +6,6 @@
 
 package lv.ctco.scm.gradle.xdeps;
 
-import lv.ctco.scm.gradle.TaskGroup;
-
 import org.gradle.api.Project;
 import org.gradle.api.Task;
 
@@ -20,7 +18,7 @@ public class XdepsTasks {
         Task existingTask = project.getTasks().findByName(taskName);
         if (existingTask == null) {
             XdepsDisplayInfoTask newTask = project.getTasks().create(taskName, XdepsDisplayInfoTask.class);
-            newTask.setGroup(TaskGroup.XDEPS.getLabel());
+            newTask.setGroup(XdepsPlugin.XDEPS_TASK_GROUP);
             newTask.setDescription("Displays Xdeps configuration information");
             newTask.setXdepsConfiguration(xdepsConfiguration);
             return newTask;
@@ -51,7 +49,7 @@ public class XdepsTasks {
 
     private static Task createXdepsPublishTask(Project project, String taskName, String repoName) {
         XdepsPublishTask newTask = project.getTasks().create(taskName, XdepsPublishTask.class);
-        newTask.setGroup(TaskGroup.XDEPS.getLabel());
+        newTask.setGroup(XdepsPlugin.XDEPS_TASK_GROUP);
         newTask.setDescription("Publishes Xdeps publications to '" + repoName + "' repository");
         newTask.setRepoName(repoName);
         return newTask;

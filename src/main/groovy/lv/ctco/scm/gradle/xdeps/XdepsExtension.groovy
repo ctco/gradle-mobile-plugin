@@ -14,6 +14,7 @@ class XdepsExtension {
     String groupId
     String version
 
+    @Deprecated
     XdepsConfiguration getXdepsConfiguration() {
         XdepsConfiguration configuration = new XdepsConfiguration()
         configuration.setGroupId(groupId)

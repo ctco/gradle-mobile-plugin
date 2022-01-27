@@ -6,9 +6,10 @@
 
 package lv.ctco.scm.gradle;
 
+import lv.ctco.scm.gradle.xdeps.XdepsPlugin;
+
 import org.gradle.api.Project;
 import org.gradle.api.artifacts.Configuration;
-import org.gradle.api.artifacts.UnknownConfigurationException;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 
@@ -53,12 +54,7 @@ public class MobilePluginUtil {
     }
 
     public static void createXdepsDependencyConfiguration(Project project) {
-        Configuration xdeps;
-        try {
-            xdeps = project.getConfigurations().getByName("xdeps");
-        } catch (UnknownConfigurationException e) {
-            xdeps = project.getConfigurations().create("xdeps");
-        }
+        Configuration xdeps = project.getConfigurations().maybeCreate(XdepsPlugin.XDEPS_CONFIGURATION_NAME);
         // https://docs.gradle.org/current/userguide/dependency_management.html#sub:dynamic_versions_and_changing_modules
         xdeps.getResolutionStrategy().cacheChangingModulesFor(0, TimeUnit.SECONDS);
     }
