@@ -1,6 +1,5 @@
 package lv.ctco.scm.gradle.xdeps;
 
-import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
 
 import org.apache.commons.io.FileUtils;
@@ -10,6 +9,7 @@ import org.gradle.api.DefaultTask;
 import org.gradle.api.tasks.InputFiles;
 import org.gradle.api.tasks.OutputDirectory;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskExecutionException;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +21,7 @@ public class XdepsRestoreDependenciesTask extends DefaultTask {
     private File outputDirectory;
 
     public XdepsRestoreDependenciesTask() {
+        this.setGroup(XdepsPlugin.XDEPS_TASK_GROUP);
         this.setDescription("Set up files from the xdeps configuration");
     }
 
@@ -48,7 +49,7 @@ public class XdepsRestoreDependenciesTask extends DefaultTask {
             FileUtils.forceMkdir(outputDirectory);
             FileUtils.cleanDirectory(outputDirectory);
         } catch (IOException e) {
-            ErrorUtil.errorInTask(this.getName(), "Failed to prepare xdeps output directory");
+            throw new TaskExecutionException(this, e);
         }
         for (File xdepsFile : xdepsFiles) {
             try {
@@ -58,7 +59,7 @@ public class XdepsRestoreDependenciesTask extends DefaultTask {
                     FileUtils.copyFileToDirectory(xdepsFile, outputDirectory);
                 }
             } catch (IOException e) {
-                ErrorUtil.errorInTask(this.getName(), "Failed to restore xdeps dependencies");
+                throw new TaskExecutionException(this, e);
             }
         }
     }

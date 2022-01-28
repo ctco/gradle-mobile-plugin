@@ -6,7 +6,6 @@
 
 package lv.ctco.scm.gradle.xdeps;
 
-import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.utils.RevisionUtil;
 import lv.ctco.scm.mobile.utils.VersionUtil;
@@ -19,6 +18,7 @@ import org.gradle.api.logging.Logger;
 import org.gradle.api.logging.Logging;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 import org.gradle.api.tasks.TaskAction;
+import org.gradle.api.tasks.TaskExecutionException;
 
 import java.io.IOException;
 import java.util.List;
@@ -42,14 +42,14 @@ public class XdepsDisplayInfoTask extends DefaultTask {
             try {
                 releaseVersion = VersionUtil.normalizeToMajorMinorPatchVersion(buildVersion);
             } catch (IOException e) {
-                ErrorUtil.errorInTask(this.getName(), e);
+                throw new TaskExecutionException(this, e);
             }
         } else {
             releaseVersion = StringUtils.removeEndIgnoreCase(xdepsConfiguration.getVersion(), "-SNAPSHOT");
             try {
                 buildVersion = releaseVersion + '.' + RevisionUtil.getRevision(getProject());
             } catch (IOException e) {
-                ErrorUtil.errorInTask(this.getName(), e);
+                throw new TaskExecutionException(this, e);
             }
         }
 
