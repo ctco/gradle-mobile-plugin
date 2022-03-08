@@ -19,8 +19,8 @@ public final class ErrorUtil {
     private static void printError(String taskName, String errorMessage) {
         logger.error(errorMessage);
         if (TeamcityUtil.isTeamcityEnvironment()) {
-            TeamcityUtil.setBuildStatus("Execution failed for task "+taskName);
-            TeamcityUtil.setErrorDescription(errorMessage);
+            logger.lifecycle(TeamcityUtil.generateBuildStatusServiceMessage("Execution failed for task "+taskName));
+            logger.lifecycle(TeamcityUtil.generateBuildProblemDescriptionServiceMessage(errorMessage));
         }
     }
 

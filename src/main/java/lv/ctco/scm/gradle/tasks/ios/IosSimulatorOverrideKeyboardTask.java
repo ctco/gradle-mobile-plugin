@@ -21,10 +21,10 @@ public class IosSimulatorOverrideKeyboardTask extends MobilePluginTask {
             getProject().getProperties().get(IosSimulatorCLP.TYPE.getName()),
             getProject().getProperties().get(IosSimulatorCLP.RUNTIME.getName())
         );
-        logger.info("Checking state of {}", iosSimulator);
+        getLogger().info("Checking state of {}", iosSimulator);
         if (IosSimulatorUtil.getState(iosSimulator) == IosSimulatorState.SHUTDOWN) {
             logSimulatorState(iosSimulator);
-            logger.info("Overriding keyboard on {}", iosSimulator);
+            getLogger().info("Overriding keyboard on {}", iosSimulator);
             IosSimulatorUtil.overrideKeyboard(iosSimulator);
         } else {
             stopWithError("iOS simulator must be shutdown to override keyboard");
@@ -32,7 +32,7 @@ public class IosSimulatorOverrideKeyboardTask extends MobilePluginTask {
     }
 
     private void logSimulatorState(IosSimulator iosSimulator) throws IOException {
-        logger.info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
+        getLogger().info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
     }
 
 }

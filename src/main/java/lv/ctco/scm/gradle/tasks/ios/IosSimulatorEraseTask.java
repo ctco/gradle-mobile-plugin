@@ -21,23 +21,23 @@ public class IosSimulatorEraseTask extends MobilePluginTask {
             getProject().getProperties().get(IosSimulatorCLP.TYPE.getName()),
             getProject().getProperties().get(IosSimulatorCLP.RUNTIME.getName())
         );
-        logger.info("Checking state of {}", iosSimulator);
+        getLogger().info("Checking state of {}", iosSimulator);
         logSimulatorState(iosSimulator);
         if (IosSimulatorUtil.getState(iosSimulator) != IosSimulatorState.SHUTDOWN) {
-            logger.info("Commanding {} to shutdown", iosSimulator);
+            getLogger().info("Commanding {} to shutdown", iosSimulator);
             if (IosSimulatorUtil.shutdown(iosSimulator).isFailure()) {
                 stopWithError("Failed to shutdown iOS simulator");
             }
             logSimulatorState(iosSimulator);
         }
-        logger.info("Erasing {}", iosSimulator);
+        getLogger().info("Erasing {}", iosSimulator);
         if (IosSimulatorUtil.erase(iosSimulator).isFailure()) {
             stopWithError("Failed to erase iOS simulator");
         }
     }
 
     private void logSimulatorState(IosSimulator iosSimulator) throws IOException {
-        logger.info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
+        getLogger().info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
     }
 
 }

@@ -21,16 +21,16 @@ public class IosSimulatorBootTask extends MobilePluginTask {
             getProject().getProperties().get(IosSimulatorCLP.TYPE.getName()),
             getProject().getProperties().get(IosSimulatorCLP.RUNTIME.getName())
         );
-        logger.info("Checking state of {}", iosSimulator);
+        getLogger().info("Checking state of {}", iosSimulator);
         logSimulatorState(iosSimulator);
         if (IosSimulatorUtil.getState(iosSimulator) == IosSimulatorState.SHUTDOWN) {
-            logger.info("Commanding {} to boot", iosSimulator);
+            getLogger().info("Commanding {} to boot", iosSimulator);
             if (IosSimulatorUtil.boot(iosSimulator).isSuccess()) {
                 logSimulatorState(iosSimulator);
                 if (System.getenv("TEAMCITY_VERSION") != null) {
-                    logger.lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_ID' value='{}']", iosSimulator.getUdid());
-                    logger.lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_NAME' value='{}']", iosSimulator.getName());
-                    logger.lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_SDK_VERSION' value='{}']", iosSimulator.getSdkVersion());
+                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_ID' value='{}']", iosSimulator.getUdid());
+                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_NAME' value='{}']", iosSimulator.getName());
+                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_SDK_VERSION' value='{}']", iosSimulator.getSdkVersion());
                 }
             } else {
                 logSimulatorState(iosSimulator);
@@ -40,7 +40,7 @@ public class IosSimulatorBootTask extends MobilePluginTask {
     }
 
     private void logSimulatorState(IosSimulator iosSimulator) throws IOException {
-        logger.info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
+        getLogger().info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
     }
 
 }

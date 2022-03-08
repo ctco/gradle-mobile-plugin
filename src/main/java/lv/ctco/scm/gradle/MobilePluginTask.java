@@ -10,6 +10,7 @@ import org.gradle.api.tasks.TaskAction;
 
 public abstract class MobilePluginTask extends DefaultTask {
 
+    @Deprecated
     protected final Logger logger = Logging.getLogger(this.getClass());
 
     @TaskAction
@@ -33,10 +34,10 @@ public abstract class MobilePluginTask extends DefaultTask {
     }
 
     private void printError(String errorMessage) {
-        logger.error(errorMessage);
+        getLogger().error(errorMessage);
         if (TeamcityUtil.isTeamcityEnvironment()) {
-            TeamcityUtil.setBuildStatus("Execution failed for task "+this.getPath());
-            TeamcityUtil.setErrorDescription(errorMessage);
+            getLogger().lifecycle(TeamcityUtil.generateBuildStatusServiceMessage("Execution failed for task "+this.getPath()));
+            getLogger().lifecycle(TeamcityUtil.generateBuildProblemDescriptionServiceMessage(errorMessage));
         }
     }
 

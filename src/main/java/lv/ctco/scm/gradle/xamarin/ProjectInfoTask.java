@@ -11,15 +11,11 @@ import lv.ctco.scm.mobile.utils.RevisionUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 
 import org.gradle.api.DefaultTask;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.tasks.TaskAction;
 
 import java.io.IOException;
 
 public class ProjectInfoTask extends DefaultTask {
-
-    private final Logger logger = Logging.getLogger(this.getClass());
 
     private String releaseVersion;
     private String revision;
@@ -45,8 +41,8 @@ public class ProjectInfoTask extends DefaultTask {
 
     @TaskAction
     public void doTaskAction() {
-        logger.info("{}", xamarinConfiguration);
-        logger.info("{}", xandroidConfiguration);
+        getLogger().info("{}", xamarinConfiguration);
+        getLogger().info("{}", xandroidConfiguration);
 
         try {
             revision = RevisionUtil.getRevision(getProject());
@@ -56,13 +52,13 @@ public class ProjectInfoTask extends DefaultTask {
 
         String buildVersion = releaseVersion + '.' + revision;
 
-        logger.lifecycle("Project's release version is '{}'", releaseVersion);
-        logger.lifecycle("Project's revision is '{}'", revision);
-        logger.lifecycle("Project's build version is '{}'", buildVersion);
+        getLogger().lifecycle("Project's release version is '{}'", releaseVersion);
+        getLogger().lifecycle("Project's revision is '{}'", revision);
+        getLogger().lifecycle("Project's build version is '{}'", buildVersion);
 
         if (TeamcityUtil.isTeamcityEnvironment()) {
-            TeamcityUtil.setBuildNumber(buildVersion);
-            TeamcityUtil.setProjectReleaseVersion(releaseVersion);
+            getLogger().lifecycle(TeamcityUtil.generateBuildNumberServiceMessage(buildVersion));
+            getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
         }
     }
 

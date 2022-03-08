@@ -14,8 +14,6 @@ import org.apache.commons.lang3.StringUtils;
 
 import org.gradle.api.DefaultTask;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
-import org.gradle.api.logging.Logger;
-import org.gradle.api.logging.Logging;
 import org.gradle.api.publish.maven.internal.publication.DefaultMavenPublication;
 import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.TaskExecutionException;
@@ -24,8 +22,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class XdepsDisplayInfoTask extends DefaultTask {
-
-    private static final Logger logger = Logging.getLogger(XdepsDisplayInfoTask.class);
 
     private XdepsConfiguration xdepsConfiguration;
 
@@ -53,25 +49,25 @@ public class XdepsDisplayInfoTask extends DefaultTask {
             }
         }
 
-        logger.lifecycle("Project's release version is '{}'", releaseVersion);
-        logger.lifecycle("Project's build version is '{}'", buildVersion);
+        getLogger().lifecycle("Project's release version is '{}'", releaseVersion);
+        getLogger().lifecycle("Project's build version is '{}'", buildVersion);
 
         if (TeamcityUtil.isTeamcityEnvironment()) {
-            TeamcityUtil.setBuildNumber(buildVersion);
-            TeamcityUtil.setProjectReleaseVersion(releaseVersion);
-            TeamcityUtil.setProjectXdepsReleaseVersion(releaseVersion);
-            TeamcityUtil.setProjectXdepsBuildVersion(buildVersion);
+            getLogger().lifecycle(TeamcityUtil.generateBuildNumberServiceMessage(buildVersion));
+            getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
+            getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.xdeps.version.iteration", releaseVersion));
+            getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.xdeps.version.publish", buildVersion));
         }
 
         List<DefaultMavenArtifactRepository> repositories = XdepsUtil.getMavenRepositories(getProject());
-        logger.info("Detected {} defined Maven publication repositories", repositories.size());
+        getLogger().info("Detected {} defined Maven publication repositories", repositories.size());
         for (DefaultMavenArtifactRepository repository : repositories) {
-            logger.info(" - '"+repository.getName()+"' "+repository.getUrl());
+            getLogger().info(" - '"+repository.getName()+"' "+repository.getUrl());
         }
         List<DefaultMavenPublication> publications = XdepsUtil.getMavenPublications(getProject());
-        logger.info("Detected {} defined Maven publication definitions", publications.size());
+        getLogger().info("Detected {} defined Maven publication definitions", publications.size());
         for (DefaultMavenPublication publication : publications) {
-            logger.info(" - '"+publication.getName()+"' '"+publication.getCoordinates()+"'");
+            getLogger().info(" - '"+publication.getName()+"' '"+publication.getCoordinates()+"'");
         }
     }
 

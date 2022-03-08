@@ -28,11 +28,11 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
         File ipa = findIpa(getProject().getProperties().get("uitest.artifact.classifier"));
         File app = extractApp(ipa);
         IosApp iosApp = getAppInfo(app);
-        logger.info("Installing iOS app { bundle:{}, version:{} } on {}",
+        getLogger().info("Installing iOS app { bundle:{}, version:{} } on {}",
                 iosApp.getBundleIdentifier(), iosApp.getBundleVersion(), iosSimulator);
         if (IosSimulatorUtil.installApp(iosSimulator, app).isSuccess()) {
             if (System.getenv("TEAMCITY_VERSION") != null) {
-                logger.lifecycle("##teamcity[setParameter name='env.UITEST_BUNDLE_ID' value='{}']", iosApp.getBundleIdentifier());
+                getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_BUNDLE_ID' value='{}']", iosApp.getBundleIdentifier());
             }
         } else {
             stopWithError("Failed to install app on iosSimulator");
@@ -42,7 +42,7 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
     private File findIpa(Object classifier) throws IOException {
         List<File> ipas = CommonUtil.findIosIpasInDirectory(getProject().getProjectDir());
         if (ipas.size() == 1) {
-            logger.info("Found only a single ipa '{}'", ipas.get(0).getName());
+            getLogger().info("Found only a single ipa '{}'", ipas.get(0).getName());
             return ipas.get(0);
         } else if (ipas.isEmpty()) {
             throw new IOException("No ipa files found");
@@ -51,7 +51,7 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
         } else {
             for (File ipa : ipas) {
                 if (ipa.getName().toLowerCase().endsWith(classifier.toString().toLowerCase()+".ipa")) {
-                    logger.info("Found ipa matching provided classifier '{}'", ipa.getName());
+                    getLogger().info("Found ipa matching provided classifier '{}'", ipa.getName());
                     return ipa;
                 }
             }

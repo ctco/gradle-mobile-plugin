@@ -15,9 +15,9 @@ public class IosSimulatorsListTask extends MobilePluginTask {
 
     public void doTaskAction() throws Exception {
         List<IosSimulator> iosSimulators = IosSimulatorUtil.getAvailableIosSimulators();
-        logger.info("Found iOS simulators: {}", iosSimulators.size());
+        getLogger().info("Found iOS simulators: {}", iosSimulators.size());
         for (IosSimulator iosSimulator : iosSimulators) {
-            logger.info("  {}", iosSimulator);
+            getLogger().info("  {}", iosSimulator);
         }
     }
 

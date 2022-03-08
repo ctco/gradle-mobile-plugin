@@ -21,10 +21,10 @@ public class IosSimulatorShutdownTask extends MobilePluginTask {
             getProject().getProperties().get(IosSimulatorCLP.TYPE.getName()),
             getProject().getProperties().get(IosSimulatorCLP.RUNTIME.getName())
         );
-        logger.info("Checking state of {}", iosSimulator);
+        getLogger().info("Checking state of {}", iosSimulator);
         logSimulatorState(iosSimulator);
         if (IosSimulatorUtil.getState(iosSimulator) != IosSimulatorState.SHUTDOWN) {
-            logger.info("Commanding {} to shutdown", iosSimulator);
+            getLogger().info("Commanding {} to shutdown", iosSimulator);
             if (IosSimulatorUtil.shutdown(iosSimulator).isFailure()) {
                 stopWithError("Failed to shut down iOS simulator");
             }
@@ -33,7 +33,7 @@ public class IosSimulatorShutdownTask extends MobilePluginTask {
     }
 
     private void logSimulatorState(IosSimulator iosSimulator) throws IOException {
-        logger.info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
+        getLogger().info("  state of {} is {}", iosSimulator, IosSimulatorUtil.getState(iosSimulator));
     }
 
 }
