@@ -61,13 +61,13 @@ public final class TeamcityUtil {
         logger.lifecycle(generateBuildStatusServiceMessage(buildStatusText));
     }
 
-    public static String generateErrorMessageMessage(String errorMessageText) {
+    public static String generateErrorMessageServiceMessage(String errorMessageText) {
         return "##teamcity[message text='"+errorMessageText+"' status='ERROR']";
     }
 
     @Deprecated
     public static void setErrorMessage(String errorMessage) {
-        logger.lifecycle(generateErrorMessageMessage(errorMessage));
+        logger.lifecycle(generateErrorMessageServiceMessage(errorMessage));
     }
 
     public static String generateBuildProblemDescriptionServiceMessage(String buildProblemDescription) {
