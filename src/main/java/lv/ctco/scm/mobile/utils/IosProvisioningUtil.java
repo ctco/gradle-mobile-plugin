@@ -6,7 +6,12 @@
 
 package lv.ctco.scm.mobile.utils;
 
-import org.apache.commons.exec.CommandLine;
+import lv.ctco.scm.utils.exec.ExecCommand;
+import lv.ctco.scm.utils.exec.ExecResult;
+import lv.ctco.scm.utils.exec.ExecUtil;
+import lv.ctco.scm.utils.exec.LoggerOutputStream;
+
+import lv.ctco.scm.utils.file.FileUtil;
 import org.apache.commons.io.FileUtils;
 
 import org.gradle.api.logging.Logger;
@@ -14,6 +19,7 @@ import org.gradle.api.logging.Logging;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.HashMap;
 
 final class IosProvisioningUtil {
@@ -45,7 +51,8 @@ final class IosProvisioningUtil {
     }
 
     static IosProvisioningProfile getProvisioningProfileFromFile(File profileFile) throws IOException {
-        File plist = new File(PathUtil.getTempDir(), profileFile.getName()+".plist");
+        File tempDir = Files.createTempDirectory("").toFile().getAbsoluteFile();
+        File plist = new File(tempDir, profileFile.getName()+".plist");
         convertProvisioningToPlist(profileFile, plist);
         //
         IosProvisioningProfile profile = new IosProvisioningProfile();
@@ -54,6 +61,8 @@ final class IosProvisioningUtil {
         profile.setTeamName(PlistUtil.getStringValue(plist, "TeamName"));
         profile.setExpirationDate(PlistUtil.getDateValue(plist, "ExpirationDate"));
         profile.setLocation(profileFile.getAbsolutePath());
+        //
+        FileUtil.cleanDirectory(tempDir);
         return profile;
     }
 
@@ -76,10 +85,13 @@ final class IosProvisioningUtil {
     }
 
     private static void convertProvisioningToPlist(File profile, File plist) throws IOException {
-        CommandLine commandLine = new CommandLine("security");
-        commandLine.addArguments(new String[] {"cms", "-D", "-i", profile.getAbsolutePath(), "-o", plist.getAbsolutePath()}, false);
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, false);
-        if (!execResult.isSuccess()) {
+        ExecCommand execCommand = new ExecCommand("security");
+        execCommand.addArguments(new String[] {"cms", "-D", "-i", profile.getAbsolutePath(), "-o", plist.getAbsolutePath()}, false);
+        ExecResult execResult = ExecUtil.executeCommand(execCommand, new LoggerOutputStream());
+        if (execResult.isFailure()) {
+            for (String line : execResult.getOutput()) {
+                logger.info(line);
+            }
             throw new IOException(execResult.getException());
         }
     }

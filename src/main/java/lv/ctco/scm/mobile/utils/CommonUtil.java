@@ -102,12 +102,14 @@ public final class CommonUtil {
         return md5hex;
     }
 
+    @Deprecated
     static File unpackIpaPayload(File targetIpa, File payloadDir) throws IOException {
         FileUtils.deleteDirectory(payloadDir);
         ZipUtil.extractAll(targetIpa, payloadDir);
         return payloadDir;
     }
 
+    @Deprecated
     static void repackIpaPayload(File payloadDir, File targetIpa) throws IOException {
         if (payloadDir.exists()) {
             ZipUtil.compressDirectory(payloadDir, false, targetIpa);

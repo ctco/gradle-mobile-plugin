@@ -15,8 +15,8 @@ import java.io.IOException;
 public final class PathUtil {
 
     private static File userDir = FileUtils.getUserDirectory();
-    private static File projectDir = new File(".");
-    private static File buildDir = new File(".", "build");
+    private static File projectDir = new File(".").getAbsoluteFile();
+    private static File buildDir = new File(".", "build").getAbsoluteFile();
 
     private static final String BACKUP_SUBPATH = "backups";
     private static final String TEMP_SUBPATH = "temp";

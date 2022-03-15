@@ -207,4 +207,22 @@ public final class IosCodesigningUtil {
         return ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
     }
 
+    public static void resignApp(File appDir) throws IOException {
+        IosApp iosApp = new IosApp(appDir);
+        String identityName = iosApp.getIdentityName();
+        signApp(appDir, identityName, null, true);
+    }
+
+    public static void resignIpa(File sourceIpa, File resultIpa) throws IOException {
+        File payloadContainerDir = new File(Files.createTempDirectory("").toFile(), sourceIpa.getName()).getAbsoluteFile();
+        if (!sourceIpa.exists()) {
+            throw new IOException("Codesign source file '"+sourceIpa.getAbsolutePath()+"' was not found");
+        }
+        IosArtifactUtil.unpackIpaPayload(sourceIpa, payloadContainerDir);
+        File appDir = IosArtifactUtil.getPayloadApp(payloadContainerDir).getCanonicalFile();
+        resignApp(appDir);
+        IosArtifactUtil.repackIpaPayload(payloadContainerDir, resultIpa);
+        FileUtils.deleteDirectory(payloadContainerDir);
+    }
+
 }
