@@ -210,7 +210,7 @@ public final class IosCodesigningUtil {
     public static void resignApp(File appDir) throws IOException {
         IosApp iosApp = new IosApp(appDir);
         String identityName = iosApp.getIdentityName();
-        signApp(appDir, identityName, null, true);
+        signApp(appDir, identityName, getEmbeddedProvisioningFile(appDir), true);
     }
 
     public static void resignIpa(File sourceIpa, File resultIpa) throws IOException {
