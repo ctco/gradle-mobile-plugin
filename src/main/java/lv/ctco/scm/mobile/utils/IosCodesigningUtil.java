@@ -18,8 +18,10 @@ import org.gradle.api.logging.Logging;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -114,7 +116,7 @@ public final class IosCodesigningUtil {
         return ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
     }
 
-    private static File getEntitlements(File appDir) {
+    private static File getArchivedEntitlementsFile(File appDir) {
         for (File file : FileUtils.listFiles(appDir, new String[]{"entitlements", "xcent"}, false)) {
             if ("archived-expanded-entitlements.xcent".equals(file.getName())
                     || file.getName().toLowerCase().endsWith(".entitlements")) {
@@ -152,7 +154,7 @@ public final class IosCodesigningUtil {
                 }
             }
         }
-        ExecResult signApp = signApp(appDir, identity, provisioning, getEntitlements(appDir));
+        ExecResult signApp = signApp(appDir, identity, provisioning, getArchivedEntitlementsFile(appDir));
         output.addAll(signApp.getOutput());
         if (verify) {
             ExecResult verifyApp = verifyApp(appDir);
@@ -207,10 +209,64 @@ public final class IosCodesigningUtil {
         return ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
     }
 
-    public static void resignApp(File appDir) throws IOException {
+    private static File getEntitlements(File appDir) throws IOException {
+        ExecCommand execCommand = new ExecCommand(EXECUTABLE_CODESIGN);
+        execCommand.addArguments(new String[]{COMMAND_DISPLAY, "--entitlements", ":-"}, false);
+        execCommand.addArgument(appDir.getAbsolutePath(), false);
+        logger.debug("Executing command:{}", execCommand);
+        ExecResult execResult = ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
+        if (execResult.isSuccess()) {
+            Path entitlementsFile = Paths.get(Files.createTempDirectory("").toAbsolutePath().toString(), "entitlements.plist");
+            Files.createFile(entitlementsFile);
+            for (String line : execResult.getOutput()) {
+                if (line.trim().startsWith("<")) {
+                    FileUtils.writeStringToFile(entitlementsFile.toFile(), line, StandardCharsets.UTF_8, true);
+                }
+            }
+            return entitlementsFile.toFile();
+        } else {
+            throw new IOException("Failed to get iOS app entitlements");
+        }
+    }
+
+    public static ExecResult signAppDir(File appDir, String identity, File provisioning, File entitlements) throws IOException {
+        List<String> output = new ArrayList<>();
+        removeCurrentAppSignature(appDir);
+        for (Path frameworkSignable : getFrameworkSignables(appDir)) {
+            ExecResult sign = signFramework(frameworkSignable, identity);
+            output.addAll(sign.getOutput());
+            if (sign.isFailure()) {
+                return new ExecResult(output, sign.getException());
+            }
+            ExecResult verifyFramework = verifyFramework(frameworkSignable);
+            output.addAll(verifyFramework.getOutput());
+            if (verifyFramework.isFailure()) {
+                return new ExecResult(output, verifyFramework.getException());
+            }
+        }
+        ExecResult signApp = signApp(appDir, identity, provisioning, entitlements);
+        output.addAll(signApp.getOutput());
+        ExecResult verifyApp = verifyApp(appDir);
+        output.addAll(verifyApp.getOutput());
+        if (verifyApp.isFailure()) {
+            return new ExecResult(output, verifyApp.getException());
+        }
+        return new ExecResult(output);
+    }
+
+    public static ExecResult resignAppDir(File appDir) throws IOException {
         IosApp iosApp = new IosApp(appDir);
         String identityName = iosApp.getIdentityName();
-        signApp(appDir, identityName, getEmbeddedProvisioningFile(appDir), true);
+        File embeddedProvisioningFile = getEmbeddedProvisioningFile(appDir);
+        File provisioningFile;
+        if (embeddedProvisioningFile == null) {
+            throw new IOException("embedded.mobileprovision not found in '"+appDir+"'");
+        } else {
+            provisioningFile = new File(Files.createTempDirectory("").toFile(), "embedded.mobileprovision");
+            Files.copy(embeddedProvisioningFile.toPath(), provisioningFile.toPath());
+        }
+        File entitlementsFile = getEntitlements(appDir);
+        return signAppDir(appDir, identityName, provisioningFile, entitlementsFile);
     }
 
     public static void resignIpa(File sourceIpa, File resultIpa) throws IOException {
@@ -220,7 +276,13 @@ public final class IosCodesigningUtil {
         }
         IosArtifactUtil.unpackIpaPayload(sourceIpa, payloadContainerDir);
         File appDir = IosArtifactUtil.getPayloadApp(payloadContainerDir).getCanonicalFile();
-        resignApp(appDir);
+        ExecResult resignApp = resignAppDir(appDir);
+        if (resignApp.isFailure()) {
+            for (String line : resignApp.getOutput()) {
+                logger.error(line);
+            }
+            throw new IOException("Failed to codesign iOS app");
+        }
         IosArtifactUtil.repackIpaPayload(payloadContainerDir, resultIpa);
         FileUtils.deleteDirectory(payloadContainerDir);
     }
