@@ -75,6 +75,9 @@ tasks.register('werckerSetupGradleProperties', SetupConfigFileTask) {
     filePath = '~/.gradle/gradle.properties'
 }
 
+import lv.ctco.scm.ci.SetupSigningKeyTask
+tasks.register('setupSigningKey', SetupSigningKeyTask)
+
 signing {
     required { hasProperty("signingKey") && hasProperty("signingPassword") && gradle.taskGraph.hasTask("uploadArchives") }
     useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
