@@ -154,3 +154,7 @@ nexusPublishing {
         }
     }
 }
+
+project.afterEvaluate {
+    afterReleaseBuild.dependsOn publishToSonatype
+}

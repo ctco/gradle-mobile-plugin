@@ -44,4 +44,4 @@ jobs:
           git config --global user.name "CSCM"
           git remote set-url origin https://${{secrets.GITHUB_TOKEN}}@github.com/${{github.repository}}
           ./gradlew --info :setupSigningKey
-          ./gradlew --info release publishToSonatype closeSonatypeStagingRepository -Prelease.useAutomaticVersion=true
+          ./gradlew --info release closeSonatypeStagingRepository -Prelease.useAutomaticVersion=true
