@@ -44,3 +44,27 @@ jobs:
         run: |
           ./gradlew --info :setupSigningKey
           ./gradlew --info assemble uploadArchives
+
+  perform-release:
+    needs: publish-snapshot
+    runs-on: ubuntu-20.04
+    environment:
+      name: releases
+      url: https://repo1.maven.org/maven2/lv/ctco/scm/gradle-mobile-plugin/
+    env:
+      ORG_GRADLE_PROJECT_ossrhUsername: ${{secrets.OSSRH_USERNAME}}
+      ORG_GRADLE_PROJECT_ossrhPassword: ${{secrets.OSSRH_PASSWORD}}
+      ORG_GRADLE_PROJECT_signingPassword: ${{secrets.SIGNING_PASSWORD}}
+      SIGNING_KEY: ${{secrets.SIGNING_KEY}}
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '8'
+
+      - name: Perform release
+        run: |
+          ./gradlew --info :setupSigningKey
+          ./gradlew --info :tasks
