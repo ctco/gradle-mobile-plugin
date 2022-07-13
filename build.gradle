@@ -10,7 +10,7 @@ plugins {
     id 'maven'
     id 'maven-publish'
     id 'signing'
-    id 'io.codearte.nexus-staging' version '0.30.0'
+    id 'io.github.gradle-nexus.publish-plugin' version '1.1.0'
     id 'net.researchgate.release' version '2.8.1'
 }
 
@@ -68,20 +68,14 @@ jar {
 import lv.ctco.scm.teamcity.ProjectInfoTask
 tasks.register('projectInfo', ProjectInfoTask)
 
-// Custom functionality for Wercker integration
-import lv.ctco.scm.wercker.SetupConfigFileTask
-tasks.register('werckerSetupGradleProperties', SetupConfigFileTask) {
-    envVar = 'GRADLE_PROPERTIES'
-    filePath = '~/.gradle/gradle.properties'
-}
-
+// Custom functionality to provide artifact signing key onto public CI
 import lv.ctco.scm.ci.SetupSigningKeyTask
 tasks.register('setupSigningKey', SetupSigningKeyTask)
 
 signing {
-    required { hasProperty("signingKey") && hasProperty("signingPassword") && gradle.taskGraph.hasTask("uploadArchives") }
+    required { hasProperty("signingKey") && hasProperty("signingPassword") }
     useInMemoryPgpKeys(findProperty("signingKey").toString(), findProperty("signingPassword").toString())
-    sign configurations.archives
+    sign publishing.publications
 }
 
 task javadocJar(type: Jar) {
@@ -102,47 +96,31 @@ publishing {
     publications {
         plugin (MavenPublication) {
             from components.java
-        }
-    }
-}
-
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: findProperty("ossrhUsername"), password: findProperty("ossrhPassword"))
-            }
-
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: findProperty("ossrhUsername"), password: findProperty("ossrhPassword"))
-            }
-
-            pom.project {
-                name 'C.T.Co Mobile Plugin for Gradle'
-                packaging 'jar'
-                description 'The C.T.Co Mobile Plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps.'
-                url 'https://github.com/ctco/gradle-mobile-plugin'
+            artifact javadocJar
+            artifact sourcesJar
+            pom {
+                name = 'C.T.Co Mobile Plugin for Gradle'
+                description = 'The C.T.Co Mobile Plugin for Gradle helps you to configure and build Xcode and Xamarin (iOS, Android) apps.'
+                url = 'https://github.com/ctco/gradle-mobile-plugin'
 
                 scm {
-                    connection 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
-                    developerConnection 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
-                    url 'https://github.com/ctco/gradle-mobile-plugin'
+                    connection = 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
+                    developerConnection = 'scm:git:git@github.com:ctco/gradle-mobile-plugin.git'
+                    url = 'https://github.com/ctco/gradle-mobile-plugin'
                 }
 
                 licenses {
                     license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'https://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'https://www.apache.org/licenses/LICENSE-2.0.txt'
                     }
                 }
 
                 developers {
                     developer {
-                        id 'Quesar'
-                        name 'Ivars Bērziņš'
-                        email 'Ivars.Berzinsh@ctco.lv'
+                        id = 'Quesar'
+                        name = 'Ivars Bērziņš'
+                        email = 'Ivars.Berzinsh@ctco.lv'
                     }
                 }
             }
@@ -165,8 +143,14 @@ release {
     buildTasks = ['build']
 }
 
-nexusStaging {
+nexusPublishing {
     packageGroup = 'lv.ctco'
+    repositories {
+        Sonatype {
+            nexusUrl = uri('https://oss.sonatype.org/service/local/')
+            snapshotRepositoryUrl = uri('https://oss.sonatype.org/content/repositories/snapshots/')
+            username = findProperty('ossrhUsername')
+            password = findProperty('ossrhPassword')
+        }
+    }
 }
-
-afterReleaseBuild.dependsOn uploadArchives

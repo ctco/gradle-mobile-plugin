@@ -43,4 +43,4 @@ jobs:
       - name: Publish snapshot
         run: |
           ./gradlew --info :setupSigningKey
-          ./gradlew --info assemble uploadArchives
+          ./gradlew --info assemble publishToSonatype
