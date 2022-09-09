@@ -19,6 +19,7 @@ import lv.ctco.scm.gradle.xcode.XcodeConfiguration
 import lv.ctco.scm.gradle.xcode.XcodeExtension
 import lv.ctco.scm.gradle.xcode.XcodePlatform
 import lv.ctco.scm.gradle.xcode.XcodeUtil
+import lv.ctco.scm.mobile.knappsack.KnappsackPublishingPlugin
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -100,6 +101,7 @@ class MobilePlugin implements Plugin<Project> {
                 logger.info("Configuring only common tasks...")
         }
         configureCommonTasks(project)
+        project.getPluginManager().apply(KnappsackPublishingPlugin.class)
     }
 
     private static void configureAndroidPlatform(Project project) {
@@ -123,7 +125,6 @@ class MobilePlugin implements Plugin<Project> {
 
     private static void configureCommonTasks(Project project) throws IOException {
         CommonTasks.registerReprofileIpaTask(project)
-        CommonTasks.registerKnappsackUploadTask(project)
         CommonTasks.registerReportGitCommitInfoTask(project)
     }
 

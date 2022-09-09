@@ -17,6 +17,15 @@ class CommonTasks {
 
     private CommonTasks() {}
 
+    /**
+     * Registers a knappsackUpload task for project
+     *
+     * @deprecated
+     * Use project.getPluginManager().apply(KnappsackPublishingPlugin.class) where needed instead.
+     *
+     * @param project Project to register the task for.
+     */
+    @Deprecated // (since = "0.15.4.0", forRemoval = true)
     static void registerKnappsackUploadTask(Project project) {
         Task task = getTaskByName(project, "knappsackUpload")
         if (task == null) {
