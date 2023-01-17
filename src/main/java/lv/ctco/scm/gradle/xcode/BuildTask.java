@@ -13,7 +13,6 @@ import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.mobile.utils.ExecResult;
 import lv.ctco.scm.mobile.utils.ExecUtil;
-import lv.ctco.scm.mobile.utils.PathUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
 
 import org.apache.commons.exec.CommandLine;
@@ -65,10 +64,10 @@ public class BuildTask extends DefaultTask {
         commandLine.addArgument(env.getSdk());
         commandLine.addArgument("-target");
         commandLine.addArgument(env.getTarget(), false);
-        commandLine.addArgument("DSTROOT="+ PathUtil.getXcodeDstDir().getAbsolutePath());
-        commandLine.addArgument("OBJROOT="+PathUtil.getXcodeObjDir().getAbsolutePath());
-        commandLine.addArgument("SYMROOT="+new File(PathUtil.getXcodeSymDir(), env.getName()).getAbsolutePath());
-        commandLine.addArgument("SHARED_PRECOMPS_DIR="+PathUtil.getXcodeSharedDir().getAbsolutePath());
+        commandLine.addArgument("DSTROOT="+new File(getProject().getBuildDir(), "xcodebuild/dst").getAbsolutePath());
+        commandLine.addArgument("OBJROOT="+new File(getProject().getBuildDir(), "xcodebuild/obj").getAbsolutePath());
+        commandLine.addArgument("SYMROOT="+new File(new File(getProject().getBuildDir(), "xcodebuild/sym"), env.getName()).getAbsolutePath());
+        commandLine.addArgument("SHARED_PRECOMPS_DIR="+new File(getProject().getBuildDir(), "xcodebuild/shared").getAbsolutePath());
         ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
         if (!execResult.isSuccess()) {
             ErrorUtil.errorInTask(this.getName(), execResult.getException());
@@ -76,7 +75,7 @@ public class BuildTask extends DefaultTask {
     }
 
     private void checkArtifacts() throws IOException {
-        File buildDir = new File(PathUtil.getXcodeSymDir(), env.getName()+"/"+env.getConfiguration()+"-"+env.getSdk());
+        File buildDir = new File(new File(getProject().getBuildDir(), "xcodebuild/sym"), env.getName()+"/"+env.getConfiguration()+"-"+env.getSdk());
         File appDir;
         List<File> apps = CommonUtil.findIosAppsInDirectory(buildDir);
         if (apps.size() == 1) {
@@ -97,7 +96,7 @@ public class BuildTask extends DefaultTask {
     }
 
     private void moveArtifactsToDistDir() throws IOException {
-        File buildDir = new File(PathUtil.getXcodeSymDir(), env.getName()+"/"+env.getConfiguration()+"-"+env.getSdk());
+        File buildDir = new File(new File(getProject().getBuildDir(), "xcodebuild/sym"), env.getName()+"/"+env.getConfiguration()+"-"+env.getSdk());
         File appDir;
         List<File> apps = CommonUtil.findIosAppsInDirectory(buildDir);
         if (apps.size() == 1) {
@@ -114,14 +113,14 @@ public class BuildTask extends DefaultTask {
         if (!StringUtils.endsWithIgnoreCase(appName, env.getName().toUpperCase())) {
             appName = appName+" "+env.getName().toUpperCase();
         }
-        File ipaFile = new File(PathUtil.getIpaDistDir(), appName+".ipa");
+        File ipaFile = new File(new File(getProject().getBuildDir(), "ipadist"), appName+".ipa");
         ZipUtil.compressDirectory(new File(buildDir, "Payload"), true, ipaFile);
         FileUtils.deleteDirectory(payloadDir);
         //
         List<File> dsyms = CommonUtil.findIosDsymsinDirectory(buildDir);
         if (dsyms.size() == 1 ) {
             File dsymDir = dsyms.get(0);
-            ZipUtil.compressDirectory(dsymDir, true, new File(PathUtil.getDsymDistDir(), "dSYM."+env.getName()+".zip"));
+            ZipUtil.compressDirectory(dsymDir, true, new File(new File(getProject().getBuildDir(), "dsymdist"), "dSYM."+env.getName()+".zip"));
             FileUtils.deleteDirectory(dsymDir);
         } else {
             logger.warn("None or multiple DSYMs found! Not moving to distribution folder.");

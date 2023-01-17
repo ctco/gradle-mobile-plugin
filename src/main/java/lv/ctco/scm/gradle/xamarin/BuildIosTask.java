@@ -10,7 +10,6 @@ import lv.ctco.scm.mobile.utils.IosApp;
 import lv.ctco.scm.mobile.utils.BuildReportUtil;
 import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
-import lv.ctco.scm.mobile.utils.PathUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
 import lv.ctco.scm.utils.exec.ExecCommand;
 import lv.ctco.scm.utils.exec.ExecResult;
@@ -114,7 +113,7 @@ public class BuildIosTask extends DefaultTask {
         if (!StringUtils.endsWithIgnoreCase(ipaName, env.getName().toUpperCase())) {
             ipaName = getProjectName()+" "+env.getName().toUpperCase();
         }
-        FileUtils.copyFile(ipa, new File(PathUtil.getIpaDistDir(), ipaName+".ipa"));
+        FileUtils.copyFile(ipa, new File(new File(getProject().getBuildDir(), "ipadist"), ipaName+".ipa"));
         FileUtils.forceDelete(ipa);
         //
         List<File> dsyms = CommonUtil.findIosDsymsinDirectory(getConfigurationBinDir());
