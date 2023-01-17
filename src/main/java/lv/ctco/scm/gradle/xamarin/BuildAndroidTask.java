@@ -10,7 +10,6 @@ import lv.ctco.scm.gradle.utils.PropertyUtil;
 import lv.ctco.scm.mobile.utils.AndroidApksignerUtil;
 import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
-import lv.ctco.scm.mobile.utils.PathUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
 import lv.ctco.scm.utils.exec.ExecCommand;
 import lv.ctco.scm.utils.exec.ExecResult;
@@ -97,7 +96,7 @@ public class BuildAndroidTask extends DefaultTask {
                 throw new IOException("Android signing key pass 'android.keypass' has not been provided");
             }
             if (signingKeystore == null) {
-                signingKeystore = PathUtil.getAndroidKeystore().getCanonicalPath();
+                signingKeystore = new File(FileUtils.getUserDirectory(), ".gradle/init.d/android.keystore").getCanonicalPath();
             } else {
                 signingKeystore = (new File(signingKeystore.replace("~", System.getProperty("user.home")))).getCanonicalPath();
             }
@@ -142,7 +141,7 @@ public class BuildAndroidTask extends DefaultTask {
     }
 
     private void moveArtifactToDistDir() throws IOException {
-        File apkDistDir = PathUtil.getApkDistDir();
+        File apkDistDir = new File(getProject().getBuildDir(),"apkdist");
         File sourceApk = findSignedArtifact();
         File targetApk = new File(apkDistDir, getProjectName()+" "+env.getName().toUpperCase()+".apk");
         FileUtils.copyFile(sourceApk, targetApk);

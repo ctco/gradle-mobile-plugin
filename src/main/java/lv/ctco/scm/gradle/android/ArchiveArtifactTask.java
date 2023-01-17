@@ -7,7 +7,6 @@
 package lv.ctco.scm.gradle.android;
 
 import lv.ctco.scm.gradle.utils.ErrorUtil;
-import lv.ctco.scm.mobile.utils.PathUtil;
 
 import org.apache.commons.io.FileUtils;
 
@@ -50,12 +49,20 @@ public class ArchiveArtifactTask extends DefaultTask {
                 environment.getAssemblyName()+"-"+environment.getConfiguration()+"-unsigned."+environment.getAssemblyType());
     }
 
+    private File getApkDistDir() {
+        return new File(getProject().getBuildDir(),"apkdist");
+    }
+
+    private File getAarDistDir() throws IOException {
+        return new File(getProject().getBuildDir(),"aardist");
+    }
+
     private File getArchiveArtifactPath() throws IOException {
         String standartizedArtifactName = environment.getAssemblyName()+"-"+environment.getBuildVersion()+"-"+environment.getConfiguration()+"."+environment.getAssemblyType();
         if ("apk".equals(environment.getAssemblyType())) {
-            return new File(PathUtil.getApkDistDir(), standartizedArtifactName);
+            return new File(getApkDistDir(), standartizedArtifactName);
         } else if ("aar".equals(environment.getAssemblyType())) {
-            return new File(PathUtil.getAarDistDir(), standartizedArtifactName);
+            return new File(getAarDistDir(), standartizedArtifactName);
         } else {
             throw new IOException("Unsupported environment type");
         }
