@@ -69,8 +69,7 @@ public class BuildTask extends DefaultTask {
         commandLine.addArgument("OBJROOT="+PathUtil.getXcodeObjDir().getAbsolutePath());
         commandLine.addArgument("SYMROOT="+new File(PathUtil.getXcodeSymDir(), env.getName()).getAbsolutePath());
         commandLine.addArgument("SHARED_PRECOMPS_DIR="+PathUtil.getXcodeSharedDir().getAbsolutePath());
-        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, true, true);
-        FileUtils.writeLines(new File(PathUtil.getBuildlogDir(), this.getName()+"Task.build.log"), execResult.getOutput());
+        ExecResult execResult = ExecUtil.execCommand(commandLine, null, null, false, true);
         if (!execResult.isSuccess()) {
             ErrorUtil.errorInTask(this.getName(), execResult.getException());
         }
