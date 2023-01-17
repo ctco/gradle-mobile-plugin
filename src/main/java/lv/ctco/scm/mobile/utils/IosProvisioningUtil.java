@@ -30,8 +30,12 @@ final class IosProvisioningUtil {
 
     private IosProvisioningUtil() {}
 
+    private static File getDefaultProvisioningProfileDir() {
+        return new File(FileUtils.getUserDirectory(), "Library/MobileDevice/Provisioning Profiles");
+    }
+
     static void getAvailableProvisioningProfiles() throws IOException {
-        File profileDir = PathUtil.getDefaultProvisioningProfileDir();
+        File profileDir = getDefaultProvisioningProfileDir();
         provisioningProfiles.clear();
         int available = 0;
         int expired = 0;
@@ -67,7 +71,7 @@ final class IosProvisioningUtil {
     }
 
     private static File getProvisioningProfileFileByUuid(String uuid) {
-        return new File(PathUtil.getDefaultProvisioningProfileDir(), uuid+".mobileprovision");
+        return new File(getDefaultProvisioningProfileDir(), uuid+".mobileprovision");
     }
 
     static IosProvisioningProfile getProvisioningProfileByUuid(String uuid) throws IOException {
