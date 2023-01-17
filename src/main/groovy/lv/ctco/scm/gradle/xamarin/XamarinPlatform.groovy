@@ -6,8 +6,6 @@
 
 package lv.ctco.scm.gradle.xamarin
 
-import lv.ctco.scm.gradle.TaskGroup
-
 import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.StringUtils
 
@@ -61,7 +59,6 @@ class XamarinPlatform {
             // Getting release versions from according csproj files
             Csproj csprojXios = new CsprojParser(extXios.getProjectFile()).parse()
             releaseVersionIos = XamarinUtil.getReleaseVersion(csprojXios)
-            getOrCreateIncrementVersionTask(project, extXios.getSolutionFile(), csprojXios)
             if (extXand.isValid()) {
                 Csproj csprojXand = new CsprojParser(extXand.getProjectFile()).parse()
                 releaseVersionAndroid = XamarinUtil.getReleaseVersion(csprojXand)
@@ -184,21 +181,6 @@ class XamarinPlatform {
             newTask.setDescription("Profiles files for iOS "+ _env.getName()+" environment")
             newTask.setProjectDir(extXios.getProjectFile().getParentFile())
             newTask.setProfiles(extXios.getSpecificProfiles(_env.getName(), "build"))
-            return newTask
-        } else {
-            return existingTask
-        }
-    }
-
-    private static Task getOrCreateIncrementVersionTask(Project project, File sln, Csproj csproj) {
-        String taskName = "incrementProjectVersion"
-        Task existingTask = project.getTasks().findByName(taskName)
-        if (existingTask == null) {
-            IncrementProjectVersionTask newTask = project.getTasks().create(taskName, IncrementProjectVersionTask.class)
-            newTask.setGroup(TaskGroup.UTILITY.getLabel())
-            newTask.setDescription("Increments version in .sln and .csproj files")
-            newTask.setSolutionFile(sln)
-            newTask.setCsproj(csproj)
             return newTask
         } else {
             return existingTask
