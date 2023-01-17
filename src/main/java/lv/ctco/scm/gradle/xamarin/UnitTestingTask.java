@@ -9,7 +9,6 @@ package lv.ctco.scm.gradle.xamarin;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.mobile.utils.ExecResult;
 import lv.ctco.scm.mobile.utils.ExecUtil;
-import lv.ctco.scm.mobile.utils.PathUtil;
 
 import org.apache.commons.exec.CommandLine;
 
@@ -58,8 +57,12 @@ public class UnitTestingTask extends DefaultTask {
         }
     }
 
+    private File getReportUnitDir() {
+        return new File(getProject().getBuildDir(), "reports/unit");
+    }
+
     private void testProject() throws IOException {
-        File reportFile = new File(PathUtil.getReportUnitDir(), "UnitTestResult.xml");
+        File reportFile = new File(getReportUnitDir(), "UnitTestResult.xml");
         CommandLine commandLine = new CommandLine("nunit-console");
         commandLine.addArgument("-labels");
         commandLine.addArgument("-output="+reportFile.getAbsolutePath(), false);
