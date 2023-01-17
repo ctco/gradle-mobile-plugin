@@ -98,7 +98,7 @@ public class BuildIosTask extends DefaultTask {
         iosApp.setName(env.getName());
         iosApp.setBuildCnf(env.getConfiguration());
         iosApp.setBuildSdk(env.getPlatform());
-        BuildReportUtil.addIosAppInfo(iosApp);
+        new BuildReportUtil(getProject()).writeReportForIosApp(iosApp, env.getName());
     }
 
     private void moveArtifactsToDistDir() throws IOException {

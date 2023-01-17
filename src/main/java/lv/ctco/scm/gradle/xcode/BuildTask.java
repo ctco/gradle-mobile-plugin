@@ -87,7 +87,7 @@ public class BuildTask extends DefaultTask {
         iosApp.setName(env.getName());
         iosApp.setBuildCnf(env.getConfiguration());
         iosApp.setBuildSdk(env.getSdk());
-        BuildReportUtil.addIosAppInfo(iosApp);
+        new BuildReportUtil(getProject()).writeReportForIosApp(iosApp, env.getName());
         if (iosApp.isSignedWithDeveloperIdentity()) {
             if (!("Debug".equalsIgnoreCase(env.getConfiguration()))) {
                 throw new IOException("iPhone Developer identity is not allowed for "+env.getConfiguration()+" configuration");

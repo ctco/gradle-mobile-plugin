@@ -116,7 +116,7 @@ public final class ReprofilingUtil {
         }
         signApp(project, appDir, verify);
         IosApp iosApp = new IosApp(appDir);
-        BuildReportUtil.addIosAppInfo(iosApp);
+        new BuildReportUtil(project).writeReportForIosApp(iosApp, targetEnv);
         File resultIpa;
         if (targetIpa.getName().contains(" ")) {
             resultIpa = new File(targetIpa.getName().substring(0, targetIpa.getName().indexOf(' '))+' '+targetEnv+".ipa");
