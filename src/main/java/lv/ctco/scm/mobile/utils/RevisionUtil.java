@@ -42,7 +42,7 @@ public final class RevisionUtil {
                 setRevision(GitUtil.getShortHash(PropertyUtil.getProjectProperty(project, PROP_VCS_REVISION)));
                 logger.info("Revision '{}' was set from project property", revision);
             } else {
-                setRevision(getRevisionFromProjectDir(project, PathUtil.getProjectDir()));
+                setRevision(getRevisionFromProjectDir(project, project.getProjectDir()));
                 logger.info("Revision '{}' was auto-detected", revision);
             }
         }
@@ -54,6 +54,7 @@ public final class RevisionUtil {
     }
 
     private static String getRevisionFromProjectDir(Project project, File projectDir) throws IOException {
+        logger.debug("Searching for Git repo in {}...", projectDir.getCanonicalFile());
         if (!GitUtil.isGitDir(projectDir)) {
             String error = "Failed to detect project's version control system, please pass revision via '"+PROP_VCS_REVISION+"' property";
             throw new IOException(error);
