@@ -16,11 +16,15 @@ import lv.ctco.scm.gradle.xcode.XcodeConfiguration
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 
 class ReprofileIpaTask extends DefaultTask {
 
+    @Internal
     MobileExtension ctcoMobile
+
+    @Internal
     List<Profile> profiles = new ArrayList<>()
 
     public ReprofileIpaTask() {
