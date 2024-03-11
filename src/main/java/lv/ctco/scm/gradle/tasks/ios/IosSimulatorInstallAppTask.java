@@ -60,7 +60,7 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
     }
 
     private File extractApp(File ipa) throws IOException {
-        File payloadDir = new File("build/gmp-temp/"+ipa.getName());
+        File payloadDir = new File(getProject().getBuildDir(), "gmp-temp/"+ipa.getName());
         ZipUtil.extractAll(ipa, payloadDir);
         return CommonUtil.findIosAppsInDirectory(payloadDir).get(0);
     }

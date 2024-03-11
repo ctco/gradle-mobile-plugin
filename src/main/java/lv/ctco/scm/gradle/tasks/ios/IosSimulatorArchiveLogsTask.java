@@ -29,13 +29,13 @@ public class IosSimulatorArchiveLogsTask extends MobilePluginTask {
         if (simLogs.isEmpty()) {
             getLogger().info("Simulator logs were not found");
         } else {
-            File tmpLogDir = new File("build/gmp-temp/simulator-logs/");
+            File tmpLogDir = new File(getProject().getBuildDir(), "gmp-temp/simulator-logs/");
             FileUtils.forceMkdir(tmpLogDir);
             FileUtils.cleanDirectory(tmpLogDir);
             for (File simLog : simLogs) {
                 FileUtils.copyFileToDirectory(simLog, tmpLogDir);
             }
-            File logDir = new File("build/logs/");
+            File logDir = new File(getProject().getBuildDir(), "logs/");
             FileUtils.forceMkdir(logDir);
             File logZip = new File(logDir, "simulator-logs.zip");
             ZipUtil.compressDirectory(tmpLogDir, false, logZip);
