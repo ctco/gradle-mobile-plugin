@@ -53,7 +53,12 @@ public class ProfilingTask extends DefaultTask {
 
             } else if (profileSourceName.endsWith(".plist")) {
 
-                File target = new File(targetDir, profile.getTarget())
+                File target
+                if (profile.getTarget().startsWith("/")) {
+                    target = new File(profile.getTarget())
+                } else {
+                    target = new File(targetDir, profile.getTarget())
+                }
                 checkWhetherFileExists(target)
                 logger.info("Profiling file " + source.getAbsolutePath() + " to " + target.getAbsolutePath())
                 PlistUtil.validatePlist(source)

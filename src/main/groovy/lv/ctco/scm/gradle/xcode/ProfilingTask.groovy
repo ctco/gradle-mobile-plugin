@@ -51,14 +51,24 @@ public class ProfilingTask extends DefaultTask {
 
             } else if (profileSourceName.endsWith(".xcconfig")) {
 
-                File target = new File(projectDir, profile.getTarget())
+                File target
+                if (profile.getTarget().startsWith("/")) {
+                    target = new File(profile.getTarget())
+                } else {
+                    target = new File(projectDir, profile.getTarget())
+                }
                 verifyFileExists(target)
                 logger.info("Profiling file '{}' to '{}'", source.getAbsolutePath(), target.getAbsolutePath())
                 XcconfigUtil.applyProfile(source, target);
 
             } else if (profileSourceName.endsWith(".plist")) {
 
-                File target = new File(projectDir, profile.getTarget())
+                File target
+                if (profile.getTarget().startsWith("/")) {
+                    target = new File(profile.getTarget())
+                } else {
+                    target = new File(projectDir, profile.getTarget())
+                }
                 verifyFileExists(target)
                 logger.info("Profiling file '{}' to '{}'", source.getAbsolutePath(), target.getAbsolutePath())
                 PlistUtil.validatePlist(source)
