@@ -1,6 +1,8 @@
 package lv.ctco.scm.gradle.tasks.ios;
 
 import lv.ctco.scm.gradle.MobilePluginTask;
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
+import lv.ctco.scm.gradle.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.utils.IosApp;
 import lv.ctco.scm.mobile.utils.CommonUtil;
 import lv.ctco.scm.mobile.utils.ZipUtil;
@@ -31,8 +33,11 @@ public class IosSimulatorInstallAppTask extends MobilePluginTask {
         getLogger().info("Installing iOS app { bundle:{}, version:{} } on {}",
                 iosApp.getBundleIdentifier(), iosApp.getBundleVersion(), iosSimulator);
         if (IosSimulatorUtil.installApp(iosSimulator, app).isSuccess()) {
-            if (System.getenv("TEAMCITY_VERSION") != null) {
-                getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_BUNDLE_ID' value='{}']", iosApp.getBundleIdentifier());
+            if (TeamcityUtil.isTeamcityEnvironment()) {
+                getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("env.UITEST_BUNDLE_ID", iosApp.getBundleIdentifier()));
+            }
+            if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+                getLogger().lifecycle(AzureDevOpsUtil.generateSetParameterServiceMessage("uitestBundleId", iosApp.getBundleIdentifier()));
             }
         } else {
             stopWithError("Failed to install app on iosSimulator");

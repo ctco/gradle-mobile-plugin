@@ -1,6 +1,8 @@
 package lv.ctco.scm.gradle.tasks.ios;
 
 import lv.ctco.scm.gradle.MobilePluginTask;
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
+import lv.ctco.scm.gradle.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.utils.IosSimulator;
 import lv.ctco.scm.mobile.utils.IosSimulatorCLP;
 import lv.ctco.scm.mobile.utils.IosSimulatorState;
@@ -27,10 +29,15 @@ public class IosSimulatorBootTask extends MobilePluginTask {
             getLogger().info("Commanding {} to boot", iosSimulator);
             if (IosSimulatorUtil.boot(iosSimulator).isSuccess()) {
                 logSimulatorState(iosSimulator);
-                if (System.getenv("TEAMCITY_VERSION") != null) {
-                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_ID' value='{}']", iosSimulator.getUdid());
-                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_NAME' value='{}']", iosSimulator.getName());
-                    getLogger().lifecycle("##teamcity[setParameter name='env.UITEST_SIMULATOR_SDK_VERSION' value='{}']", iosSimulator.getSdkVersion());
+                if (TeamcityUtil.isTeamcityEnvironment()) {
+                    getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("env.UITEST_SIMULATOR_ID",iosSimulator.getUdid()));
+                    getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("env.UITEST_SIMULATOR_NAME",iosSimulator.getName()));
+                    getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("env.UITEST_SIMULATOR_SDK_VERSION",iosSimulator.getSdkVersion()));
+                }
+                if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+                    getLogger().lifecycle(AzureDevOpsUtil.generateSetParameterServiceMessage("uitestSimulatorId",iosSimulator.getUdid()));
+                    getLogger().lifecycle(AzureDevOpsUtil.generateSetParameterServiceMessage("uitestSimulatorName",iosSimulator.getName()));
+                    getLogger().lifecycle(AzureDevOpsUtil.generateSetParameterServiceMessage("uitestSimulatorSdkVersion",iosSimulator.getSdkVersion()));
                 }
             } else {
                 logSimulatorState(iosSimulator);
