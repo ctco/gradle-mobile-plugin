@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.gradle.xdeps;
 
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 import lv.ctco.scm.mobile.utils.RevisionUtil;
 import lv.ctco.scm.mobile.utils.VersionUtil;
@@ -57,6 +58,9 @@ public class XdepsDisplayInfoTask extends DefaultTask {
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.xdeps.version.iteration", releaseVersion));
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.xdeps.version.publish", buildVersion));
+        }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            getLogger().lifecycle(AzureDevOpsUtil.generateBuildNumberServiceMessage(buildVersion));
         }
 
         List<DefaultMavenArtifactRepository> repositories = XdepsUtil.getMavenRepositories(getProject());

@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.gradle.android;
 
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 
 import org.gradle.api.DefaultTask;
@@ -35,6 +36,9 @@ public class ProjectInfoTask extends DefaultTask {
         if (TeamcityUtil.isTeamcityEnvironment()) {
             getLogger().lifecycle(TeamcityUtil.generateBuildNumberServiceMessage(buildVersion));
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
+        }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            getLogger().lifecycle(AzureDevOpsUtil.generateBuildNumberServiceMessage(buildVersion));
         }
     }
 

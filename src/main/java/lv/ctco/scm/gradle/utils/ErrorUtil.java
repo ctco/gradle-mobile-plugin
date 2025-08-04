@@ -22,6 +22,9 @@ public final class ErrorUtil {
             logger.lifecycle(TeamcityUtil.generateBuildStatusServiceMessage("Execution failed for task "+taskName));
             logger.lifecycle(TeamcityUtil.generateBuildProblemDescriptionServiceMessage(errorMessage));
         }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            logger.lifecycle(AzureDevOpsUtil.generateErrorMessageServiceMessage(errorMessage));
+        }
     }
 
     public static void errorInTask(String taskName, String errorMessage) {

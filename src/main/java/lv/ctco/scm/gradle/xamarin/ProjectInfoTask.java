@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.gradle.xamarin;
 
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.mobile.utils.RevisionUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
@@ -59,6 +60,9 @@ public class ProjectInfoTask extends DefaultTask {
         if (TeamcityUtil.isTeamcityEnvironment()) {
             getLogger().lifecycle(TeamcityUtil.generateBuildNumberServiceMessage(buildVersion));
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
+        }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            getLogger().lifecycle(AzureDevOpsUtil.generateBuildNumberServiceMessage(buildVersion));
         }
     }
 

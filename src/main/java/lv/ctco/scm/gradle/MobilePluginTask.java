@@ -1,5 +1,6 @@
 package lv.ctco.scm.gradle;
 
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
 import lv.ctco.scm.gradle.utils.TeamcityUtil;
 
 import org.gradle.api.DefaultTask;
@@ -38,6 +39,9 @@ public abstract class MobilePluginTask extends DefaultTask {
         if (TeamcityUtil.isTeamcityEnvironment()) {
             getLogger().lifecycle(TeamcityUtil.generateBuildStatusServiceMessage("Execution failed for task "+this.getPath()));
             getLogger().lifecycle(TeamcityUtil.generateBuildProblemDescriptionServiceMessage(errorMessage));
+        }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            getLogger().lifecycle(AzureDevOpsUtil.generateErrorMessageServiceMessage(errorMessage));
         }
     }
 

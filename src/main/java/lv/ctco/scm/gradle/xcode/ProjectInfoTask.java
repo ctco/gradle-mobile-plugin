@@ -6,6 +6,7 @@
 
 package lv.ctco.scm.gradle.xcode;
 
+import lv.ctco.scm.gradle.utils.AzureDevOpsUtil;
 import lv.ctco.scm.gradle.utils.ErrorUtil;
 import lv.ctco.scm.mobile.utils.PlistUtil;
 import lv.ctco.scm.mobile.utils.RevisionUtil;
@@ -63,6 +64,9 @@ public class ProjectInfoTask extends DefaultTask {
         if (TeamcityUtil.isTeamcityEnvironment()) {
             getLogger().lifecycle(TeamcityUtil.generateBuildNumberServiceMessage(buildVersion));
             getLogger().lifecycle(TeamcityUtil.generateSetParameterServiceMessage("project.version.iteration", releaseVersion));
+        }
+        if (AzureDevOpsUtil.isAzureDevOpsEnvironment()) {
+            getLogger().lifecycle(AzureDevOpsUtil.generateBuildNumberServiceMessage(buildVersion));
         }
     }
 

@@ -46,21 +46,16 @@ public final class IosCodesigningUtil {
     public static IosCodesigningIdentity getCodesigningIdentity(File appDir) {
         ExecCommand execCommand = new ExecCommand(EXECUTABLE_CODESIGN);
         execCommand.addArguments(new String[]{COMMAND_DISPLAY, OPTION_VERBOSE_4, appDir.getAbsolutePath()}, false);
-        IosCodesigningIdentity iosCodesigningIdentity = new IosCodesigningIdentity();
         logger.debug("Executing command:{}", execCommand);
         ExecResult execResult = ExecUtil.executeCommand(execCommand, new CapturingOutputStream());
         if (execResult.isSuccess()) {
             for (String line : execResult.getOutput()) {
                 if (line.trim().startsWith("Authority=")) {
-                    iosCodesigningIdentity.setCommonName(line.replaceFirst("Authority=", ""));
-                    if (iosCodesigningIdentity.getCommonName().startsWith("iPhone Distribution: ")) {
-                        iosCodesigningIdentity.setIdentityType("iPhone Distribution");
-                        iosCodesigningIdentity.setIdentityName(iosCodesigningIdentity.getCommonName().replace("iPhone Distribution: ", ""));
-                    } else if (iosCodesigningIdentity.getCommonName().startsWith("iPhone Developer: ")) {
-                        iosCodesigningIdentity.setIdentityType("iPhone Developer");
-                        iosCodesigningIdentity.setIdentityName(iosCodesigningIdentity.getCommonName().replace("iPhone Developer: ", ""));
+                    String identityType = line.trim().replaceFirst("Authority=", "").split(":")[0];
+                    logger.debug("Found identity type '{}' within signature authorities", identityType);
+                    if (IosCodesigningIdentity.SUPPORTED_IDENTITY_TYPES.contains(identityType)) {
+                        return new IosCodesigningIdentity(line.trim().replaceFirst("Authority=", ""));
                     }
-                    return iosCodesigningIdentity;
                 }
             }
         }
